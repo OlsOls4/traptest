@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TrapTest Leaderboard — MOCK DATA</title>
+<style>
+  body { font-family: system-ui, -apple-system, sans-serif; margin: 0 auto; max-width: 960px; padding: 1rem; color: #111; line-height: 1.45; }
+  .banner { background: #b91c1c; color: #fff; padding: 1rem; border-radius: 8px; font-weight: 700; }
+  .banner small { display: block; font-weight: 400; margin-top: .25rem; }
+  h1 { font-size: 1.6rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+  th, td { border: 1px solid #ccc; padding: .45rem .6rem; text-align: left; }
+  th { background: #f3f4f6; }
+  .pass { color: #15803d; font-weight: 700; }
+  .fail { color: #b91c1c; font-weight: 700; }
+  details { margin: .75rem 0; border: 1px solid #ddd; border-radius: 8px; padding: .5rem 1rem; }
+  summary { cursor: pointer; font-weight: 600; }
+  .muted { color: #555; }
+  .livebox { border: 2px dashed #888; border-radius: 8px; padding: 1rem; margin: 1rem 0; background: #fafafa; }
+  input[type=text] { width: 100%; padding: .5rem; box-sizing: border-box; }
+  code { background: #f3f4f6; padding: .1rem .3rem; border-radius: 4px; }
+  #load-error { color: #b91c1c; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="banner">⚠ MOCK DATA — NOT REAL RESULTS
+  <small>This page renders a prep fixture (<code>results.json</code> in this folder). No Telegraph purchase sits behind any row. Never submit this file, or any number derived from it, as a real result. The live page is identical in layout but is fed only by event-period (1 Nov–1 Dec 2026) purchases with real receipts.</small>
+</div>
+<noscript><p><strong>JavaScript is required to render this leaderboard.</strong> The data file is <code>results.json</code> in this folder.</p></noscript>
+
+<h1>TrapTest — provider leaderboard</h1>
+<p class="muted">Intent: <code>ONCHAIN_TX_LOOKUP</code> &middot; Ranking: pass rate, then traps run, then lower total testnet cost, then provider id — the same rules as <code>traptest/leaderboard.py</code>. A provider with zero scored traps is unranked, never shown as passing. Scoring is strict: a status mismatch fails the trap outright, and a missing provider field is a failure, never a pass (<code>traptest/scoring.py</code>).</p>
+
+<div class="livebox">
+  <strong>Judge in 60 seconds (live build, from 1 Nov — disabled in mock mode)</strong>
+  <ol>
+    <li>Enter one trap transaction hash below.</li>
+    <li>TrapTest buys competing providers' answers on testnet (Direct Ask, one miner at a time).</li>
+    <li>Each answer is scored pass/fail against the trap's known ground truth, with its receipt.</li>
+    <li>The leaderboard below re-ranks. A stale or wrong answer is shown <span class="fail">FAIL</span> on screen — that is the built-in failure case, not a hidden error.</li>
+  </ol>
+  <label for="trap-input">Trap transaction hash (live mode only):</label>
+  <input id="trap-input" type="text" placeholder="0x… (disabled in mock mode)" disabled>
+  <p class="muted">This input does nothing in mock mode by design. In the live build it triggers real testnet purchases only after the free-testnet gate has passed (see <code>docs/how-to-run.md</code>).</p>
+</div>
+
+<p id="load-error"></p>
+<p class="muted">Data source: <span id="source">results.json (same folder)</span> &middot; <label>Load a different results file: <input type="file" id="file-input" accept=".json,application/json"></label></p>
+
+<h2>Ranked providers</h2>
+<table id="ranked">
+  <thead><tr><th>Rank</th><th>Provider</th><th>Pass rate</th><th>Passed / run</th><th>Total testnet cost (USD)</th><th>Receipts</th></tr></thead>
+  <tbody></tbody>
+</table>
+<p id="unranked" class="muted"></p>
+
+<h2>Per-trap detail (every scored answer, pass and fail)</h2>
+<div id="detail"></div>
+
+<p class="muted">How to open: serve this folder locally — <code>python3 -m http.server</code> from <code>docs/leaderboard/</code> — then open <code>http://localhost:8000/</code>. Opening the file directly (<code>file://</code>) blocks the <code>results.json</code> fetch in most browsers; use the file picker above instead. No hosting, account, or paid service is involved.</p>
+
+<script>
+function esc(s) {
+  return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+  });
+}
+function render(data) {
+  var banner = document.querySelector(".banner");
+  if (!data || data.data_kind !== "MOCK") {
+    banner.textContent = "WARNING: this file is not labelled MOCK — refusing to render it as mock data. Only MOCK-labelled fixtures may be rendered by this page.";
+    return;
+  }
+  var stats = {};
+  (data.scores || []).forEach(function (s) {
+    var st = stats[s.provider_id] || (stats[s.provider_id] = {provider_id: s.provider_id, run: 0, passed: 0, cost: 0, receipts: 0});
+    st.run += 1;
+    if (s.passed) st.passed += 1;
+    if (s.cost_usd != null) st.cost += Number(s.cost_usd);
+    if (s.receipt_present) st.receipts += 1;
+  });
+  var ranked = Object.keys(stats).map(function (k) { return stats[k]; }).filter(function (s) { return s.run > 0; });
+  ranked.sort(function (a, b) {
+    var ra = a.passed / a.run, rb = b.passed / b.run;
+    if (rb !== ra) return rb - ra;
+    if (b.run !== a.run) return b.run - a.run;
+    if (a.cost !== b.cost) return a.cost - b.cost;
+    return a.provider_id < b.provider_id ? -1 : 1;
+  });
+  var tbody = document.querySelector("#ranked tbody");
+  tbody.innerHTML = ranked.map(function (s, i) {
+    return "<tr><td>" + (i + 1) + "</td><td>" + esc(s.provider_id) + "</td><td>" +
+      (100 * s.passed / s.run).toFixed(0) + "%</td><td>" + s.passed + " / " + s.run + "</td><td>" +
+      s.cost.toFixed(4) + "</td><td>" + s.receipts + " / " + s.run + "</td></tr>";
+  }).join("") || "<tr><td colspan='6'>No scored traps yet.</td></tr>";
+  var unranked = data.unranked_providers || [];
+  document.getElementById("unranked").textContent = unranked.length ?
+    "Unranked (zero scored traps — never shown as passing): " + unranked.map(function (u) { return u.provider_id; }).join(", ") : "";
+  var detail = document.getElementById("detail");
+  detail.innerHTML = ranked.map(function (s) {
+    var rows = (data.scores || []).filter(function (x) { return x.provider_id === s.provider_id; }).map(function (x) {
+      var fields = (x.fields || []).map(function (f) {
+        return "<tr><td>" + esc(f.field) + "</td><td>" + esc(f.expected) + "</td><td>" +
+          (f.actual == null ? "<em>missing</em>" : esc(f.actual)) + "</td><td class='" +
+          (f.passed ? "pass" : "fail") + "'>" + (f.passed ? "PASS" : "FAIL") + "</td></tr>";
+      }).join("");
+      return "<details><summary>" + esc(x.trap_id) + " — <span class='" + (x.passed ? "pass" : "fail") + "'>" +
+        (x.passed ? "PASS" : "FAIL") + "</span> · cost " + (x.cost_usd == null ? "n/a" : Number(x.cost_usd).toFixed(4)) +
+        " USD · receipt " + (x.receipt_present ? "present" : "MISSING") +
+        (x.signal_hash ? " · signal " + esc(x.signal_hash) : "") + "</summary><table><thead><tr><th>Field</th><th>Expected</th><th>Actual</th><th>Result</th></tr></thead><tbody>" +
+        fields + "</tbody></table></details>";
+    }).join("");
+    return "<h3>" + esc(s.provider_id) + "</h3>" + rows;
+  }).join("");
+}
+fetch("results.json").then(function (r) {
+  if (!r.ok) throw new Error("HTTP " + r.status);
+  return r.json();
+}).then(render).catch(function (e) {
+  document.getElementById("load-error").textContent =
+    "Could not load results.json (" + e.message + "). Serve this folder with python3 -m http.server, or use the file picker above.";
+});
+document.getElementById("file-input").addEventListener("change", function (ev) {
+  var f = ev.target.files[0];
+  if (!f) return;
+  var reader = new FileReader();
+  reader.onload = function () {
+    try {
+      var data = JSON.parse(reader.result);
+      document.getElementById("source").textContent = f.name + " (loaded by file picker)";
+      document.getElementById("load-error").textContent = "";
+      render(data);
+    } catch (err) { document.getElementById("load-error").textContent = "That file is not valid JSON: " + err.message; }
+  };
+  reader.readAsText(f);
+});
+</script>
+</body>
+</html>
