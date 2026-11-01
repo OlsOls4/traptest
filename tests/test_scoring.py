@@ -12,7 +12,7 @@ from traptest.leaderboard import Leaderboard
 
 def trap():
     # MOCK fixture: a made-up hash/ground truth for framework testing only.
-    return Trap("mock-1", "ONCHAIN_TX_LOOKUP",
+    return Trap("mock-1", "ONCHAIN_TX_LOOKUP_GENERAL",
                 "0x" + "ab" * 32,
                 expected_status="confirmed",
                 expected_from="0xAAA", expected_to="0xBBB",

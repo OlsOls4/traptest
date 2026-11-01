@@ -1,4 +1,4 @@
-"""Fixed trap-set catalogue design for ONCHAIN_TX_LOOKUP.
+"""Fixed trap-set catalogue design for ONCHAIN_TX_LOOKUP_GENERAL.
 
 PREP ONLY (before 1 Nov 2026): this module defines the STRUCTURE of the
 fixed trap set — categories, required ground-truth fields, provenance
@@ -25,7 +25,7 @@ from dataclasses import dataclass
 
 from .traps import Trap, validate_trap_set
 
-INTENT = "ONCHAIN_TX_LOOKUP"
+INTENT = "ONCHAIN_TX_LOOKUP_GENERAL"
 CHAIN = "Base Sepolia (chain ID 84532)"
 
 # --- Size / cost caps -------------------------------------------------
@@ -205,7 +205,7 @@ def validate_provenance(prov: GroundTruthProvenance, trap: Trap) -> None:
     if trap.intent != INTENT:
         raise ValueError(
             f"trap {trap.trap_id!r} intent {trap.intent!r} is not "
-            f"{INTENT!r} — this catalogue is ONCHAIN_TX_LOOKUP only")
+            f"{INTENT!r} — this catalogue is ONCHAIN_TX_LOOKUP_GENERAL only")
     if trap.expected_status != spec["required_status"]:
         raise ValueError(
             f"trap {trap.trap_id!r} ({prov.category}) must have status "

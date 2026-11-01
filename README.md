@@ -9,8 +9,8 @@ testnet, scored pass/fail against the truth, and published as a live leaderboard
 ## Truth list (freeze before submission, per hackathon_submission_check skill)
 
 - Hackathon: Telegraph Season II, 1 Nov–1 Dec 2026, deadline 1 Dec 23:59 UTC.
-- Primary intent: `ONCHAIN_TX_LOOKUP` (23 miners live on the Engine at
-  verification on 27 Oct 2026; re-fetch at run time — miner IDs are NOT stable,
+- Primary intent: `ONCHAIN_TX_LOOKUP_GENERAL` (21 miners live on the Engine at
+  verification on 1 Nov 2026; re-fetch at run time — miner IDs are NOT stable,
   never hardcode them).
 - Purchase flow: Direct Ask `POST /engine/v1/ask/{minerId}` (auto-routed ask
   picks one miner and cannot be used to compare competitors). Price is read
@@ -19,6 +19,30 @@ testnet, scored pass/fail against the truth, and published as a live leaderboard
   (`X-TELEGRAPH-RECEIPT`).
 - Judging: /100, Technical 35 (min 24), Commercial 30, Adoption 15,
   Integration 10, Proof 10; need 70+.
+
+## Intent migration note — 1 Nov 2026
+
+- Old intent `ONCHAIN_TX_LOOKUP`: 0 miners on 1 Nov 2026
+  (`/engine/v1/intents/ONCHAIN_TX_LOOKUP/miners` returned
+  `{"count":0,"miners":[]}`) — the prep default was stale and is no longer
+  usable.
+- New intent `ONCHAIN_TX_LOOKUP_GENERAL`: 21 miners on 1 Nov 2026
+  (~10 usable-looking by catalogue description after excluding
+  Blockscout list-only endpoints and VulnFeed; catalogue presence is
+  not a live probe, and no provider is scored until it answers a
+  Direct Ask).
+- Migrated 1 Nov 2026 across code (`traptest/run.py` `--intent`
+  default, `traptest/trap_catalog.py` `INTENT` constant and validation,
+  `traptest/traps.py` docstring), tests (intent constants/fixtures in
+  `test_providers.py`, `test_scoring.py`, `test_trap_catalog.py` — these
+  tests hardcoded the old intent, so they were updated to the new one;
+  no test logic was weakened), and docs (README truth list, `docs/
+  how-to-run.md`, `docs/submission-pack.md` truth list, `traptest/
+  trap_design.md`, `docs/demo-script.md`). Dated historical records
+  (`docs/supply-recheck-2026-10-28.md`, `docs/judge-review.md`) were
+  deliberately left untouched. Other catalogue rules are unchanged:
+  30-trap cap, mandatory reverted + unknown categories, provenance
+  validation.
 
 ## Gates (27 Oct 2026)
 

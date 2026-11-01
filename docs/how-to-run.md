@@ -8,7 +8,7 @@ real result.** Mock fixtures demonstrate the UI and the scoring rules only.
 
 TrapTest (Evaluator-led, Telegraph Hackathon Season II, 1 Nov–1 Dec 2026)
 buys fixed trap transaction queries — queries whose ground truth is known
-in advance — from competing `ONCHAIN_TX_LOOKUP` providers on testnet,
+in advance — from competing `ONCHAIN_TX_LOOKUP_GENERAL` providers on testnet,
 scores each answer pass/fail against that truth, and publishes a
 leaderboard that re-ranks providers. A provider that returns a stale or
 wrong answer is shown failing, not hidden. That failure-on-screen is the
@@ -50,7 +50,7 @@ run, then lower cost), the per-trap field table, the `FAIL` rows
    known ground truth from the fixed trap set (see §4). No login, no
    setup, no wallet connection on the reviewer's side.
 2. **Competing answers bought.** TrapTest buys that trap from at least
-   two competing `ONCHAIN_TX_LOOKUP` providers via Direct Ask
+   two competing `ONCHAIN_TX_LOOKUP_GENERAL` providers via Direct Ask
    (`POST /engine/v1/ask/{minerId}` — one miner at a time; the
    auto-routed ask cannot compare competitors). Miner ids are re-fetched
    from the live catalogue at run time, never hardcoded.
@@ -119,9 +119,10 @@ run, then lower cost), the per-trap field table, the `FAIL` rows
    STOP — never buy or bridge with real money without Olly's explicit
    approval of that specific spend.
 3. **Competing-provider supply re-confirmed live:** at least two
-   usable `ONCHAIN_TX_LOOKUP` miners answer the trap intent at run
-   time (27 Oct check found 23 miners, ≥10 usable after filtering
-   list-only endpoints — re-fetch, do not reuse those ids).
+   usable `ONCHAIN_TX_LOOKUP_GENERAL` miners answer the trap intent at run
+   time (1 Nov 2026 check: old intent `ONCHAIN_TX_LOOKUP` now 0 miners;
+   successor `ONCHAIN_TX_LOOKUP_GENERAL` 21 miners, ~10 usable-looking
+   after filtering list-only endpoints — re-fetch, do not reuse those ids).
 4. **Evaluator-specific submission wording** confirmed in the live
    browser with the Evaluator track selected, before submitting.
 
@@ -131,7 +132,7 @@ run, then lower cost), the per-trap field table, the `FAIL` rows
   self-purchase counted as a buyer) is a disqualifier. No adoption,
   user, accuracy, or time-saved figure exists for TrapTest yet — do not
   invent one.
-- The entry is single-Intent (`ONCHAIN_TX_LOOKUP`); it does not claim
+- The entry is single-Intent (`ONCHAIN_TX_LOOKUP_GENERAL`); it does not claim
   coverage of other Intents.
 - If the live leaderboard UI slips, the fallback is a scored table +
   receipts for the same fixed trap set — same evidence, plainer layout.

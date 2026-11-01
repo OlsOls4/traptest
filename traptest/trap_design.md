@@ -9,7 +9,7 @@ public Base Sepolia explorer/API, recording provenance, and freezing
 the set before the first provider is scored. Mock fixtures in tests
 are framework tests only and must never be submitted as results.
 
-Intent: `ONCHAIN_TX_LOOKUP` only. Chain: Base Sepolia (84532).
+Intent: `ONCHAIN_TX_LOOKUP_GENERAL` only. Chain: Base Sepolia (84532).
 Miner IDs are re-fetched at run time (`providers.py`) — never hardcoded.
 
 ## 1. The fixed-set rule
@@ -80,7 +80,7 @@ Every real trap carries a `GroundTruthProvenance`:
   a reviewer needs to reproduce the check.
 
 `validate_provenance` rejects: a provenance/trap id mismatch, an
-unknown category, a non-`ONCHAIN_TX_LOOKUP` intent, a status that
+unknown category, a non-`ONCHAIN_TX_LOOKUP_GENERAL` intent, a status that
 does not match the category's required status, a missing required
 field, an `unknown_tx` carrying any field beyond status, a
 non-http(s) or empty source URL, a tx/block reference mismatch, or
@@ -159,7 +159,7 @@ missing `checked_at`/`checker`. `pending` is rejected outright (see §5).
   window), not in the trap definitions.
 - `unknown_tx` traps have a shelf life: they are valid only while
   the hash stays absent from the chain (see retirement rule, §3).
-- This catalogue covers `ONCHAIN_TX_LOOKUP` only. A second trap
+- This catalogue covers `ONCHAIN_TX_LOOKUP_GENERAL` only. A second trap
   intent (e.g. transfer verification) would need its own category
   table and provenance rules — it is not smuggled in here.
 

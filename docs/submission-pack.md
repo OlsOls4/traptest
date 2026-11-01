@@ -15,9 +15,10 @@ not on this list is unverified and must not appear on a submission surface.
 | Hackathon / window / deadline | Telegraph Season II, 1 Nov–1 Dec 2026, deadline 1 Dec 23:59 UTC | hackathon.telegraphprotocol.com (rules/timeline, read 27 Oct) |
 | First integration milestone | 14 Nov 2026 (progress check only, not disqualification) | Same |
 | Registration | COMPLETED 27 Oct 2026: Olly McBride, Individual, Discord ols0817, project TrapTest (Python), email ollymcbride4@gmail.com verified; confirmation "You're registered", no reference number shown | Live browser registration, 27 Oct |
-| Primary intent | `ONCHAIN_TX_LOOKUP` | Engine catalogue, 27 Oct check |
+| Primary intent | `ONCHAIN_TX_LOOKUP_GENERAL` | Engine catalogue, 1 Nov 2026 check: 21 miners listed (see migration row below) |
 | Provider supply at check | 23 miners listed, ≥10 usable after filtering list-only endpoints | Engine `/intents/ONCHAIN_TX_LOOKUP/miners`, 27 Oct — **re-fetch at run time; miner ids are not stable** |
 | Provider supply re-check | 23 listed, 12 usable-looking by catalogue description (10 Blockscout list-only excluded; VulnFeed excluded as contract-security, not tx-hash lookup) — catalogue presence only, NOT a live probe | Same endpoint, 28 Oct — see `docs/supply-recheck-2026-10-28.md`. Re-fetch again at run time; pre-flight ≥2–3 providers before freezing the trap set |
+| Intent migration (1 Nov 2026) | Old intent `ONCHAIN_TX_LOOKUP`: 0 miners on 1 Nov; successor `ONCHAIN_TX_LOOKUP_GENERAL`: 21 miners, ~10 usable-looking by description — code, tests and docs migrated to the new intent 1 Nov (see README migration note); the 27/28 Oct rows above are dated history under the old intent | Engine `/intents/ONCHAIN_TX_LOOKUP/miners` and `/intents/ONCHAIN_TX_LOOKUP_GENERAL/miners`, 1 Nov — **re-fetch at run time; miner ids are not stable** |
 | Purchase flow | Direct Ask `POST /engine/v1/ask/{minerId}`; price from live 402 challenge, never catalogue `cost_per_call: "0.00"` | docs.telegraphprotocol.com |
 | Evidence per served call | `cost_usd`, `signal_hash`, `X-TELEGRAPH-RECEIPT` | Same |
 | Testnet | Base Sepolia (chain 84532); USDC `0x036CbD53842c5426634e7929541eC2318f3dCF7e`; Diamond `0x5a2324aA18613FAD4e44bDF0d6c73Ec1f6D87ff8`; Engine `https://devnode.telegraphprotocol.com/engine` | Docs, 27 Oct |
@@ -48,7 +49,7 @@ not on this list is unverified and must not appear on a submission surface.
 ## 3. Commercial summary (draft — numbers only from live evidence)
 
 - **Buyer/user:** Telegraph itself, and every agent/builder choosing an
-  `ONCHAIN_TX_LOOKUP` provider — they need verified ranking trust
+  `ONCHAIN_TX_LOOKUP_GENERAL` provider — they need verified ranking trust
   before spending on intelligence. The ranking is the product; a
   ranking nobody can audit has no buyer.
 - **Intended payer and route to revenue (a case, not a result):**

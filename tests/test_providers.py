@@ -13,7 +13,7 @@ from traptest.providers import (
     TransportHTTPError, UnknownMinerError, _HttpResponse, parse_402_challenge,
 )
 
-INTENT = "ONCHAIN_TX_LOOKUP"
+INTENT = "ONCHAIN_TX_LOOKUP_GENERAL"
 MINER = "9002"
 # MOCK catalogue: cost_per_call "0.00" must NEVER be used as a price.
 CATALOGUE = [{"id": MINER, "name": "MockMiner", "cost_per_call": "0.00"},

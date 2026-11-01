@@ -26,7 +26,7 @@ SOURCE = "https://sepolia.basescan.org/tx/0xmock"
 
 
 def plain_trap():
-    return Trap("mock-plain", "ONCHAIN_TX_LOOKUP", MOCK_HASH,
+    return Trap("mock-plain", "ONCHAIN_TX_LOOKUP_GENERAL", MOCK_HASH,
                 expected_status="confirmed", expected_from="0xAAA",
                 expected_to="0xBBB", expected_value="1000",
                 expected_block=12345)
@@ -42,7 +42,7 @@ def plain_prov():
 
 
 def reverted_trap():
-    return Trap("mock-reverted", "ONCHAIN_TX_LOOKUP", MOCK_HASH_2,
+    return Trap("mock-reverted", "ONCHAIN_TX_LOOKUP_GENERAL", MOCK_HASH_2,
                 expected_status="reverted", expected_from="0xAAA",
                 expected_to="0xBBB", expected_block=12346)
 
@@ -56,7 +56,7 @@ def reverted_prov():
 
 
 def unknown_trap():
-    return Trap("mock-unknown", "ONCHAIN_TX_LOOKUP", "0x" + "12" * 32,
+    return Trap("mock-unknown", "ONCHAIN_TX_LOOKUP_GENERAL", "0x" + "12" * 32,
                 expected_status="not_found")
 
 
@@ -102,27 +102,27 @@ class TestProvenance(unittest.TestCase):
             validate_provenance(prov, plain_trap())
 
     def test_missing_required_field_rejected(self):
-        trap = Trap("mock-plain", "ONCHAIN_TX_LOOKUP", MOCK_HASH,
+        trap = Trap("mock-plain", "ONCHAIN_TX_LOOKUP_GENERAL", MOCK_HASH,
                     expected_status="confirmed", expected_from="0xAAA",
                     expected_to="0xBBB", expected_block=12345)  # no value
         with self.assertRaises(ValueError):
             validate_provenance(plain_prov(), trap)
 
     def test_unknown_tx_with_extra_field_rejected(self):
-        trap = Trap("mock-unknown", "ONCHAIN_TX_LOOKUP", "0x" + "12" * 32,
+        trap = Trap("mock-unknown", "ONCHAIN_TX_LOOKUP_GENERAL", "0x" + "12" * 32,
                     expected_status="not_found", expected_from="0xAAA")
         with self.assertRaises(ValueError):
             validate_provenance(unknown_prov(), trap)
 
     def test_wrong_status_for_category_rejected(self):
-        trap = Trap("mock-reverted", "ONCHAIN_TX_LOOKUP", MOCK_HASH_2,
+        trap = Trap("mock-reverted", "ONCHAIN_TX_LOOKUP_GENERAL", MOCK_HASH_2,
                     expected_status="confirmed", expected_from="0xAAA",
                     expected_to="0xBBB", expected_block=12346)
         with self.assertRaises(ValueError):
             validate_provenance(reverted_prov(), trap)
 
     def test_pending_never_a_trap(self):
-        trap = Trap("mock-pending", "ONCHAIN_TX_LOOKUP", MOCK_HASH,
+        trap = Trap("mock-pending", "ONCHAIN_TX_LOOKUP_GENERAL", MOCK_HASH,
                     expected_status="pending")
         prov = GroundTruthProvenance(
             trap_id="mock-pending", category="plain_transfer",
@@ -148,7 +148,7 @@ class TestFixedSet(unittest.TestCase):
     def test_over_cap_rejected(self):
         entries = []
         for i in range(15):
-            t = Trap(f"mock-r{i}", "ONCHAIN_TX_LOOKUP",
+            t = Trap(f"mock-r{i}", "ONCHAIN_TX_LOOKUP_GENERAL",
                      "0x" + f"{i:02x}" * 32, expected_status="reverted",
                      expected_from="0xAAA", expected_to="0xBBB",
                      expected_block=100 + i)
@@ -163,7 +163,7 @@ class TestFixedSet(unittest.TestCase):
         # 15 reverted + 1 unknown = 16, under cap. Add 15 plain traps
         # to push the set to 31, over the cap.
         for i in range(15, 30):
-            t = Trap(f"mock-p{i}", "ONCHAIN_TX_LOOKUP",
+            t = Trap(f"mock-p{i}", "ONCHAIN_TX_LOOKUP_GENERAL",
                      "0x" + f"{i:02x}" * 32, expected_status="confirmed",
                      expected_from="0xAAA", expected_to="0xBBB",
                      expected_value="1", expected_block=200 + i)

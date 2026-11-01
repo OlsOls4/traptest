@@ -34,7 +34,7 @@ On screen: the TrapTest title and one sentence.
 
 ### Shot 2 — What a trap is (0:20–0:50) — screen capture of the trap file
 
-`[LIVE FOOTAGE: trap file — trap id, intent ONCHAIN_TX_LOOKUP, tx hash,
+`[LIVE FOOTAGE: trap file — trap id, intent ONCHAIN_TX_LOOKUP_GENERAL, tx hash,
 expected status, from, to, value, block, and the public-chain source
 link for the ground truth. No provider answer visible yet.]`
 

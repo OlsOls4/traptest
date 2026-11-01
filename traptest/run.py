@@ -58,7 +58,7 @@ def check_gates(today=None, marker=None):
 
 def main(argv=None, today=None):
     parser = argparse.ArgumentParser(description="TrapTest live runner (gated)")
-    parser.add_argument("--intent", default="ONCHAIN_TX_LOOKUP")
+    parser.add_argument("--intent", default="ONCHAIN_TX_LOOKUP_GENERAL")
     parser.add_argument("--miner", help="miner id (verified against fresh catalogue)")
     parser.add_argument("--traps", help="path to trap-set JSON (event-window ground truth)")
     parser.add_argument("--list-miners", action="store_true",

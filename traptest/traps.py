@@ -10,7 +10,7 @@ from dataclasses import dataclass, field
 
 @dataclass(frozen=True)
 class Trap:
-    """One trap query for ONCHAIN_TX_LOOKUP (or a second trap intent)."""
+    """One trap query for ONCHAIN_TX_LOOKUP_GENERAL (or a second trap intent)."""
     trap_id: str
     intent: str
     tx_hash: str
