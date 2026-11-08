@@ -3,6 +3,25 @@
 Ranking: pass rate first, then traps run (more evidence wins ties),
 then lower total testnet cost. A provider with zero scored traps is
 unranked — it is never shown as passing.
+
+Unservable tier (Council finding F-rank): a provider that served
+ZERO traps (every call failed before an answer — e.g. LiveCert 4433,
+Sigil 9010, OnChain Intel 900 in the 6 Nov 2026 run) is NOT a 0%
+provider. It goes in its own ``unservable`` tier via
+:meth:`Leaderboard.mark_unservable` (or ``add(score, served=False)``)
+and never appears in :meth:`Leaderboard.ranked`, above or below
+served providers. A served provider that failed every trap it
+answered IS ranked (at 0%) — failing answers are evidence; no
+answers are not a pass rate.
+
+``traptest/leaderboard.py`` is the single source of truth for this
+aggregation. NOTE (follow-up, not done here): the leaderboard page
+(``docs/leaderboard/index.html``) re-implements the same aggregation
+in JavaScript and counts every row in ``results.json`` as a served
+trap, so it still ranks unservable providers as 0% rows. That page
+is owned by another worker — it should read the ``unservable`` tier
+from a Python-generated file (or import this module's output)
+instead of re-aggregating.
 """
 from dataclasses import dataclass, field
 
@@ -27,10 +46,17 @@ class ProviderStats:
 class Leaderboard:
     def __init__(self):
         self._stats: dict[str, ProviderStats] = {}
+        self._unservable: set[str] = set()
 
-    def add(self, score) -> None:
+    def add(self, score, served: bool = True) -> None:
+        """Record one scored trap. ``served=False`` records the
+        provider as unservable instead (no answer was served)."""
+        if not served:
+            self.mark_unservable(score.provider_id)
+            return
+        self._unservable.discard(score.provider_id)
         stats = self._stats.setdefault(score.provider_id,
-                                      ProviderStats(score.provider_id))
+                                       ProviderStats(score.provider_id))
         stats.traps_run += 1
         if score.passed:
             stats.passed += 1
@@ -39,8 +65,23 @@ class Leaderboard:
         if score.receipt_present:
             stats.receipts += 1
 
+    def mark_unservable(self, provider_id: str) -> None:
+        """Record a provider that served zero traps. It is kept out
+        of ``ranked()`` permanently unless it later serves a trap
+        (see ``add``)."""
+        if provider_id not in self._stats:
+            self._unservable.add(provider_id)
+
+    # Backwards-friendly alias.
+    add_unservable = mark_unservable
+
+    def unservable_providers(self) -> list:
+        """Provider ids that served zero traps, sorted. Never ranked."""
+        return sorted(self._unservable)
+
     def ranked(self) -> list:
-        ranked = [s for s in self._stats.values() if s.traps_run > 0]
+        ranked = [s for s in self._stats.values()
+                  if s.traps_run > 0 and s.provider_id not in self._unservable]
         ranked.sort(key=lambda s: (-s.pass_rate, -s.traps_run,
                                    s.total_cost_usd, s.provider_id))
         return ranked

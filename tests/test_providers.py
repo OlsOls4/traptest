@@ -152,7 +152,11 @@ class TestDirectAsk(unittest.TestCase):
             parse_402_challenge(402, _json_body(
                 {"amount_usd": 0.01, "asset": "0xDEAD"}), {})
 
-    def test_failed_call_is_not_a_charge(self):
+    def test_failed_call_is_not_a_billed_served_call(self):
+        # PurchaseFailedError.charged is False = "not billed for a
+        # served answer". It does NOT mean the call cost $0: a failed
+        # call can still settle $0.01 into Telegraph escrow credit
+        # (observed 6 Nov 2026, $0.24 on 24 failed calls).
         def fail(m, u, b, h):
             raise TransportHTTPError(500, b"internal error", {})
         t = FakeTransport([(_is_miners, catalogue_handler), (_is_ask, fail)])
@@ -190,6 +194,208 @@ class TestDirectAsk(unittest.TestCase):
         d = DirectAskClient(transport=t).buy(INTENT, MINER, {})
         for key in ("answer", "cost_usd", "signal_hash", "receipt_present"):
             self.assertIn(key, d)
+
+    def test_live_402_shape_parses(self):
+        # Exact shape observed from the live Engine 1 Nov 2026 (unpaid
+        # probe; no purchase): accepts list, "$0.01" string price,
+        # Sepolia settlement network, payTo, no asset field.
+        live = {
+            "error": "payment required",
+            "accepts": [
+                {"scheme": "exact", "price": "$0.01",
+                 "network": "eip155:11155111",
+                 "payTo": "0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b"},
+                {"scheme": "escrow", "price": "$0.01",
+                 "network": "eip155:11155111",
+                 "payTo": "0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b"},
+            ],
+        }
+        ch = parse_402_challenge(402, _json_body(live), {})
+        self.assertEqual(ch["amount_usd"], 0.01)
+        self.assertEqual(ch["scheme"], "exact")
+        self.assertEqual(ch["network"], "eip155:11155111")
+        self.assertEqual(ch["pay_to"], "0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b")
+        # No asset in the body: asset comes from the network map —
+        # the LIVE accepted token 0xcc19… ("USD Coin"), NOT Circle
+        # faucet USDC 0x1c7d… (the stale value previously asserted
+        # here). Sepolia, NOT Base.
+        self.assertEqual(
+            ch["asset"].lower(),
+            "0xcc194e1a843b658526d0d5c431f670028582ae17")
+
+    def test_payment_required_header_envelope_wins(self):
+        # The live Engine's real envelope is the Payment-Required
+        # header (x402Version 2): it names the exact token, the amount
+        # in smallest units, and the EIP-712 name — all absent from the
+        # body. The header must win over the body fallback.
+        import base64
+        env = {
+            "x402Version": 2,
+            "accepts": [
+                {"scheme": "exact", "amount": "10000",
+                 "asset": "0xcc194e1a843B658526D0D5C431f670028582Ae17",
+                 "extra": {"name": "USD Coin", "version": "2"},
+                 "maxTimeoutSeconds": 60, "network": "eip155:11155111",
+                 "payTo": "0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b"},
+            ],
+        }
+        header = base64.b64encode(json.dumps(env).encode()).decode()
+        body = _json_body({"error": "payment required", "accepts": [
+            {"scheme": "exact", "price": "$0.01",
+             "network": "eip155:11155111",
+             "payTo": "0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b"}]})
+        ch = parse_402_challenge(402, body, {"Payment-Required": header})
+        self.assertEqual(ch["amount_usd"], 0.01)
+        self.assertEqual(ch["asset"],
+                         "0xcc194e1a843B658526D0D5C431f670028582Ae17")
+        self.assertEqual(ch["token_name"], "USD Coin")
+        self.assertEqual(ch["x402_version"], 2)
+
+    def test_header_with_circle_asset_refused(self):
+        # Header path previously skipped asset validation: a header
+        # naming Circle USDC 0x1c7d… on Sepolia must now be refused,
+        # exactly as the body path refuses it — 0x1c7d… is a different
+        # token from the live accepted asset 0xcc19….
+        import base64
+        env = {
+            "x402Version": 2,
+            "accepts": [
+                {"scheme": "exact", "amount": "10000",
+                 "asset": "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238",
+                 "extra": {"name": "USDC", "version": "2"},
+                 "maxTimeoutSeconds": 60, "network": "eip155:11155111",
+                 "payTo": "0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b"},
+            ],
+        }
+        header = base64.b64encode(json.dumps(env).encode()).decode()
+        with self.assertRaises(PaymentRequiredError):
+            parse_402_challenge(402, _json_body({"error": "payment required"}),
+                                {"Payment-Required": header})
+
+    def test_body_with_circle_asset_refused(self):
+        with self.assertRaises(PaymentRequiredError):
+            parse_402_challenge(402, _json_body(
+                {"amount_usd": 0.01, "network": "eip155:11155111",
+                 "asset": "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238",
+                 "payTo": "0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b"}), {})
+
+    def test_served_call_without_cost_records_none_and_flags(self):
+        # A paid call that returns no cost figure must NOT fall back
+        # to the 402 challenge amount: cost_usd is None + flagged.
+        def ask(m, u, b, h):
+            if "X-PAYMENT" in h:
+                return _HttpResponse(200, _json_body(
+                    {"answer": ANSWER, "signal_hash": "mock-sig-1"}), {})
+            raise TransportHTTPError(402, _json_body({"amount_usd": 0.01}), {})
+        t = FakeTransport([(_is_miners, catalogue_handler), (_is_ask, ask)])
+        res = DirectAskClient(
+            transport=t,
+            payment_provider=lambda ch: {"X-PAYMENT": "mock-signed"}).buy_result(
+            INTENT, MINER, {})
+        self.assertTrue(res.charged)
+        self.assertIsNone(res.cost_usd)
+        self.assertTrue(res.cost_missing)
+        self.assertEqual(res.challenge_amount_usd, 0.01)
+
+    def test_returned_402_retries_with_payment(self):
+        # A transport that RETURNS 402 (instead of raising) must also
+        # retry with payment headers, not just raise.
+        def ask(m, u, b, h):
+            if "X-PAYMENT" in h:
+                return served_handler()(m, u, b, h)
+            return _HttpResponse(402, _json_body({"amount_usd": 0.01}), {})
+        t = FakeTransport([(_is_miners, catalogue_handler), (_is_ask, ask)])
+        res = DirectAskClient(
+            transport=t,
+            payment_provider=lambda ch: {"X-PAYMENT": "mock-signed"}).buy_result(
+            INTENT, MINER, {})
+        self.assertTrue(res.charged)
+        self.assertEqual(res.cost_usd, 0.01)
+
+
+class TestX402Provider(unittest.TestCase):
+    """Signing only — a fresh in-test key, never persisted, never a
+    real wallet. Verifies the EIP-3009 authorisation recovers to the
+    signer's address with the challenge's exact amount and pay-to."""
+
+    def test_signs_live_challenge_shape(self):
+        import base64
+        from eth_account import Account
+        from eth_account.messages import encode_typed_data
+        from traptest.x402 import make_x402_provider
+
+        key = Account.create().key
+        payer = Account.from_key(key).address
+        provider = make_x402_provider(key)
+        challenge = {
+            "amount_usd": 0.01,
+            "network": "eip155:11155111",
+            "pay_to": "0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b",
+            "asset": "0xcc194e1a843B658526D0D5C431f670028582Ae17",
+            "token_name": "USD Coin",
+            "token_version": "2",
+            "x402_version": 2,
+            # Raw v2 envelope, as parse_402_challenge returns it: the
+            # provider echoes the accepted requirement + resource.
+            "raw": {
+                "accepts": [{
+                    "scheme": "exact", "network": "eip155:11155111",
+                    "amount": "10000",
+                    "asset": "0xcc194e1a843B658526D0D5C431f670028582Ae17",
+                    "payTo": "0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b",
+                    "extra": {"name": "USD Coin", "version": "2"},
+                }],
+                "resource": {"description": "Payment required",
+                             "mimeType": "application/json",
+                             "url": "https://devnode.telegraphprotocol.com/engine/v1/ask/9002"},
+            },
+        }
+        headers = provider(challenge)
+        # x402 v2: PAYMENT-SIGNATURE, not X-PAYMENT (v1 only — the live
+        # server silently ignores X-PAYMENT; proven 6 Nov 2026).
+        self.assertIn("PAYMENT-SIGNATURE", headers)
+        payload = json.loads(base64.b64decode(headers["PAYMENT-SIGNATURE"]))
+        self.assertEqual(payload["x402Version"], 2)
+        self.assertEqual(payload["accepted"]["scheme"], "exact")
+        self.assertEqual(payload["accepted"]["amount"], "10000")
+        auth = payload["payload"]["authorization"]
+        self.assertEqual(auth["from"], payer)
+        self.assertEqual(auth["to"], challenge["pay_to"])
+        # Authorization numerics are STRINGS on the wire (the live
+        # facilitator parses them as strings; JSON numbers fail).
+        self.assertEqual(auth["value"], "10000")  # $0.01 in 6-decimal USDC
+        self.assertEqual(provider.payer, payer)
+        # Recover the signer from the EIP-712 message + signature.
+        # Telegraph's accepted token's on-chain EIP-712 name is "USD Coin".
+        domain = {"name": "USD Coin", "version": "2", "chainId": 11155111,
+                  "verifyingContract": challenge["asset"]}
+        types = {"TransferWithAuthorization": [
+            {"name": "from", "type": "address"},
+            {"name": "to", "type": "address"},
+            {"name": "value", "type": "uint256"},
+            {"name": "validAfter", "type": "uint256"},
+            {"name": "validBefore", "type": "uint256"},
+            {"name": "nonce", "type": "bytes32"},
+        ]}
+        # Wire strings back to ints for the typed-data encoding.
+        typed_auth = {**auth, "value": int(auth["value"]),
+                      "validAfter": int(auth["validAfter"]),
+                      "validBefore": int(auth["validBefore"])}
+        msg = encode_typed_data(domain, types, typed_auth)
+        recovered = Account.recover_message(
+            msg, signature=bytes.fromhex(payload["payload"]["signature"][2:]))
+        self.assertEqual(recovered, payer)
+
+    def test_refuses_challenge_without_pay_to_or_network(self):
+        from eth_account import Account
+        from traptest.x402 import make_x402_provider
+
+        provider = make_x402_provider(Account.create().key)
+        with self.assertRaises(ValueError):
+            provider({"amount_usd": 0.01, "network": "eip155:11155111"})
+        with self.assertRaises(ValueError):
+            provider({"amount_usd": 0.01, "network": "eip155:999999",
+                      "pay_to": "0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b"})
 
 
 if __name__ == "__main__":

@@ -29,6 +29,12 @@ class Trap:
             raise ValueError(f"unknown expected_status: {self.expected_status}")
         if not self.tx_hash.startswith("0x") or len(self.tx_hash) != 66:
             raise ValueError("tx_hash must be a 0x-prefixed 32-byte hash")
+        # Length + prefix alone are not enough: "0x" + "zz"*32 is 66
+        # chars and would previously have passed. Reject non-hex.
+        try:
+            int(self.tx_hash, 16)
+        except ValueError:
+            raise ValueError("tx_hash must be hex (0x + 64 hex chars)") from None
 
 
 def validate_trap_set(traps) -> None:

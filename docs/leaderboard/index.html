@@ -3,12 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>TrapTest Leaderboard — MOCK DATA</title>
+<title>TrapTest Leaderboard — CORRECTED RE-ANALYSIS (8 Nov 2026)</title>
 <style>
   body { font-family: system-ui, -apple-system, sans-serif; margin: 0 auto; max-width: 960px; padding: 1rem; color: #111; line-height: 1.45; }
   .banner { background: #b91c1c; color: #fff; padding: 1rem; border-radius: 8px; font-weight: 700; }
   .banner small { display: block; font-weight: 400; margin-top: .25rem; }
   h1 { font-size: 1.6rem; }
+  .tablewrap { overflow-x: auto; }
   table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
   th, td { border: 1px solid #ccc; padding: .45rem .6rem; text-align: left; }
   th { background: #f3f4f6; }
@@ -17,66 +18,170 @@
   details { margin: .75rem 0; border: 1px solid #ddd; border-radius: 8px; padding: .5rem 1rem; }
   summary { cursor: pointer; font-weight: 600; }
   .muted { color: #555; }
+  .verdict { border: 2px solid #1d4ed8; border-radius: 8px; padding: 1rem; margin: 1rem 0; background: #eff6ff; }
   .livebox { border: 2px dashed #888; border-radius: 8px; padding: 1rem; margin: 1rem 0; background: #fafafa; }
-  input[type=text] { width: 100%; padding: .5rem; box-sizing: border-box; }
   code { background: #f3f4f6; padding: .1rem .3rem; border-radius: 4px; }
+  pre { white-space: pre-wrap; word-break: break-word; background: #f9fafb; padding: .5rem; border-radius: 4px; font-size: .85rem; }
   #load-error { color: #b91c1c; font-weight: 600; }
+  @media (max-width: 600px) { body { padding: .5rem; } h1 { font-size: 1.25rem; } th, td { padding: .3rem .4rem; font-size: .9rem; } }
 </style>
 </head>
 <body>
-<div class="banner">⚠ MOCK DATA — NOT REAL RESULTS
-  <small>This page renders a prep fixture (<code>results.json</code> in this folder). No Telegraph purchase sits behind any row. Never submit this file, or any number derived from it, as a real result. The live page is identical in layout but is fed only by event-period (1 Nov–1 Dec 2026) purchases with real receipts.</small>
+<div class="banner">✓ LIVE DATA — CORRECTED RE-ANALYSIS (8 Nov 2026)
+  <small>This page renders the corrected re-score in <code>results.json</code> in this folder
+  (copy of <code>results-live/results-corrected-2026-11-08.json</code>, top-level
+  <code>data_kind: CORRECTED_REANALYSIS</code>). It is a disclosed re-analysis of the same frozen
+  raw answers from the 6 Nov 2026 full scored run — the original strict table is preserved
+  verbatim inside the file under <code>strict_original</code> and shown below alongside the
+  corrected table. It does NOT change the live results in
+  <code>results-live/full-run-2026-11-06.json</code>. Every row is a real Telegraph Direct Ask
+  purchase (or a real failed call, cost $0) from the 1 Nov–1 Dec 2026 event window, with real
+  receipts. The mock prep fixture was replaced by this live file.</small>
 </div>
 <noscript><p><strong>JavaScript is required to render this leaderboard.</strong> The data file is <code>results.json</code> in this folder.</p></noscript>
 
 <h1>TrapTest — provider leaderboard</h1>
-<p class="muted">Intent: <code>ONCHAIN_TX_LOOKUP</code> &middot; Ranking: pass rate, then traps run, then lower total testnet cost, then provider id — the same rules as <code>traptest/leaderboard.py</code>. A provider with zero scored traps is unranked, never shown as passing. Scoring is strict: a status mismatch fails the trap outright, and a missing provider field is a failure, never a pass (<code>traptest/scoring.py</code>).</p>
+<p class="lede">Builders choosing a transaction-intelligence provider on Telegraph need to know whose
+answers can be trusted before they spend — this page buys the same twelve trap queries, whose
+correct answers are known in advance, from five competing providers and scores each answer
+pass or fail, with receipts. It matters because a wrong answer sold as intelligence costs buyers
+money and trust, and three of the five providers could not serve a single trap.</p>
+<p class="muted">Links:
+<a href="https://github.com/OlsOls4/traptest">repo</a> &middot;
+<a href="../how-to-run.md">how-to-run</a> &middot;
+<a href="../demo-video/traptest-demo-2026-11-08.mp4">demo video v2 (2026-11-08, 2:42)</a> &middot;
+<a href="../../traps-frozen-2026-11-06.json">frozen trap file</a> &middot;
+<a href="https://anjoman.ai/dashboard/eval">submit evaluation material (anjoman.ai/dashboard/eval)</a>
+</p>
+<p class="muted">Intent: <code>ONCHAIN_TX_LOOKUP_GENERAL</code> &middot; n=12 traps per provider &middot;
+Ranking: pass rate, then traps run, then lower total testnet cost, then provider id — the same
+rules as <code>traptest/leaderboard.py</code>. A provider with zero scored traps is unranked, never
+shown as passing. Scoring is strict: a status mismatch fails the trap outright, and a missing
+provider field is a failure, never a pass (<code>traptest/scoring.py</code>).</p>
+
+<div class="verdict" id="verdict">
+  <strong>Verdict (corrected re-score, 8 Nov 2026 — n=12 traps per provider)</strong>
+  <ul>
+    <li><strong>Truvian (8453) 1st — 4/12</strong> (t07, t08, t11, t12); field accuracy 37/47.
+      <strong>TxLens (9002) 2nd — 2/12</strong> (t11, t12 only); field accuracy 2/47.
+      Truvian 4/12 vs TxLens 2/12 differ by two traps — treat a small margin as evidence, not a
+      proven gap.</li>
+    <li><strong>Unservable — not a 0% pass rate:</strong> LiveCert (4433) served 0/12
+      (HTTP 503 <code>no_compatible_miner</code> on all 12); Sigil (9010) served 0/12
+      (HTTP 500, upstream 404); OnChain Intel (900) served 0/12 (HTTP 500, upstream 400,
+      "Could not determine a supported chain"). No pass rate is computed for a provider that
+      served nothing.</li>
+    <li><strong>Cost:</strong> billed $0.26 total including $0.02 smoke tests ($0.24 in the run
+      file + $0.02 smoke); $0.24 settled into Telegraph escrow credit, NOT billed (24 unserved
+      calls at $0.01 — buyers pay even when nothing is served); wallet 30.00 → 29.50 test USDC (drop $0.50).</li>
+    <li><strong>What changed in the correction:</strong> Truvian strict 3/12 → corrected 4/12 —
+      t08 was scored FAIL though its <code>value_eth</code> 1e-05 equals the expected
+      10000000000000 wei (fixed normaliser). Field accuracy corrected 37/47 (strict 36/47).
+      Ranking order unchanged.</li>
+  </ul>
+</div>
 
 <div class="livebox">
-  <strong>Judge in 60 seconds (live build, from 1 Nov — disabled in mock mode)</strong>
-  <ol>
-    <li>Enter one trap transaction hash below.</li>
-    <li>TrapTest buys competing providers' answers on testnet (Direct Ask, one miner at a time).</li>
-    <li>Each answer is scored pass/fail against the trap's known ground truth, with its receipt.</li>
-    <li>The leaderboard below re-ranks. A stale or wrong answer is shown <span class="fail">FAIL</span> on screen — that is the built-in failure case, not a hidden error.</li>
-  </ol>
-  <label for="trap-input">Trap transaction hash (live mode only):</label>
-  <input id="trap-input" type="text" placeholder="0x… (disabled in mock mode)" disabled>
-  <p class="muted">This input does nothing in mock mode by design. In the live build it triggers real testnet purchases only after the free-testnet gate has passed (see <code>docs/how-to-run.md</code>).</p>
+  <strong>Reproduce this run yourself (no live in-page loop)</strong>
+  <p>This page does not buy answers in the browser. To re-run the scored run, fund your own
+  burner wallet as in <a href="../how-to-run.md">how-to-run.md §1</a> (funding steps), then run
+  these two commands from the repo root — each buys traps via Direct Ask on testnet at $0.01
+  per served call, so only run them if you accept that testnet spend:</p>
+  <pre><code>python3 scripts/full_run.py   # 12 frozen traps × TxLens (9002) + LiveCert (4433)
+python3 scripts/mini_run.py   # 12 frozen traps × Sigil (9010) → OnChain Intel (900) → Truvian (8453)</code></pre>
+  <p class="muted">Prefer to spend nothing? Inspect the pre-run evidence instead: this page renders the
+  frozen 6 Nov run with every receipt and settlement link, and
+  <code>results-live/results-corrected-2026-11-08.json</code> holds the full corrected re-score.
+  See <code>docs/how-to-run.md</code> §2 for the no-spend checks.</p>
 </div>
 
 <p id="load-error"></p>
 <p class="muted">Data source: <span id="source">results.json (same folder)</span> &middot; <label>Load a different results file: <input type="file" id="file-input" accept=".json,application/json"></label></p>
 
-<h2>Ranked providers</h2>
-<table id="ranked">
-  <thead><tr><th>Rank</th><th>Provider</th><th>Pass rate</th><th>Passed / run</th><th>Total testnet cost (USD)</th><th>Receipts</th></tr></thead>
+<h2>Ranked providers — corrected (8 Nov 2026)</h2>
+<div class="tablewrap"><table id="ranked">
+  <thead><tr><th>Rank</th><th>Provider</th><th>Pass rate</th><th>Passed / run</th><th>Field accuracy</th><th>Total testnet cost (USD)</th><th>Receipts</th></tr></thead>
   <tbody></tbody>
-</table>
+</table></div>
 <p id="unranked" class="muted"></p>
 
-<h2>Per-trap detail (every scored answer, pass and fail)</h2>
+<h2>Strict original (6 Nov 2026 run, as scored then — preserved verbatim)</h2>
+<div class="tablewrap"><table id="strict">
+  <thead><tr><th>Provider</th><th>Passed / run</th><th>Field accuracy</th><th>Total testnet cost (USD)</th></tr></thead>
+  <tbody></tbody>
+</table></div>
+<p class="muted">The only change between the strict and corrected tables is Truvian t08 (3/12 → 4/12,
+field accuracy 36/47 → 37/47). Never present corrected numbers as the original run.</p>
+
+<h2>Token traps t03/t04 — value-excluded view</h2>
+<div class="tablewrap"><table id="value-excluded">
+  <thead><tr><th>Provider</th><th>Served (t03/t04)</th><th>Passed, value excluded</th></tr></thead>
+  <tbody></tbody>
+</table></div>
+<p class="muted">t03/t04 score the Transfer EVENT amount as value, which no provider returns in
+<code>value_eth</code> (native tx value). This view scores them on status/from/to/block only (value
+excluded): 0 passes for every provider in that view. The frozen traps were not edited; this view
+is shown alongside the corrected table, not instead of it, and it changes no pass count.</p>
+
+<h2>Per-trap detail (every scored answer, pass and fail — corrected scoring)</h2>
 <div id="detail"></div>
+
+<h2>Honest limits</h2>
+<p class="muted">Testnet use is not adoption, and no user, retention, accuracy, or time-saved figure is
+claimed. The entry is single-Intent (<code>ONCHAIN_TX_LOOKUP_GENERAL</code>). n=12 traps per provider
+is small: a two-trap margin (Truvian 4/12 vs TxLens 2/12) is evidence, not a proven gap. Schema
+gaps are not lies: Truvian returns no <code>status</code> for confirmed transactions (its
+block/from/to/value were all correct on 6 such traps) — those traps score FAIL under the strict
+rules and the gap is reported as a gap, not as a wrong answer. TxLens's <code>not_found</code>
+answers ARE wrong answers (the txs are mined and confirmed), not a schema gap. Failed calls can
+still settle: Sigil and OnChain Intel failed every call, yet $0.01 per call settled on-chain into
+Telegraph escrow credit (not billed).</p>
 
 <p class="muted">How to open: serve this folder locally — <code>python3 -m http.server</code> from <code>docs/leaderboard/</code> — then open <code>http://localhost:8000/</code>. Opening the file directly (<code>file://</code>) blocks the <code>results.json</code> fetch in most browsers; use the file picker above instead. No hosting, account, or paid service is involved.</p>
 
 <script>
+var NAMES = {"8453": "Truvian", "9002": "TxLens", "4433": "LiveCert", "9010": "Sigil", "900": "OnChain Intel"};
+var EXPLORER = "https://sepolia.etherscan.io/tx/";
 function esc(s) {
   return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
     return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
   });
 }
+function providerLabel(id) { return esc(NAMES[id] || "") + " (" + esc(id) + ")"; }
+function receiptHash(row) {
+  if (!row.receipt) return null;
+  try {
+    var decoded = JSON.parse(atob(row.receipt));
+    return decoded.receipt_hash || null;
+  } catch (e) { return null; }
+}
+function receiptCell(row) {
+  if (!row.receipt_present) return "n/a (not served)";
+  var h = receiptHash(row);
+  var shown = h ? esc(h.slice(0, 18)) + "&hellip;" : esc(String(row.receipt).slice(0, 18)) + "&hellip;";
+  var link = row.receipt_settlement_tx ?
+    " <a href=\"" + EXPLORER + esc(row.receipt_settlement_tx) + "\">settlement tx</a>" :
+    " <span class='muted'>(no settlement tx recorded in results file)</span>";
+  return "<code title=\"" + esc(h || row.receipt) + "\">" + shown + "</code>" + link;
+}
 function render(data) {
   var banner = document.querySelector(".banner");
-  if (!data || data.data_kind !== "MOCK") {
-    banner.textContent = "WARNING: this file is not labelled MOCK — refusing to render it as mock data. Only MOCK-labelled fixtures may be rendered by this page.";
+  // LIVE gate: only LIVE-labelled event results, or the disclosed CORRECTED_REANALYSIS of them, may render.
+  if (!data || (data.data_kind !== "LIVE" && data.data_kind !== "CORRECTED_REANALYSIS")) {
+    banner.textContent = "WARNING: this file is not labelled LIVE or CORRECTED_REANALYSIS — refusing to render it as live data. Only LIVE-labelled event results (or their disclosed corrected re-analysis) may be rendered by this page.";
     return;
   }
+  var isCorrected = data.data_kind === "CORRECTED_REANALYSIS";
+  var scores = isCorrected ? (data.corrected.scores || []) : (data.scores || []);
+  var table = isCorrected ? data.corrected.table : null;
+  var fieldAcc = isCorrected ? data.corrected.field_accuracy : null;
+  function isPassed(s) { return isCorrected ? !!s.corrected_passed : !!s.passed; }
+  function isServed(s) { return s.served === true || !!s.receipt_present; }
   var stats = {};
-  (data.scores || []).forEach(function (s) {
+  scores.forEach(function (s) {
     var st = stats[s.provider_id] || (stats[s.provider_id] = {provider_id: s.provider_id, run: 0, passed: 0, cost: 0, receipts: 0});
     st.run += 1;
-    if (s.passed) st.passed += 1;
+    if (isPassed(s)) st.passed += 1;
     if (s.cost_usd != null) st.cost += Number(s.cost_usd);
     if (s.receipt_present) st.receipts += 1;
   });
@@ -90,28 +195,60 @@ function render(data) {
   });
   var tbody = document.querySelector("#ranked tbody");
   tbody.innerHTML = ranked.map(function (s, i) {
-    return "<tr><td>" + (i + 1) + "</td><td>" + esc(s.provider_id) + "</td><td>" +
+    var fa = fieldAcc && fieldAcc[s.provider_id] ?
+      (fieldAcc[s.provider_id].accuracy == null ? "n/a (not served)" : fieldAcc[s.provider_id].correct + "/" + fieldAcc[s.provider_id].scored) : "—";
+    var served = scores.filter(function (x) { return x.provider_id === s.provider_id && isServed(x); }).length;
+    var receiptLabel = served === 0 ? "n/a (not served)" : s.receipts + " / " + served;
+    return "<tr><td>" + (i + 1) + "</td><td>" + providerLabel(s.provider_id) + "</td><td>" +
       (100 * s.passed / s.run).toFixed(0) + "%</td><td>" + s.passed + " / " + s.run + "</td><td>" +
-      s.cost.toFixed(4) + "</td><td>" + s.receipts + " / " + s.run + "</td></tr>";
-  }).join("") || "<tr><td colspan='6'>No scored traps yet.</td></tr>";
-  var unranked = data.unranked_providers || [];
-  document.getElementById("unranked").textContent = unranked.length ?
-    "Unranked (zero scored traps — never shown as passing): " + unranked.map(function (u) { return u.provider_id; }).join(", ") : "";
+      esc(fa) + "</td><td>" + s.cost.toFixed(4) + "</td><td>" + receiptLabel + "</td></tr>";
+  }).join("") || "<tr><td colspan='7'>No scored traps yet.</td></tr>";
+  var unservable = isCorrected ? (data.corrected.unservable || []) : (data.unranked_providers || []).map(function (u) { return u.provider_id; });
+  var reasons = {"4433": "HTTP 503 no_compatible_miner", "9010": "HTTP 500 upstream 404", "900": "HTTP 500 upstream 400 \u201cCould not determine a supported chain\u201d"};
+  document.getElementById("unranked").textContent = unservable.length ?
+    "Unservable (zero served traps — never shown as passing, and no pass rate is computed for them): " +
+    unservable.map(function (id) { return (NAMES[id] || id) + " (" + id + ") — " + (reasons[id] || ""); }).join("; ") : "";
+  // Strict original table (verbatim from the file when present).
+  var strictBody = document.querySelector("#strict tbody");
+  if (isCorrected && data.strict_original && data.strict_original.table) {
+    var st = data.strict_original.table, sfa = data.strict_original.field_accuracy;
+    strictBody.innerHTML = Object.keys(st).map(function (id) {
+      var fa = sfa && sfa[id] ? (sfa[id].accuracy == null ? "n/a (not served)" : sfa[id].correct + "/" + sfa[id].scored) : "—";
+      return "<tr><td>" + providerLabel(id) + "</td><td>" + st[id].passed + " / " + st[id].rows + "</td><td>" + esc(fa) + "</td><td>" + Number(st[id].total_cost_usd).toFixed(4) + "</td></tr>";
+    }).join("");
+  } else {
+    strictBody.innerHTML = "<tr><td colspan='4'>Strict original not included in this file — see results-live/full-run-2026-11-06.json.</td></tr>";
+  }
+  // Value-excluded view (t03/t04, value excluded).
+  var veBody = document.querySelector("#value-excluded tbody");
+  if (isCorrected && data.value_excluded_view && data.value_excluded_view.table) {
+    var vt = data.value_excluded_view.table;
+    veBody.innerHTML = Object.keys(vt).map(function (id) {
+      return "<tr><td>" + providerLabel(id) + "</td><td>" + vt[id].served + "</td><td>" + vt[id].passed_value_excluded + " / " + vt[id].served + "</td></tr>";
+    }).join("");
+  } else {
+    veBody.innerHTML = "<tr><td colspan='3'>Value-excluded view not included in this file.</td></tr>";
+  }
   var detail = document.getElementById("detail");
   detail.innerHTML = ranked.map(function (s) {
-    var rows = (data.scores || []).filter(function (x) { return x.provider_id === s.provider_id; }).map(function (x) {
+    var rows = scores.filter(function (x) { return x.provider_id === s.provider_id; }).map(function (x) {
+      var passed = isPassed(x);
       var fields = (x.fields || []).map(function (f) {
         return "<tr><td>" + esc(f.field) + "</td><td>" + esc(f.expected) + "</td><td>" +
           (f.actual == null ? "<em>missing</em>" : esc(f.actual)) + "</td><td class='" +
           (f.passed ? "pass" : "fail") + "'>" + (f.passed ? "PASS" : "FAIL") + "</td></tr>";
       }).join("");
-      return "<details><summary>" + esc(x.trap_id) + " — <span class='" + (x.passed ? "pass" : "fail") + "'>" +
-        (x.passed ? "PASS" : "FAIL") + "</span> · cost " + (x.cost_usd == null ? "n/a" : Number(x.cost_usd).toFixed(4)) +
-        " USD · receipt " + (x.receipt_present ? "present" : "MISSING") +
-        (x.signal_hash ? " · signal " + esc(x.signal_hash) : "") + "</summary><table><thead><tr><th>Field</th><th>Expected</th><th>Actual</th><th>Result</th></tr></thead><tbody>" +
-        fields + "</tbody></table></details>";
+      var body = fields ?
+        "<div class='tablewrap'><table><thead><tr><th>Field</th><th>Expected</th><th>Actual</th><th>Result</th></tr></thead><tbody>" + fields + "</tbody></table></div>" :
+        "<p class='muted'>No fields scored — this trap was not served.</p>";
+      var err = x.error ? "<p><strong>Error returned:</strong></p><pre>" + esc(x.error) + "</pre>" : "";
+      var note = (isCorrected && x.correction_note) ? "<p class='muted'>Correction: " + esc(x.correction_note) + "</p>" : "";
+      return "<details><summary>" + esc(x.trap_id) + " — <span class='" + (passed ? "pass" : "fail") + "'>" +
+        (passed ? "PASS" : "FAIL") + "</span> · cost " + (x.cost_usd == null ? "n/a" : Number(x.cost_usd).toFixed(4)) +
+        " USD · receipt " + receiptCell(x) +
+        (x.signal_hash ? " · signal " + esc(x.signal_hash) : "") + "</summary>" + body + err + note + "</details>";
     }).join("");
-    return "<h3>" + esc(s.provider_id) + "</h3>" + rows;
+    return "<h3>" + providerLabel(s.provider_id) + "</h3>" + rows;
   }).join("");
 }
 fetch("results.json").then(function (r) {

@@ -309,7 +309,100 @@ and penalises the inflation.
 
 ---
 
-## Conclusion
+## Addendum — live build review (6 Nov 2026)
+
+**Scope reviewed:** the 6 Nov 2026 live run — `traps-frozen-2026-11-06.json`
+(12 traps, frozen 13:59:42 UTC, before the first scored purchase),
+`results-live/full-run-2026-11-06.json` (60 rows, `data_kind: LIVE`),
+`scripts/full_run.py` + `scripts/mini_run.py`, `docs/leaderboard/`
+(rendered and screenshotted live), `docs/demo-video/` (2:36 video),
+42/42 unit tests green. The prep review above (§1–§4) is preserved as
+history; this addendum re-scores on the live evidence only.
+
+### Results (all event-period, receipts on-chain)
+
+| Provider | Served | Passed | Cost billed | Note |
+|---|---|---|---|---|
+| Truvian 8453 | 12/12 | **3/12** | $0.12 | Passed t07 (reverted), t11 + t12 (unknown-tx). |
+| TxLens 9002 | 12/12 | **2/12** | $0.12 | Passed t11 + t12 only; answered `not_found` for all 10 mined txs. |
+| LiveCert 4433 | 0/12 | 0/12 | $0 | 503 `no_compatible_miner` on all 12. |
+| Sigil 9010 | 0/12 | 0/12 | $0 (+$0.12 escrow) | HTTP 500 upstream 404 on all 12. |
+| OnChain Intel 900 | 0/12 | 0/12 | $0 (+$0.12 escrow) | HTTP 500 upstream 400 "Could not determine a supported chain" (upstream still on old `ONCHAIN_TX_LOOKUP` intent). |
+
+Session accounting (verified on-chain): billed $0.26 (smoke $0.02 +
+full run $0.12 + Truvian $0.12); $0.24 settled into Telegraph escrow
+credit, not billed; burner wallet 30.00 → 29.50 test USDC. Billed spend
+is inside the $0.50 session cap; out-of-wallet total including escrow
+credit is exactly $0.50. All 24 served receipts verified on-chain
+(`receipt_verified_onchain: true`).
+
+### Risk register — updated
+
+- **Risk 1 (funding) — RESOLVED, with a finding.** No Telegraph faucet
+  exists, but the accepted token has an open mint and burner 3
+  self-minted 30 test USDC (other builders do the same); gas from the
+  PoW faucet. Zero real money. The funding route is documented, not
+  assumed.
+- **Risk 2 (schema mismatch) — PARTLY REALISED, handled honestly.**
+  Truvian returns no `status` for confirmed transactions: on t01, t02,
+  t05, t06, t09, t10 every returned field was correct and the ONLY
+  failing field was `status`. Under the strict scorer these are FAILs
+  (a missing field is a failure), and the pack reports them as a schema
+  gap, not as lies — exactly the outcome the prep review prescribed.
+  TxLens's `not_found` answers are wrong answers, not a schema gap.
+  Normalisation (block_number → block, value_eth → value, ETH→wei) is
+  implemented in the run harness and recorded per row; raw answers are
+  kept alongside normalised ones.
+- **Risk 3 (supply) — PARTLY REALISED.** 24 miners listed, but only 2
+  of 5 attempted providers served the intent. The leaderboard is still
+  a real comparison (2 serving providers, 3 documented unservable) —
+  but the "competing providers" claim now rests on 2, not 5, and the
+  unservable three are evidence of network immaturity, not of TrapTest
+  failing to look. No second intent was added; the task brief forbade
+  tuning traps and the frozen set was never touched.
+- **Risk 4 (trap credibility) — HELD.** Set frozen before the first
+  scored purchase (13:59:42 UTC), 12 traps, 2/category, ground truth
+  from public Base Sepolia RPC with per-trap provenance. No trap was
+  changed after seeing answers. Small-sample caveat stands: a 1-trap
+  difference (3 vs 2) is noise, and the pack must say so — the ranking
+  is evidence, not a verdict on provider quality.
+- **Risk 5 (track mismatch / replay) — HALF OPEN.** The loop is real,
+  autonomous, receipted, and replayable (`scripts/full_run.py`,
+  `scripts/mini_run.py`, `docs/how-to-run.md`). The Evaluator-route
+  confirmation (§3 checklist) is STILL NOT DONE — it needs a live
+  browser check with the Evaluator track selected, which is a human
+  step outside this build. If it fails, the Apps & Agents fallback from
+  §3 still applies.
+
+### Re-score on live evidence (projection, same criteria)
+
+| Criterion | Prep | Live | Why |
+|---|---|---|---|
+| Technical (/35) | 13 | **27–29** | Live loop works, frozen set, verified receipts, replayable, normalisation + escrow accounting. Docked: only 2 serving providers; no mainnet-readiness note yet. |
+| Commercial (/30) | 8 | **18–20** | Commercial summary now has a named buyer, observed cost, and observed result (see submission-pack §3). Still a case, not a result — no payer evidenced. |
+| Adoption (/15) | 0 | **3** | No independent adoption claimed (honest ceiling); credit only for reviewer repeatability. |
+| Integration (/10) | 2 | **9** | Real autonomous Direct Ask purchases, per-provider, receipted, fresh catalogue. Docked 1: 3 of 5 providers unservable for the intent. |
+| Proof (/10) | 2 | **8–9** | 2:36 demo with visible fails, how-to-run with the live command, receipts bundle, reviewer failure case on screen. |
+| **Total** | **25** | **65–70, central ~68** | **Still borderline — likely just under 70.** The live build moved Technical and Proof most of the way, but Adoption cannot rise and Commercial is capped without a payer. The entry is submittable and honest; it is not a safe pass. |
+
+### What would still move the score before 1 Dec
+
+1. **Evaluator-route confirmation** (live browser) — removes the
+   track-mismatch risk; without it the submission may be judged as an
+   App anyway.
+2. **A second serving provider** — a re-run of the mini-run closer to
+   submission (catalogue churn is real: 21 miners on 1 Nov, 24 on
+   6 Nov) could add a third serving provider and strengthen the
+   comparison. Costs $0.12 billed per attempt; cap discipline applies.
+3. **Mainnet-readiness note** — one paragraph (same Direct Ask flow,
+   parameterised Engine/contract addresses, no testnet-only shortcuts)
+   for +1–2 Technical.
+4. **Do NOT chase Adoption** — no claim is available and any
+   manufactured claim is a disqualifier (see §4).
+
+---
+
+## Conclusion (prep review, 27 Oct 2026 — preserved)
 
 - **As-is score: 25/100 — fails 70+ and fails the 24/35 technical minimum (13/35).**
 - **Projected completed score: 65–76, central ~71 — a borderline pass, with no slack.**
@@ -325,3 +418,63 @@ and penalises the inflation.
   checklist (live browser, Evaluator track selected). If the Evaluator
   route does not fit a leaderboard-plus-script artefact, submit as
   Apps & Agents.
+
+## Addendum — Council review, 8 Nov 2026 (all six panels in parallel + fresh-judge re-score)
+
+**Scores.** Prior internal re-score 65–70, central ~68. Council first-pass independent
+re-scores: Judge A 65/100, Judge B 59–62 (central ~60). After the improvement round,
+fresh independent judge (revised artifacts only): **66/100 (range 64–69) on the frozen
+snapshot rubric (T35/C30/A15/I10/P10) — FAIL, narrowly; 61/100 (58–64) on the live
+Apps-view weights (T35/C25/A10/I5/P5 + Organic growth 20).** Breakdown: T29, C19, A2,
+I8, P8 frozen. The entry does NOT pass 70 on either rubric on central estimate.
+The shortfall is structural (zero independent adoption, zero public distribution,
+repo push unconfirmed, video local-only) — not code quality.
+
+**Rubric warning (researchers, live fetch 8 Nov 11:03 UTC).** The live rules page
+defaults to the Apps & Agents view: T35 (min 24), C25, A10, I5, P5, + Organic growth /
+education / developer activation 20 — NOT the frozen snapshot rubric. The
+Evaluator-view rubric is UNVERIFIED and needs a live-browser check with the Evaluator
+track selected. The 20-point growth category (≥3 dated public updates, a tutorial,
+evidence an independent developer reproduced the work) has no verified activity behind
+it yet. The live weights punish this entry *more* than the frozen rubric.
+
+**Corrected re-score (8 Nov, disclosed re-analysis of the same frozen raw answers).**
+Truvian 8453: **4/12** (strict 3/12 — t08 was a harness normalisation bug: value_eth
+"1e-05" = 10,000,000,000,000 wei), field accuracy 37/47. TxLens 9002: 2/12, 2/47.
+LiveCert 4433 / Sigil 9010 / OnChain Intel 900: 0 served (unservable tier, not ranked).
+Ranking order unchanged. Value-excluded t03/t04 view: 0 passes for every provider.
+Canonical accounting: billed $0.26 incl. $0.02 smoke; $0.24 escrow credit, not billed;
+wallet 30.00 → 29.50.
+
+**Evaluator route — RESOLVED 8 Nov.** No sign-in on the hackathon website; sign in on
+anjoman.ai. No GitHub bounty issue exists for ONCHAIN_TX_LOOKUP_GENERAL — nothing to
+/claim. Material goes in directly at anjoman.ai/dashboard/eval. **SUBMITTED 8 Nov
+11:20–11:21: 12 preference pairs + 1 truth source admitted; pool went 4 → 5
+contributors (activation threshold met).** Staged fixes for t04/t06/t10 rejected
+answers exist in `anjoman-material/review-fixes-2026-11-08/` — NOT yet applied or
+re-submitted. Truth source still UNVALIDATED (Anjoman sandbox validator not run).
+Whether direct /dashboard/eval submission without a bounty /claim qualifies for the
+4×$300 verified-delivery awards is UNVERIFIED — entry may be excellence-only
+($500/$300); ask organisers in #hackathon.
+
+**What the improvement round changed (verified 8 Nov).** Shared `traptest/normalise.py`
+(Decimal) + `traptest/receipts.py` (status AND Transfer-log verification); stale token
+map fixed (Sepolia accepted token 0xcc19…); leaderboard rewritten (verdict strip,
+field accuracy, unserved reasons, corrected + strict tables, honest replay box);
+submission-pack/README/how-to-run updated (verified Anjoman route, mainnet-readiness,
+escrow finding headlining commercial); parametrised append-only runner
+(`traptest/run.py`, dry-run, --spend-cap $0.30 default, no-overwrite); video v2
+(2:42, Shot 4 table fixed, Shot 5 re-cropped, receipt overlay, caveat line);
+tests 42 → **91/91 passing**; stale-string sweep 8 Nov (zero "re-cut in progress",
+"42 tests", "nothing yet", "PREP ONLY" across README/pack/how-to-run/leaderboard/
+anjoman README). Frozen files sha256-verified untouched.
+
+**Remaining open items.** (1) Evaluator-view rubric verification (live browser).
+(2) Repo push: live-build files not yet confirmed pushed to github.com/OlsOls4/traptest
+(no local .git). (3) Anjoman pair re-submission with fixes + truth-source validation.
+(4) Publish/distribute — the highest-upside move (+~8 live / +2–3 frozen): public repo,
+uploaded video, bounties-repo star (live rules §5 requires it for every track), 3 dated
+public posts. (5) Second live re-run (~$0.12–0.24, 26 miners now live) to test whether
+4-vs-2 is stable. (6) Final submission form — does not exist yet; watch Discord.
+(7) UK prize-payment terms still unpublished. Full record:
+`~/workspace/goals/traptest-telegraph-season-ii-submission/hidden_files/council-2026-11-08.md`.

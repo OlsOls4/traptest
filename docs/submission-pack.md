@@ -1,9 +1,13 @@
-# TrapTest — submission pack (skeleton, prep only)
+# TrapTest — submission pack (live, 6 Nov 2026)
 
-**Status at writing (27 Oct 2026, pre-opening): REGISTERED, not submitted.
-No event evidence exists yet. Every [BRACKET] below is a gap to be filled
-only with event-period (1 Nov–1 Dec 2026) evidence. Do not fill a bracket
-with a mock, estimated, or pre-window number.**
+**Status: LIVE RUN COMPLETE 6 Nov 2026, corrected re-score 8 Nov 2026, not
+yet submitted. Every number below is event-period (1 Nov–1 Dec 2026)
+evidence from `results-live/full-run-2026-11-06.json` (60 rows,
+`data_kind: LIVE`, strict original) and
+`results-live/results-corrected-2026-11-08.json` (corrected re-score).
+No [BRACKET] below may be filled with a mock, estimated, or pre-window
+number — all remaining brackets are genuine gaps (repo-public state,
+prize terms).
 
 ## 1. Truth list (freeze before the final polish round)
 
@@ -21,15 +25,16 @@ not on this list is unverified and must not appear on a submission surface.
 | Intent migration (1 Nov 2026) | Old intent `ONCHAIN_TX_LOOKUP`: 0 miners on 1 Nov; successor `ONCHAIN_TX_LOOKUP_GENERAL`: 21 miners, ~10 usable-looking by description — code, tests and docs migrated to the new intent 1 Nov (see README migration note); the 27/28 Oct rows above are dated history under the old intent | Engine `/intents/ONCHAIN_TX_LOOKUP/miners` and `/intents/ONCHAIN_TX_LOOKUP_GENERAL/miners`, 1 Nov — **re-fetch at run time; miner ids are not stable** |
 | Purchase flow | Direct Ask `POST /engine/v1/ask/{minerId}`; price from live 402 challenge, never catalogue `cost_per_call: "0.00"` | docs.telegraphprotocol.com |
 | Evidence per served call | `cost_usd`, `signal_hash`, `X-TELEGRAPH-RECEIPT` | Same |
-| Testnet | Base Sepolia (chain 84532); USDC `0x036CbD53842c5426634e7929541eC2318f3dCF7e`; Diamond `0x5a2324aA18613FAD4e44bDF0d6c73Ec1f6D87ff8`; Engine `https://devnode.telegraphprotocol.com/engine` | Docs, 27 Oct |
+| Testnet | Trap queries are Base Sepolia txs (chain 84532). Payment settles on Ethereum Sepolia (eip155:11155111); accepted token `0xcc194e1a843B658526D0D5C431f670028582Ae17` ("USD Coin", open mint, self-minted — NOT Circle faucet USDC `0x1c7d…`). Engine `https://devnode.telegraphprotocol.com/engine` | Docs + live 402 challenges + on-chain verification, 1–6 Nov 2026 |
 | Judging | /100: Technical 35 (min 24), Commercial 30, Adoption 15, Integration 10, Proof 10; need 70+ | Official rules |
 | Prize context | $10,000 programme total; main $7,000 (Apps & Agents $3,000, Miners $2,000, Evaluators $2,000) + $3,000 December challenges. TrapTest is Evaluator-led — do not claim the $10,000 or the $3,000 Apps slice as its prize | Official rules |
 | Entry fee | Site says "free to register" (27 Oct) | Live browser |
-| Test count | [FILL at submission: `python3 -m unittest discover -s tests` count] | Repo tests |
-| Live results | [FILL from event window only: trap-set size, providers scored, total testnet cost, pass rates — each with its receipts file] | Event-period run |
-| Demo video | [FILL: version, length (must be 2–5 min), link] | Submission |
-| Repo | [FILL: link, public/private state at submission] | GitHub |
-| **UNVERIFIED — do not claim** | UK prize eligibility; payout currency/method/timing; free testnet USDC/gas acquisition (no Telegraph faucet documented) | Re-check on/after 1 Nov |
+| Test count | 91 tests, all passing (`python3 -m unittest discover -s tests`, 8 Nov 2026) | Repo tests |
+| Live results (corrected) | 12 frozen traps × 5 providers = 60 rows, 6 Nov 2026 run, corrected re-score 8 Nov 2026. Corrected: Truvian 8453: 4/12 (t07, t08, t11, t12; field accuracy 37/47). TxLens 9002: 2/12 (t11 + t12 only; field accuracy 2/47). LiveCert 4433: 0/12 served (503). Sigil 9010: 0/12 served (HTTP 500 upstream 404). OnChain Intel 900: 0/12 served (HTTP 500 upstream 400). Strict original (preserved verbatim in the corrected file): Truvian 3/12, field accuracy 36/47 — only t08 changed. Billed $0.26 total including $0.02 smoke tests ($0.24 in the run file + $0.02 smoke); $0.24 settled into Telegraph escrow credit, NOT billed; burner 30.00 → 29.50 test USDC (drop $0.50). 24 served receipts verified on-chain. | `results-live/results-corrected-2026-11-08.json` (CORRECTED_REANALYSIS), `results-live/full-run-2026-11-06.json` (LIVE, strict original), `docs/leaderboard/results.json` (copy of the corrected file) |
+| Demo video | v2, 2026-11-08, `docs/demo-video/traptest-demo-2026-11-08.mp4` — DONE, 2:42 (161.6 s), 1280×720; v1 (2:36, 155.8 s, 1280×720, local file `docs/demo-video/traptest-demo-2026-11-06.mp4`) superseded as the submission video. NOT uploaded anywhere. Narration script + storyboard in `docs/demo-video/narration.md`. | Submission |
+| Repo | https://github.com/OlsOls4/traptest — [PUBLIC/PRIVATE STATE AT SUBMISSION TO CONFIRM: prep pushed 1 Nov (commit 30b3f8f); live-build files NOT yet pushed — do not submit until the push state is confirmed] | GitHub |
+| **UNVERIFIED — do not claim** | UK prize eligibility; payout currency/method/timing (re-checked 1 Nov and 6 Nov, still unpublished) | Re-check before submitting |
+| Evaluator submission route (VERIFIED 8 Nov, Discord #hackathon) | There is NO sign-in on the hackathon website and none is needed — the hackathon is completely open. Sign in on anjoman.ai (Telegraph's dashboard). Evaluation material is submitted at anjoman.ai/dashboard/eval. No GitHub bounty issue exists for `ONCHAIN_TX_LOOKUP_GENERAL`, so there is nothing to /claim for this intent. The final submission form does NOT exist yet — it opens later and will be shared in Discord before the 1 Dec deadline. | Discord server findings, 8 Nov 2026 (`~/workspace/goals/traptest-telegraph-season-ii-submission/hidden_files/discord-server-findings-2026-11-08.md`) |
 
 ## 2. Short public summary (draft — final wording frozen with the truth list)
 
@@ -48,6 +53,12 @@ not on this list is unverified and must not appear on a submission surface.
 
 ## 3. Commercial summary (draft — numbers only from live evidence)
 
+- **Headline finding: failed calls still settled $0.01 into escrow — $0.24 on
+  24 failed calls — buyers pay for failures.** Sigil (9010) and OnChain Intel
+  (900) failed all 12 of their calls each, yet $0.01 per call settled on-chain
+  into Telegraph escrow credit (not billed). A buyer who pays per call pays
+  even when the provider serves nothing — that is the commercial problem
+  TrapTest's verified ranking exists to expose.
 - **Buyer/user:** Telegraph itself, and every agent/builder choosing an
   `ONCHAIN_TX_LOOKUP_GENERAL` provider — they need verified ranking trust
   before spending on intelligence. The ranking is the product; a
@@ -68,40 +79,86 @@ not on this list is unverified and must not appear on a submission surface.
 - **Demo flow:** one trap input → competing answers bought on testnet →
   pass/fail with receipts → leaderboard re-ranks (see
   `docs/how-to-run.md` §3 and `docs/demo-script.md`).
-- **Observed cost:** [FILL: total testnet USDC spent, per-call cost from
-  the live 402 challenges, and the confirmed free testnet allocation it
-  sat inside. Until filled: ~$0.01/call per docs is an estimate, not a
-  measured bill. Also [FILL: cost-accounting total from the run log —
-  the commercial summary must not quote a cost that the run log does
-  not support.]
-- **Observed result:** [FILL: providers scored, pass rates, and at least
-  one failing row with its mismatching field — or an honest note that
-  no provider failed. Provider answers that could not be mapped to the
-  scorer's fields are reported as "unmapped schema, not scored as a
-  lie", never as failures.]
+- **Observed cost:** Billed $0.26 total including $0.02 smoke tests ($0.24
+  in the run file + $0.02 smoke), at $0.01 per served call from the live 402
+  challenges. A further $0.24 settled on-chain into Telegraph escrow credit,
+  NOT billed (Sigil $0.12 + OnChain Intel $0.12 — failed calls that still
+  settled; see `docs/how-to-run.md` §4). Burner wallet 30.00 → 29.50 test
+  USDC (drop $0.50, verified on-chain 6 Nov 2026). The confirmed free
+  allocation was 30 self-minted test USDC + PoW-faucet Sepolia gas; billed
+  spend is inside the $0.50 session cap.
+- **Observed result (corrected re-score, 8 Nov 2026; strict original Truvian
+  3/12, field accuracy 36/47):** 5 providers scored over 12 frozen traps.
+  Truvian 8453: 4/12 (t07 + t08 reverted, t11 + t12 unknown-tx; field
+  accuracy 37/47 — t08 newly passes under the fixed normaliser, its
+  `value_eth` 1e-05 equalling the expected 10000000000000 wei). TxLens 9002:
+  2/12 (t11 + t12 only — it answered `not_found` for all 10 mined txs;
+  field accuracy 2/47). LiveCert 4433: 0/12 served (503 `no_compatible_miner`
+  on all 12). Sigil 9010: 0/12 served (HTTP 500 upstream 404). OnChain Intel
+  900: 0/12 served (HTTP 500 upstream 400, "Could not determine a supported
+  chain"). The three unserved providers are an UNSERVABLE tier, not a 0%
+  pass rate. Truvian's 6 other fails are a schema gap, not wrong answers:
+  on t01, t02, t05, t06, t09, t10 its block/from/to/value were all
+  correct and only `status` was missing (null for confirmed txs) —
+  scored FAIL under the strict rules and reported as such. No provider
+  failed by inventing data for an unknown tx: TxLens and Truvian both
+  answered `not_found` correctly on t11/t12 and passed those traps.
+  **Small-margin caveat:** Truvian 4/12 vs TxLens 2/12 differ by two traps
+  on n=12 — treat that as evidence, not a proven gap; one trap either way
+  would halve or erase the margin. The token traps t03/t04 score 0 passes
+  for every provider even with value excluded (status/from/to/block only),
+  so the value-excluded view changes no pass count.
 - **Honest limits (repeat on the submission surface):** [No independent
   adoption is claimed. All usage to date is testnet evaluation by the
   author during the event window. Testnet use is not adoption. No user,
   retention, accuracy, or time-saved figure is claimed.]
-- **How to try:** [FILL: repo link + the exact commands in
-  `docs/how-to-run.md` once the live loop exists.]
+- **Mainnet readiness:** TrapTest uses the same Direct Ask flow on mainnet as
+  on testnet — the Engine and contract addresses are parameters, not
+  hardcoded testnet values, and there are no testnet-only shortcuts in the
+  scoring path (the same strict scorer, frozen trap discipline, and
+  receipt verification apply). Moving to mainnet changes only the funding
+  (real USDC instead of self-minted test USDC) and the trap set (mainnet
+  transactions with ground truth checked against public chain data); no code
+  change to the buy–score–rank loop is needed. No mainnet run has been made
+  and none is claimed.
+- **How to try:** repo https://github.com/OlsOls4/traptest (live-build
+  files to be pushed before submission — see truth list). Reviewer
+  replay: `python3 scripts/full_run.py` and
+  `python3 scripts/mini_run.py` (frozen trap set, own burner funded as
+  in `docs/how-to-run.md` §1); or inspect the evidence without spending
+  — `docs/leaderboard/` renders the corrected `results.json`, and every
+  served row carries its `cost_usd`, `signal_hash`, and Telegraph
+  receipt.
 
 ## 4. Submission contents checklist (H2 website)
 
-- [ ] Project details (TrapTest, Evaluator-led; track choice confirmed
-  against the Evaluator-specific submission wording in the live browser)
-- [ ] Demo video, 2–5 min: hook → one live judge path (input → competing
+- [ ] Project details (TrapTest, Evaluator-led; submit evaluation material at
+  anjoman.ai/dashboard/eval — verified route, 8 Nov Discord findings: no
+  sign-in on the hackathon website, sign in on anjoman.ai; no GitHub bounty
+  issue exists for this intent, so nothing to /claim; final submission form
+  opens later and will be shared in Discord before 1 Dec)
+  — **VERIFIED 8 Nov; watch Discord for the final form opening.**
+- [x] Demo video, 2–5 min: hook → one live judge path (input → competing
   answers → pass/fail with receipts → re-rank) → failure case on screen
-  → how to reproduce. No mock footage presented as live; any mock shot
-  labelled MOCK on screen.
-- [ ] How-to-run (`docs/how-to-run.md`, final version with the live
-  command filled in)
-- [ ] Evidence: live `results.json` + receipts/requests/accounting
-  (cost per call, signal hashes, Telegraph receipts) — event-period only
-- [ ] Short public summary (§2, frozen wording)
-- [ ] Showcase permission + commercial summary (§3)
+  → how to reproduce. No mock footage presented as live. **DONE 6 Nov:
+  v1, 2:36, local file `docs/demo-video/traptest-demo-2026-11-06.mp4` —
+  superseded by v2 (2026-11-08), `docs/demo-video/traptest-demo-2026-11-08.mp4`,
+  DONE 8 Nov 2026 — v2, 2:42.**
+- [x] How-to-run (`docs/how-to-run.md`, final version with the live
+  command filled in) — **DONE 6 Nov.**
+- [x] Evidence: live `results.json` + receipts/requests/accounting
+  (cost per call, signal hashes, Telegraph receipts) — event-period only.
+  **DONE 6 Nov: 60 rows, 24 receipts verified on-chain, escrow accounting
+  included. Corrected re-score 8 Nov: Truvian 4/12 (strict 3/12), TxLens
+  2/12 — see `results-live/results-corrected-2026-11-08.json`.**
+- [x] Short public summary (§2, frozen wording) — **DONE (unchanged
+  from draft; it was already accurate).**
+- [x] Showcase permission + commercial summary (§3) — **DONE 6 Nov,
+  real numbers only.**
 - [ ] Disclosure: prep scaffold reused (own code, written before 1 Nov);
-  major open-source reuse, if any, disclosed with licences
+  major open-source reuse, if any, disclosed with licences — **to
+  confirm at submission (no third-party code beyond stdlib + the
+  Telegraph Engine API; state that).**
 
 ## 5. Submission-check steps (hackathon_submission_check skill)
 
@@ -128,18 +185,24 @@ not on this list is unverified and must not appear on a submission surface.
    video version/length, evidence links) so the next check starts from
    a confirmed state.
 
-## 6. Gaps for the live demo (to be filled only with event-period evidence)
+## 6. Gaps for the live demo (6 Nov 2026 status)
 
-- [ ] Day-1 gates passed: prize-payment terms (UK), free testnet
-  USDC/gas (burner wallet + balance at the USDC contract), competing
-  supply re-confirmed live, Evaluator submission wording confirmed.
-- [ ] Live purchase loop implemented (`ProviderClient.buy` is currently
-  `NotImplementedError` by design) and run against testnet in-window.
-- [ ] Fixed trap set committed before scoring, ground truth checked
-  against public chain data.
-- [ ] Live `results.json` with real receipts, replacing the mock file —
+- [ ] Day-1 gates: prize-payment terms (UK) — **STILL UNPUBLISHED, state
+  plainly**; free testnet USDC/gas — **RESOLVED (open mint + PoW
+  faucet)**; competing supply re-confirmed live — **DONE (24 miners,
+  5 attempted, 2 served)**; Evaluator submission route —
+  **VERIFIED 8 Nov (Discord): no sign-in on the hackathon website, sign in
+  on anjoman.ai, eval material at anjoman.ai/dashboard/eval, no GitHub
+  bounty issue for this intent so nothing to /claim; final submission form
+  opens later — watch Discord before 1 Dec**.
+- [x] Live purchase loop implemented and run against testnet in-window
+  (6 Nov 2026).
+- [x] Fixed trap set committed before scoring, ground truth checked
+  against public chain data (frozen 13:59:42 UTC, 6 Nov).
+- [x] Live `results.json` with real receipts, replacing the mock file —
   and the mock file removed from every submitted surface.
-- [ ] Demo video recorded from the live run (2–5 min), with the failure
-  case visible on screen.
+- [x] Demo video recorded from the live run (v1, 2:36), with the failure
+  case visible on screen — v2 (2026-11-08) DONE, supersedes v1.
 - [ ] Repo public (or as the submission requires) with the final
-  how-to-run, and the submission verified live after saving.
+  how-to-run — **OPEN: live-build files not yet pushed; push state to
+  confirm at submission** — and the submission verified live after saving.

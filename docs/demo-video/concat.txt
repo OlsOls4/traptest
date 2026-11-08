@@ -1,0 +1,6 @@
+file '/home/hatch/workspace/telegraph-traptest/docs/demo-video/s1_seg.mp4'
+file '/home/hatch/workspace/telegraph-traptest/docs/demo-video/s2_seg.mp4'
+file '/home/hatch/workspace/telegraph-traptest/docs/demo-video/s3_seg.mp4'
+file '/home/hatch/workspace/telegraph-traptest/docs/demo-video/s4_seg.mp4'
+file '/home/hatch/workspace/telegraph-traptest/docs/demo-video/s5_seg.mp4'
+file '/home/hatch/workspace/telegraph-traptest/docs/demo-video/s6_seg.mp4'

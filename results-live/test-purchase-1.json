@@ -1,0 +1,58 @@
+{
+  "data_kind": "LIVE",
+  "trap_id": "t01-confirmed-transfer",
+  "intent": "ONCHAIN_TX_LOOKUP_GENERAL",
+  "tx_hash": "0xd47a090fee50ae43d3af7dcb03eced0be6c98a48b3aa92dc21a8c4d9d784ae96",
+  "miner_id": "9002",
+  "cost_usd": 0.01,
+  "signal_hash": "0xe76518b4e55f8ee07bced01c518b8824394108c720d162045e7d77d34313f8b2",
+  "receipt_present": true,
+  "receipt": "eyJyZWNlaXB0X2hhc2giOiIweDAxZDZjYTRkYzE3MTEyMjA2YjQ3YjNhZDdiMTExNmM5NDJkYWY2NzIyNzFkZWZhNjYxMmE4YWVmYzZkZTBlNzciLCJyYWlsIjoieDQwMiIsInBheWVyIjoiMHgxNzBEZkE2N0QxZTM3OTE1ZDgxMzBlYUI5YkQzYjBhNEUxMTVmMEMwIiwibWluZXIiOiI1MDc4IiwiaW50ZW50IjoiT05DSEFJTl9UWF9MT09LVVBfR0VORVJBTCIsImFtb3VudF91dXNkYyI6IjEwMDAwIiwiZXBvY2hfaWQiOjIwMjcsInNldHRsZW1lbnQiOiJvbmNoYWluIiwiY2hhaW4iOiJlaXAxNTU6MTExNTUxMTEiLCJ0eF9oYXNoIjoiMHgyNjdjZDA5MzEzODc1NTY4Mjk0MjAyZDcwMzY5NTA5MWY3ODZkZWZlMzY4MGM4MGQxNzA3YTI2N2EyOWM2Yjg2IiwidGltZXN0YW1wIjoxNzkzOTczNDE0fQ==",
+  "answer": {
+    "tx_hash": "0xd47a090fee50ae43d3af7dcb03eced0be6c98a48b3aa92dc21a8c4d9d784ae96",
+    "status": "not_found",
+    "from": null,
+    "to": null,
+    "block_number": null,
+    "value_eth": null
+  },
+  "passed": false,
+  "fields": [
+    {
+      "field": "status",
+      "expected": "confirmed",
+      "actual": "not_found",
+      "passed": false
+    },
+    {
+      "field": "from",
+      "expected": "0xdeaddeaddeaddeaddeaddeaddeaddeaddead0001",
+      "actual": null,
+      "passed": false
+    },
+    {
+      "field": "to",
+      "expected": "0x4200000000000000000000000000000000000015",
+      "actual": null,
+      "passed": false
+    },
+    {
+      "field": "value",
+      "expected": "0",
+      "actual": null,
+      "passed": false
+    },
+    {
+      "field": "block",
+      "expected": "53047427",
+      "actual": null,
+      "passed": false
+    }
+  ],
+  "provenance": {
+    "ground_truth_source": "Base Sepolia public RPC, 6 Nov 2026",
+    "block": 53047427,
+    "payer": "burner 3 (testnet only), 30 self-minted test USDC",
+    "settlement": "Ethereum Sepolia, x402 exact, $0.01/call"
+  }
+}

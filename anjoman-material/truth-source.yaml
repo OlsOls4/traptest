@@ -1,0 +1,146 @@
+# Truth source for ONCHAIN_TX_LOOKUP_GENERAL (Telegraph / Anjoman eval pool).
+#
+# Format: miner YAML v1, exactly as specified in the official docs:
+#   - https://anjoman.ai/docs/scoring/contribute-evaluation-data
+#     ("Writing one" — the Frankfurter truth-source example this file follows;
+#     "id and slug are required by the schema but are only labels here")
+#   - https://anjoman.ai/docs/miners/yaml-config (full miner YAML schema;
+#     every key used here is in the documented closed sets)
+#   - Intent definition (canonical request/response fields):
+#     https://devnode.telegraphprotocol.com/engine/v1/intents/ONCHAIN_TX_LOOKUP_GENERAL
+#     (class: deterministic; request params tx_hash + chain; response fields
+#     tx_hash, status [confirmed|reverted|pending|not_found], from, to,
+#     block_number, value_eth)
+#
+# Source of truth: the Base Sepolia public JSON-RPC endpoint that the frozen
+# TrapTest ground truth was itself verified against
+# (traps-frozen-2026-11-06.json, provenance.source_url). Free, public, no key.
+#
+# HOW IT IS USED (per the docs): the node calls this source each epoch, builds
+# the request from the params below with the same request builder used for
+# miners, reads the value out of the answer with the node's response parser
+# and the intent's answer format, and takes the median across the sources it
+# could read. That median is the reference every miner is checked against.
+#
+# KNOWN LIMITS — read before submitting (see anjoman-material/README.md):
+# 1. Two endpoints serve the same intent. The receipt endpoint is the primary
+#    one (it is the only place execution status lives); the tx endpoint
+#    supplies the native value, which is not in a receipt. The docs say the
+#    endpoint description decides which is picked when several serve one
+#    intent — the descriptions below steer that choice.
+# 2. JSON-RPC body shape. The node builds the POST body from the declared
+#    body params. The `params` field must be a JSON array containing exactly
+#    the one tx hash. Whether the request builder wraps a single input into
+#    that array is NOT shown in any docs example (all published examples are
+#    GET/query or simple POST bodies) — verify with the sandbox validator at
+#    anjoman.ai/dashboard/earn before relying on it.
+# 3. Hex and status decoding. eth_getTransactionByHash returns value and
+#    blockNumber as hex strings; eth_getTransactionReceipt returns status as
+#    0x1 (confirmed) / 0x0 (reverted) and a null result for an unknown hash
+#    (not_found). The node's response parser must do that decoding; no
+#    intent_mapping is included here, matching the official truth-source
+#    example (which has none).
+# 4. `chain` is fixed by base_url: this endpoint only serves base-sepolia.
+#    The JSON-RPC methods take no chain argument, so no chain body field is
+#    declared; input_schema still requires callers to name chain=base-sepolia.
+version: '1'
+kind: miner
+id: 0
+slug: truth-base-sepolia-rpc
+protocol: generic
+name: Base Sepolia Public RPC (truth source)
+description: Free, public, no-key Base Sepolia JSON-RPC endpoint (PublicNode) that returns the canonical transaction and receipt for any Base Sepolia transaction hash. Truth source for ONCHAIN_TX_LOOKUP_GENERAL.
+base_url: https://base-sepolia-rpc.publicnode.com
+auth:
+  type: none
+endpoints:
+  - path: /receipt
+    external_path: /
+    method: POST
+    content_type: application/json
+    description: >
+      Fetch the receipt for one Base Sepolia transaction by hash
+      (eth_getTransactionReceipt). Returns the receipt with execution status
+      (0x1 confirmed, 0x0 reverted), blockNumber, from, to, and logs including
+      ERC-20 Transfer events — or null when the hash is unknown or not yet
+      mined. PRIMARY endpoint for ONCHAIN_TX_LOOKUP_GENERAL: use this first,
+      because execution status lives only in the receipt.
+    intents:
+      - ONCHAIN_TX_LOOKUP_GENERAL
+    params:
+      body:
+        required:
+          - name: jsonrpc
+            type: string
+            intents: ['*']
+            description: JSON-RPC version, always "2.0".
+          - name: method
+            type: string
+            intents: ['*']
+            description: JSON-RPC method, always "eth_getTransactionReceipt" for this endpoint.
+          - name: params
+            type: array
+            intents: ['*']
+            description: JSON-RPC params array containing exactly one element, the transaction hash (0x-prefixed, 64 hex characters).
+          - name: id
+            type: integer
+            intents: ['*']
+            description: JSON-RPC request id, always 1.
+  - path: /tx
+    external_path: /
+    method: POST
+    content_type: application/json
+    description: >
+      Look up one Base Sepolia transaction by hash (eth_getTransactionByHash).
+      Returns the transaction object (from, to, value in hex wei, blockNumber
+      in hex) or null when the hash is unknown. USE THIS for
+      ONCHAIN_TX_LOOKUP_GENERAL when the native value is needed — the receipt
+      endpoint does not carry it.
+    intents:
+      - ONCHAIN_TX_LOOKUP_GENERAL
+    params:
+      body:
+        required:
+          - name: jsonrpc
+            type: string
+            intents: ['*']
+            description: JSON-RPC version, always "2.0".
+          - name: method
+            type: string
+            intents: ['*']
+            description: JSON-RPC method, always "eth_getTransactionByHash" for this endpoint.
+          - name: params
+            type: array
+            intents: ['*']
+            description: JSON-RPC params array containing exactly one element, the transaction hash (0x-prefixed, 64 hex characters).
+          - name: id
+            type: integer
+            intents: ['*']
+            description: JSON-RPC request id, always 1.
+input_schema:
+  type: object
+  required: [tx_hash, chain]
+  properties:
+    tx_hash:
+      type: string
+      pattern: "^0x[0-9a-fA-F]{64}$"
+    chain:
+      type: string
+      enum: ["base-sepolia"]
+output_schema:
+  type: object
+  properties:
+    status:
+      type: string
+      enum: [confirmed, reverted, pending, not_found]
+    from:
+      type: string
+    to:
+      type: string
+    block_number:
+      type: integer
+    value_eth:
+      type: number
+semantics:
+  supported_intents:
+    - ONCHAIN_TX_LOOKUP_GENERAL
