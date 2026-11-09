@@ -1,5 +1,16 @@
 """Second-provider mini-run: 12 frozen traps x ONE more provider (6 Nov 2026).
 
+DEPRECATED (Council F5, 9 Nov 2026) — do not use for new runs. The
+supported replay path is the parametrised runner:
+`python3 -m traptest.run --traps ... --providers ... --out ...`
+(see docs/how-to-run.md §3), which resolves providers against a fresh
+catalogue fetch and refuses an absent miner instead of trying a
+hardcoded candidate list. This script is kept only so the historical
+6 Nov 2026 mini-run stays re-runnable in exactly its original shape,
+to a new file. Its hardcoded 12-trap set and candidate list
+(Sigil 9010, OnChain Intel 900, Truvian 8453) are retired and must not
+be copied into new tooling.
+
 Tries candidates in order from a FRESH catalogue re-fetch at run time:
 Sigil (9010), then OnChain Intel (900), then Truvian (8453). A candidate
 is skipped if absent from the catalogue; a candidate that answers
@@ -69,6 +80,11 @@ def main():
                         help="output results path (must NOT exist; the frozen "
                         "results files are never overwritten)")
     args = parser.parse_args()
+    print("DEPRECATED: scripts/mini_run.py is retired (Council F5). For new "
+          "runs use: python3 -m traptest.run --traps <trap-set.json> "
+          "--providers <id[,id...]> --out <new file>. This script keeps "
+          "only its historical 12-trap shape and candidate list.",
+          file=sys.stderr)
     out = Path(args.out)
     if any(out.resolve() == f.resolve() for f in FROZEN_FILES):
         print(f"REFUSED: --out is a frozen results file ({out}). "

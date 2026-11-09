@@ -72,6 +72,14 @@ USDC_BY_NETWORK = {
 BASE_SEPOLIA_CHAIN_ID = 84532
 RECEIPT_HEADER = "X-TELEGRAPH-RECEIPT"
 
+# Per-call spend ceiling (F4): no single call may sign more than
+# $0.05 of test USDC, whatever the live 402 challenge asks. The docs
+# figure is $0.01/call; $0.05 is 5x headroom for a price move, and
+# anything above it is refused rather than signed. Enforced both here
+# (before any payment provider is invoked) and in traptest/x402.py
+# (at the signer — the last line of defence).
+MAX_CALL_USD = 0.05
+
 
 class TelegraphError(Exception):
     """Base error for Direct Ask failures. (The ``charged`` flag on
@@ -406,11 +414,42 @@ class DirectAskClient(ProviderClient):
     """
 
     def __init__(self, base_url: str = ENGINE_BASE, transport=None,
-                 payment_provider=None, payment_mode: str = "x402"):
+                 payment_provider=None, payment_mode: str = "x402",
+                 max_call_usd: float = MAX_CALL_USD, spend_guard=None):
         self.base_url = base_url.rstrip("/")
         self._transport = transport or _urllib_transport
         self.payment_provider = payment_provider
         self.payment_mode = payment_mode
+        self.max_call_usd = max_call_usd
+        # spend_guard(amount_usd) -> bool: optional caller check
+        # against the run's remaining spend cap, applied to the live
+        # challenge amount BEFORE any payment is attempted (F4). The
+        # runner wires this to its running total so the cap is charged
+        # against the challenge amount, not the assumed $0.01.
+        self.spend_guard = spend_guard
+
+    def _check_challenge(self, challenge: dict) -> None:
+        """Refuse a 402 challenge that would overspend, before any
+        payment provider is invoked (no signature, no retry, no spend).
+        Raises PaymentRequiredError, which callers already treat as a
+        failed (unpaid) call."""
+        amount = challenge.get("amount_usd")
+        try:
+            amount = float(amount) if amount is not None else None
+        except (TypeError, ValueError):
+            amount = None
+        if amount is not None and amount > self.max_call_usd:
+            raise PaymentRequiredError(
+                challenge,
+                f"402 challenge amount ${amount:.2f} exceeds the "
+                f"per-call ceiling of ${self.max_call_usd:.2f}; "
+                f"refusing to sign")
+        if self.spend_guard is not None and amount is not None \
+                and not self.spend_guard(amount):
+            raise PaymentRequiredError(
+                challenge,
+                f"402 challenge amount ${amount:.2f} would exceed the "
+                f"remaining spend cap; refusing to sign")
 
     # -- catalogue (re-fetched at run time, every buy) ----------------------
     def _get_json(self, url):
@@ -440,6 +479,7 @@ class DirectAskClient(ProviderClient):
     # -- purchase ------------------------------------------------------------
     def _retry_with_payment(self, intent, miner_id, url, body, headers, challenge):
         """Retry one ask with payment headers. Raises on any failure."""
+        self._check_challenge(challenge)
         if self.payment_provider is None:
             raise PaymentRequiredError(challenge)
         pay_headers = self.payment_provider(challenge) or {}
@@ -459,8 +499,22 @@ class DirectAskClient(ProviderClient):
                               challenge["amount_usd"], self.payment_mode)
 
     def buy_result(self, intent: str, miner_id: str, params: dict,
-                   verify_miner: bool = True) -> PurchaseResult:
-        if verify_miner:
+                   verify_miner: bool = True, miner_entry: dict | None = None) -> PurchaseResult:
+        """Buy one result. ``miner_entry`` (F12): a catalogue entry the
+        caller already fetched (run.py resolves all providers once per
+        run and passes each entry in) — when given, the catalogue is
+        NOT re-fetched for this buy. Without it, verify_miner=True
+        re-fetches the catalogue per buy, as before. An entry whose id
+        does not match ``miner_id`` is refused, never trusted blindly.
+        """
+        if miner_entry is not None:
+            entry_id = (miner_entry.get("id") or miner_entry.get("miner_id")
+                        or miner_entry.get("minerId"))
+            if entry_id is not None and str(entry_id) != str(miner_id):
+                raise UnknownMinerError(
+                    f"supplied catalogue entry is for miner {entry_id!r}, "
+                    f"not {miner_id!r}; refusing to buy")
+        elif verify_miner:
             # The catalogue entry is fetched and then DELIBERATELY ignored
             # for pricing: cost_per_call is not a price (see module docstring).
             self.verify_miner(intent, miner_id)
@@ -473,6 +527,7 @@ class DirectAskClient(ProviderClient):
             resp = e.response
             if resp.status == 402:
                 challenge = parse_402_challenge(resp.status, resp.body, resp.headers)
+                self._check_challenge(challenge)
                 if self.payment_provider is None:
                     raise PaymentRequiredError(challenge)
                 pay_headers = self.payment_provider(challenge) or {}
@@ -513,6 +568,7 @@ class DirectAskClient(ProviderClient):
         return _served_result(intent, miner_id, resp, False, None, None)
 
     def buy(self, intent: str, miner_id: str, params: dict,
-            verify_miner: bool = True) -> dict:
+            verify_miner: bool = True, miner_entry: dict | None = None) -> dict:
         return self.buy_result(intent, miner_id, params,
-                               verify_miner=verify_miner).as_dict()
+                               verify_miner=verify_miner,
+                               miner_entry=miner_entry).as_dict()

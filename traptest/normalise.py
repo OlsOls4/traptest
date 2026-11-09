@@ -115,8 +115,18 @@ def normalise(answer):
                 out["value"] = s
                 notes.append(f"value_eth {s} unparseable -> value as-is")
             else:
-                out["value"] = str(int(eth * WEI_PER_ETH))
-                notes.append(f"value_eth {s} ETH -> {out['value']} wei")
+                wei = eth * WEI_PER_ETH
+                if wei != wei.to_integral_value():
+                    # Fractional wei: no on-chain amount exists below
+                    # 1 wei, so truncating to 0 could false-pass a
+                    # zero-value trap. Keep the value as-is; the
+                    # scorer fails it on numeric comparison.
+                    out["value"] = s
+                    notes.append(f"value_eth {s} ETH is fractional wei "
+                                 f"(< 1 wei) -> value as-is")
+                else:
+                    out["value"] = str(int(wei))
+                    notes.append(f"value_eth {s} ETH -> {out['value']} wei")
     elif out.get("value") is not None:
         canon = _canonical_wei(out["value"])
         if canon is not None and str(out["value"]) != canon:

@@ -1,5 +1,17 @@
 """Full scored run: 12 frozen traps x 2 providers (6 Nov 2026, event window).
 
+DEPRECATED (Council F5, 9 Nov 2026) — do not use for new runs. The
+supported replay path is the parametrised runner:
+`python3 -m traptest.run --traps ... --providers ... --out ...`
+(see docs/how-to-run.md §3), which resolves providers against a fresh
+catalogue fetch and refuses an absent miner instead of substituting
+another one into a named slot. This script is kept only so the
+historical 6 Nov 2026 run stays re-runnable in exactly its original
+shape, to a new file. It hardcodes a 12-trap set and substitutes a
+different miner into the TxLens/LiveCert slots when 9002/4433 are
+absent from the catalogue; that substitution behaviour is retired and
+must not be copied into new tooling.
+
 Reads the FROZEN trap set (traps-frozen-2026-11-06.json) — never edits it —
 buys each trap from TxLens (9002) and LiveCert (4433) via Direct Ask with
 the x402 provider on burner 3, scores with traptest/scoring.py, and writes
@@ -71,6 +83,11 @@ def main():
                         help="output results path (must NOT exist; the frozen "
                         "results file is never overwritten)")
     args = parser.parse_args()
+    print("DEPRECATED: scripts/full_run.py is retired (Council F5). For new "
+          "runs use: python3 -m traptest.run --traps <trap-set.json> "
+          "--providers <id[,id...]> --out <new file>. This script keeps "
+          "only its historical 12-trap shape, including miner "
+          "substitution into named slots.", file=sys.stderr)
     out = Path(args.out)
     if out.resolve() == FROZEN_OUT.resolve():
         print(f"REFUSED: --out is the frozen 6 Nov 2026 results file "

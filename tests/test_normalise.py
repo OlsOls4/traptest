@@ -140,5 +140,77 @@ class TestScoringNumerics(unittest.TestCase):
         self.assertTrue(s.passed)
 
 
+class TestFractionalWei(unittest.TestCase):
+    """F9: a value_eth below 1 wei must never truncate to "0" — that
+    would false-pass a zero-value trap."""
+
+    def test_fractional_wei_kept_as_is(self):
+        out, notes = normalise({"value_eth": "1e-19"})
+        self.assertEqual(out["value"], "1e-19")
+        self.assertTrue(any("fractional wei" in n for n in notes))
+        out, _ = normalise({"value_eth": 1e-19})
+        self.assertEqual(out["value"], "1e-19")
+        out, _ = normalise({"value_eth": "5e-19"})  # 0.5 wei
+        self.assertEqual(out["value"], "5e-19")
+
+    def test_one_wei_boundary_converts(self):
+        out, _ = normalise({"value_eth": "1e-18"})
+        self.assertEqual(out["value"], "1")
+        out, _ = normalise({"value_eth": "0.000000000000000001"})
+        self.assertEqual(out["value"], "1")
+
+    def test_fractional_wei_does_not_false_pass_zero_trap(self):
+        # Expected value "0"; a 1e-19 ETH answer is NOT zero.
+        raw = {"status": "confirmed", "from": "0xAAA", "to": "0xBBB",
+               "value_eth": "1e-19", "block": 123}
+        norm, _ = normalise(raw)
+        s = score_answer(trap(value="0"), "miner-1", norm)
+        self.assertFalse(s.passed)
+
+
+class TestParseDecimalShared(unittest.TestCase):
+    """F10: scoring.py and normalise.py share ONE _parse_decimal —
+    the canonical implementation in normalise.py. Identical behaviour
+    on the edge cases, proved against both import paths."""
+
+    def test_same_function_object(self):
+        import traptest.normalise as normalise_mod
+        import traptest.scoring as scoring_mod
+        self.assertIs(scoring_mod._parse_decimal,
+                      normalise_mod._parse_decimal)
+
+    def test_edge_cases_identical(self):
+        from decimal import Decimal
+
+        from traptest.normalise import _parse_decimal as parse_n
+        from traptest.scoring import _parse_decimal as parse_s
+        cases = [
+            # (input, expected Decimal or None)
+            (None, None), (True, None), (False, None),
+            (0, Decimal(0)), (1, Decimal(1)), (-3, Decimal(-3)),
+            (2.5, Decimal("2.5")), (1e-05, Decimal("1e-05")),
+            ("1e-05", Decimal("1e-05")), ("0x64", Decimal(100)),
+            ("0X10", Decimal(16)), ("100.0", Decimal("100.0")),
+            ("  42  ", Decimal(42)), ("", None), ("   ", None),
+            ("abc", None), ("0xzz", None), ("0x", None),
+            ("1e100", Decimal("1e100")),
+            ("123456789012345678901234567890",
+             Decimal("123456789012345678901234567890")),
+            ("0x" + "f" * 40, Decimal(int("f" * 40, 16))),
+            (Decimal("7.5"), Decimal("7.5")),
+            ("  0x2a  ", Decimal(42)),
+            ("-0.5", Decimal("-0.5")),
+        ]
+        for value, expected in cases:
+            with self.subTest(value=repr(value)):
+                got_n, got_s = parse_n(value), parse_s(value)
+                self.assertEqual(got_n, got_s)
+                self.assertEqual(got_n, expected)
+        # NaN parses (Decimal accepts it) but is never equal to
+        # anything — both paths agree.
+        self.assertTrue(parse_n(float("nan")).is_nan())
+        self.assertTrue(parse_s(float("nan")).is_nan())
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -22,8 +22,14 @@ itself can be trusted.
 
 ## 1. Prerequisites (zero cost)
 
-- Python 3 (stdlib only for the scaffold; no pip packages, no API keys,
-  no account, no hosting).
+- Python 3 (stdlib only for the scaffold, plus one pip package for the
+  live loop: `pip install eth-account` — `traptest/x402.py` imports
+  `eth_account` for signing; no version is pinned anywhere in the code,
+  and there is no `requirements.txt`). No API keys, no account, no hosting.
+- `curl` — the live engine transport defaults to curl
+  (`traptest/harness.py` `curl_transport`): urllib truncates the live
+  catalogue, while curl fetches it whole. Tests inject a fake transport,
+  so curl is only needed for the live loop.
 - A browser (for the static leaderboard page).
 - For the LIVE loop only: a burner wallet holding Telegraph's accepted
   test USDC (`0xcc194e1a843B658526D0D5C431f670028582Ae17` on Ethereum
@@ -134,14 +140,22 @@ their returned error strings (LiveCert 503 on all 12; Sigil HTTP 500 upstream
 > write `data_kind: LIVE` rows. The runner records the trap file's
 > sha256 in every output file, so a re-run can be checked against the
 > exact trap set it scored. One attempt per trap+miner (single retry
-> only for a transport failure before any payment). Session spend cap
-> $0.50 (billed); see §4 for the accounting, including the
-> escrow-credit finding. A re-run scores whoever the live catalogue
-> returns for the requested ids on that day — miner ids are not
-> stable, so a replay's provider set may differ from 6 Nov.
+> only for a transport failure before any payment). Per-run hard spend
+> cap defaults to $0.30 (`traptest/run.py` `DEFAULT_SPEND_CAP_USD`;
+> `scripts/full_run.py` `SPEND_CAP_USD = 0.30`); the $0.50 figure is
+> the 6 Nov session cap only (`scripts/mini_run.py` `SESSION_CAP_USD =
+> 0.50`: full run + smoke + mini run) — see §4 for the accounting,
+> including the escrow-credit finding. A re-run scores whoever the
+> live catalogue returns for the requested ids on that day — miner ids
+> are not stable, so a replay's provider set may differ from 6 Nov.
 
 ## 4. Reproduce from instructions (reviewer checklist)
 
+- [ ] **List the live miners first (free discovery, no purchase):**
+  `python3 -m traptest.run --list-miners` lists the miners the live
+  catalogue currently returns for the intent, with no key, no trap
+  file, and no spend — use it to confirm the requested provider ids
+  are live before funding a burner or running anything.
 - [ ] Trap set is fixed **before** scoring begins: confirm the trap file
   (ids, intents, tx hashes, expected status/from/to/value/block) is
   committed and unchanged after the first scored purchase. A set tuned
@@ -198,15 +212,21 @@ their returned error strings (LiveCert 503 on all 12; Sigil HTTP 500 upstream
   traps run → lower cost.
 - [ ] **Cost cap:** total testnet spend stays inside the confirmed free
   testnet allocation; the trap set is 12 traps × 5 providers (60 rows).
-  Session accounting, verified on-chain 6 Nov 2026: billed $0.26 total
-  including $0.02 smoke tests ($0.24 in the run file + $0.02 smoke);
-  $0.24 settled into Telegraph escrow credit, NOT billed (Sigil $0.12 +
-  OnChain Intel $0.12 — a failed call can still settle $0.01 on-chain;
-  Telegraph's message says the amount is credited to escrow, and the burner
-  balance drop confirms it); burner wallet 30.00 → 29.50 test USDC (drop
-  $0.50). Billed spend is inside the $0.50 session cap; out-of-wallet total
-  including escrow credit is exactly $0.50. Any further spend needs a
-  fresh explicit approval — never a silent purchase or bridge.
+  Per-run hard cap defaults to $0.30 (`traptest/run.py`
+  `DEFAULT_SPEND_CAP_USD`). Session accounting, verified on-chain:
+  6 Nov 2026 billed $0.26 total including $0.02 smoke tests ($0.24 in
+  the run file + $0.02 smoke); $0.24 settled into Telegraph escrow
+  credit, NOT billed (Sigil $0.12 + OnChain Intel $0.12 — a failed call
+  can still settle $0.01 on-chain; Telegraph's message says the amount
+  is credited to escrow, and the burner balance drop confirms it);
+  burner wallet 30.00 → 29.50 test USDC on 6 Nov (drop $0.50). The
+  $0.50 figure was the 6 Nov session cap only (`scripts/mini_run.py`
+  `SESSION_CAP_USD = 0.50`). 8 Nov re-run
+  (`results-live/replay-2026-11-08.json`): 24 calls, $0.24, scores
+  stable (Truvian 4/12, TxLens 2/12), wallet 29.50 → 29.26; cumulative
+  drop 30.00 → 29.26 ($0.74: $0.50 billed + $0.24 escrow credit). Any
+  further spend needs a fresh explicit approval — never a silent
+  purchase or bridge.
 
 ### Worked receipt example (TxLens t01, 6 Nov 2026)
 
@@ -285,10 +305,15 @@ that is simply what the receipts say. (For example, the Truvian t08 receipt
   coverage of other Intents.
 - If the live leaderboard UI slips, the fallback is a scored table +
   receipts for the same fixed trap set — same evidence, plainer layout.
-- Scores: judging is /100 (Technical 35, min 24; Commercial 30;
-  Adoption 15; Integration 10; Proof 10; need 70+). TrapTest's honest
-  ceiling on Adoption is low (see above); its case rests on Technical,
-  Integration, and Proof.
+- Scores: judging is /100 under the TRACK 03 Evaluator rubric (verified
+  live 8 Nov 2026): Measurement validity 40 (minimum 28/40 to qualify),
+  Integrity and robustness 15, Reproducibility and protocol compatibility
+  10, Useful evaluation coverage and demonstrated improvement 10,
+  Documentation and integration clarity 5, Organic growth / education /
+  developer activation 20 (5+5+5+5); need 70/100 AND pass 28/40 on
+  Measurement validity. TrapTest's honest ceiling on Organic growth is
+  low (see above); its case rests on Measurement validity, Integrity
+  and robustness, and Reproducibility.
 - Schema gaps are not lies: Truvian returns no `status` for confirmed
   transactions (its block/from/to/value were all correct on 6 such
   traps) — those traps score FAIL under the strict rules (a missing

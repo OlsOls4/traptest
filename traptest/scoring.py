@@ -15,10 +15,22 @@ all pass, and ``"1e-05"`` ETH normalised to wei compares equal to its
 decimal form. Non-numeric values fall back to plain string comparison
 (and fail unless the strings match). Addresses / status still compare
 case-insensitively as strings.
+
+Scoring v2 (expansion set only, 9 Nov 2026 — NEVER retroactive):
+a trap with ``strict_unknown=True`` (new-set unknown_tx traps only)
+fails outright when a ``not_found`` answer carries ANY invented
+from/to/value/block field, even though those fields have no expected
+value and the v1 scorer skips them. The v1 path is byte-identical:
+``strict_unknown`` defaults to False and the frozen-12 traps never
+set it, so their scores cannot change. See
+``tests/test_scoring.py::TestScoringV2``.
 """
 from dataclasses import dataclass
-from decimal import Decimal, InvalidOperation
 
+from .normalise import _parse_decimal  # canonical implementation (F10):
+# scoring.py used to carry its own copy of _parse_decimal; the two had
+# already drifted once (the t08 bug). There is now one implementation,
+# in traptest/normalise.py, and this module imports it.
 from .traps import Trap
 
 
@@ -45,33 +57,6 @@ def _norm(value):
     if value is None:
         return None
     return str(value).strip().lower()
-
-
-def _parse_decimal(value):
-    """Parse a numeric value as Decimal; hex as integer. None if not numeric."""
-    if value is None or isinstance(value, bool):
-        return None
-    if isinstance(value, int):
-        return Decimal(value)
-    if isinstance(value, float):
-        try:
-            return Decimal(str(value))
-        except InvalidOperation:
-            return None
-    if isinstance(value, Decimal):
-        return value
-    s = str(value).strip()
-    if not s:
-        return None
-    if s.lower().startswith("0x"):
-        try:
-            return Decimal(int(s, 16))
-        except ValueError:
-            return None
-    try:
-        return Decimal(s)
-    except InvalidOperation:
-        return None
 
 
 def _parse_int(value):
@@ -135,6 +120,37 @@ def score_answer(trap: Trap, provider_id: str, answer: dict,
     scored = [r for r in (status_ok, from_ok, to_ok, value_ok, block_ok)
                if r is not None]
     passed = bool(scored) and all(scored)
+
+    # Scoring v2, strict-unknown rule (new set only): a not_found
+    # answer must carry NO invented detail. The v1 scorer skips
+    # expected-None fields, so a hallucinated from/to/value/block
+    # would otherwise be unscored. Each invented field is recorded
+    # as a failed field result (expected "(absent)") and fails the
+    # trap outright. Only applies when the trap opts in via
+    # Trap.strict_unknown; the frozen 12 never do.
+    if getattr(trap, "strict_unknown", False) and \
+            trap.expected_status == "not_found":
+        for name in ("from", "to", "value", "block"):
+            actual_value = actual.get(name)
+            if actual_value is not None and str(actual_value).strip() != "":
+                fields.append(FieldResult(name, "(absent)",
+                                          str(actual_value), False))
+                passed = False
     return Score(trap.trap_id, provider_id, passed, tuple(fields),
                  cost_usd=cost_usd, signal_hash=signal_hash,
                  receipt_present=receipt_present)
+
+
+def field_accuracy(scores):
+    """Field-weighted accuracy over Score objects: (correct, scored).
+
+    Co-primary metric alongside pass rate for the expansion set
+    (9 Nov 2026): pass rate is trap-level (all fields must match),
+    this counts every scored field individually, so a provider that
+    gets 4 of 5 fields right on every trap scores 0% pass rate but
+    80% field accuracy — the two numbers together say more than
+    either alone. ``scores`` may be any iterable of Score.
+    """
+    correct = sum(1 for s in scores for f in s.fields if f.passed)
+    scored = sum(len(s.fields) for s in scores)
+    return correct, scored

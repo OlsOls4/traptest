@@ -56,7 +56,10 @@ no key and no trap file.
 
 Exit codes: 0 ok · 2 gate refused · 3 missing --traps/--providers ·
 4 key file missing · 5 provider not in fresh catalogue ·
-6 --out exists without --append · 7 trap-set mismatch on --append.
+6 --out exists without --append · 7 trap-set mismatch on --append ·
+8 post-loop receipt verification or balance read failed (rows already
+saved; the output doc records receipt_verification_error /
+balance_read_error).
 
 Trap JSON format: {"traps": [{"trap_id","intent","tx_hash",
 "expected_status","expected_from","expected_to","expected_value",
@@ -147,22 +150,22 @@ def main(argv=None, today=None, transport=None, payment_provider=None,
     # a payment provider is wired in below.
     try:
         from .harness import (  # package execution
-            CALL_PRICE_USD, MissingKeyError, build_scored_row,
-            curl_transport, eth_balance, fail_row, load_traps,
-            read_key_file, token_balance, verify_receipts)
+            CALL_PRICE_USD, MissingKeyError, atomic_write_text,
+            build_scored_row, curl_transport, eth_balance, fail_row,
+            load_traps, read_key_file, token_balance, verify_receipts)
         from .providers import (  # noqa: F401  (re-exported for clarity)
-            DirectAskClient, PurchaseFailedError, PaymentRequiredError,
-            TransportHTTPError, UnknownMinerError)
+            DirectAskClient, MAX_CALL_USD, PurchaseFailedError,
+            PaymentRequiredError, TransportHTTPError, UnknownMinerError)
         from .x402 import make_x402_provider
     except ImportError:  # direct script execution: python traptest/run.py
         sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
         from traptest.harness import (  # noqa: F401
-            CALL_PRICE_USD, MissingKeyError, build_scored_row,
-            curl_transport, eth_balance, fail_row, load_traps,
-            read_key_file, token_balance, verify_receipts)
+            CALL_PRICE_USD, MissingKeyError, atomic_write_text,
+            build_scored_row, curl_transport, eth_balance, fail_row,
+            load_traps, read_key_file, token_balance, verify_receipts)
         from traptest.providers import (  # noqa: F401
-            DirectAskClient, PurchaseFailedError, PaymentRequiredError,
-            TransportHTTPError, UnknownMinerError)
+            DirectAskClient, MAX_CALL_USD, PurchaseFailedError,
+            PaymentRequiredError, TransportHTTPError, UnknownMinerError)
         from traptest.x402 import make_x402_provider
 
     if balance_reader is None:
@@ -261,7 +264,8 @@ def main(argv=None, today=None, transport=None, payment_provider=None,
         payment_provider = make_x402_provider(key, validity_seconds=55)
 
     client = DirectAskClient(transport=transport or curl_transport,
-                             payment_provider=payment_provider)
+                             payment_provider=payment_provider,
+                             max_call_usd=MAX_CALL_USD)
 
     # Resolve the requested providers against a FRESH catalogue fetch.
     # A re-run scores whoever the catalogue returns for these ids;
@@ -309,9 +313,11 @@ def main(argv=None, today=None, transport=None, payment_provider=None,
                     if (t.trap_id, mid) not in existing_pairs)
         print(f"DRY RUN OK: {len(traps)} traps x {len(provider_ids)} "
               f"providers = {n_new} new (trap, provider) pairs, "
-              f"max cost ${n_new * CALL_PRICE_USD:.2f} "
-              f"(cap ${args.spend_cap:.2f}), run-id would be {run_id}, "
-              f"output would go to {out_path or '(no --out given)'}. "
+              f"max cost ${n_new * CALL_PRICE_USD:.2f} at the "
+              f"${CALL_PRICE_USD:.2f}/call docs figure (per-call ceiling "
+              f"${MAX_CALL_USD:.2f}, cap ${args.spend_cap:.2f}), run-id "
+              f"would be {run_id}, output would go to "
+              f"{out_path or '(no --out given)'}. "
               f"Nothing bought, nothing written.")
         return 0
 
@@ -325,6 +331,16 @@ def main(argv=None, today=None, transport=None, payment_provider=None,
     if existing_doc:
         spent = float(existing_doc.get("total_cost_usd") or 0)
         escrow_credit = float(existing_doc.get("escrow_credit_usd") or 0)
+
+    # Spend guard (F4): the live 402 challenge amount is checked
+    # against the remaining cap BEFORE any payment is attempted, so
+    # the cap is charged against the challenge amount, not the assumed
+    # $0.01. The pre-loop check below is only the cheap planning
+    # check; this guard is authoritative. Reads ``spent`` at call
+    # time (closure over the local, which the loop updates).
+    def spend_guard(amount_usd):
+        return spent + amount_usd <= args.spend_cap
+    client.spend_guard = spend_guard
 
     def save():
         doc = dict(existing_doc) if existing_doc else {}
@@ -347,11 +363,16 @@ def main(argv=None, today=None, transport=None, payment_provider=None,
             "burner_eth_before": eth_before,
             "scores": rows,
         })
-        out_path.write_text(json.dumps(doc, indent=2))
+        # Atomic (F8): temp file + fsync + rename, so a crash mid-write
+        # cannot corrupt the results file.
+        atomic_write_text(out_path, json.dumps(doc, indent=2))
 
     def buy_once(trap, miner_id):
+        # F12: pass the catalogue entry already fetched above instead
+        # of re-fetching the catalogue for every buy.
         return client.buy_result(args.intent, miner_id,
-                                 {"tx_hash": trap.tx_hash, "chain": "base-sepolia"})
+                                 {"tx_hash": trap.tx_hash, "chain": "base-sepolia"},
+                                 miner_entry=by_mid[miner_id])
 
     for trap in traps:
         for miner_id in provider_ids:
@@ -380,8 +401,11 @@ def main(argv=None, today=None, transport=None, payment_provider=None,
                         result = buy_once(trap, miner_id)
                     except Exception as e2:
                         print(f"{label}: FAILED after retry: {type(e2).__name__}: {str(e2)[:200]}")
+                        # Full error string to fail_row: it parses the
+                        # payment.status structurally and truncates the
+                        # stored field itself (F7).
                         row = fail_row(trap, miner_id,
-                                       f"{type(e2).__name__}: {str(e2)[:300]}")
+                                       f"{type(e2).__name__}: {str(e2)}")
                         rows.append(row)
                         new_rows.append(row)
                         escrow_credit += float(row.get("escrow_credit_usd") or 0)
@@ -392,14 +416,19 @@ def main(argv=None, today=None, transport=None, payment_provider=None,
                           f"(a failed call may still have settled $0.01 "
                           f"into escrow credit — never assumed $0)")
                     row = fail_row(trap, miner_id,
-                                   f"{type(e).__name__}: {str(e)[:300]}")
+                                   f"{type(e).__name__}: {str(e)}")
                     rows.append(row)
                     new_rows.append(row)
                     escrow_credit += float(row.get("escrow_credit_usd") or 0)
                     save()
                     continue
             if result.charged:
-                spent += float(result.cost_usd or 0)
+                # Charge the cap against what the call actually cost:
+                # the served cost when reported, else the 402 challenge
+                # amount that was signed (F4) — never an assumed $0.
+                spent += float(result.cost_usd
+                               if result.cost_usd is not None
+                               else (result.challenge_amount_usd or 0))
             row = build_scored_row(trap, by_id[trap.trap_id], miner_id,
                                    args.intent, result)
             print(f"{label}: charged={result.charged} cost={result.cost_usd} "
@@ -410,23 +439,60 @@ def main(argv=None, today=None, transport=None, payment_provider=None,
             save()
 
     # Verify settlement receipts on-chain for the new rows only.
-    verified, total = receipt_verifier(new_rows)
-    if total:
-        print(f"receipts verified on-chain: {verified}/{total} settled")
+    # Post-loop failures must NOT propagate as a traceback: the rows
+    # are already saved, so record the failure in the output doc and
+    # exit non-zero cleanly (F8).
+    verification_error = None
+    try:
+        verified, total = receipt_verifier(new_rows)
+        if total:
+            print(f"receipts verified on-chain: {verified}/{total} settled")
+    except Exception as e:  # noqa: BLE001 — any verifier/RPC failure
+        verification_error = f"{type(e).__name__}: {e}"
+        print(f"RECEIPT VERIFICATION FAILED: {verification_error}. "
+              f"Rows are already saved in {out_path}; totals below are "
+              f"recorded where available.", file=sys.stderr)
 
-    bal_after, eth_after = balance_reader(BURNER)
+    balance_error = None
+    bal_after = eth_after = None
+    try:
+        bal_after, eth_after = balance_reader(BURNER)
+    except Exception as e:  # noqa: BLE001 — any balance/RPC failure
+        balance_error = f"{type(e).__name__}: {e}"
+        print(f"BALANCE READ FAILED: {balance_error}. Rows are already "
+              f"saved in {out_path}; after-balances are unavailable.",
+              file=sys.stderr)
+
     doc = json.loads(out_path.read_text())
     doc["run"] = run_id
+    # Persist the post-loop receipt verification flags: verify_receipts
+    # mutates the in-memory rows in place, and the disk copy re-read
+    # above predates those mutations — without this line the verified
+    # flags (and settlement tx hashes) were silently discarded on
+    # every run through this runner (found 9 Nov 2026: the 8 Nov
+    # replay file and the expansion files all carried zero
+    # receipt_verified_onchain flags despite "24/24 settled" logs).
+    doc["scores"] = rows
     run_ids = list(doc.get("run_ids") or [])
     if run_id not in run_ids:
         run_ids.append(run_id)
     doc["run_ids"] = run_ids
     doc["total_cost_usd"] = round(spent, 4)
     doc["escrow_credit_usd"] = round(escrow_credit, 4)
-    doc["burner_balance_after_usdc"] = bal_after
-    doc["burner_eth_after"] = eth_after
-    doc["balance_drop_usdc"] = round(bal_before - bal_after, 4)
-    out_path.write_text(json.dumps(doc, indent=2))
+    if bal_after is not None:
+        doc["burner_balance_after_usdc"] = bal_after
+        doc["burner_eth_after"] = eth_after
+        doc["balance_drop_usdc"] = round(bal_before - bal_after, 4)
+    if verification_error:
+        doc["receipt_verification_error"] = verification_error
+    if balance_error:
+        doc["balance_read_error"] = balance_error
+    atomic_write_text(out_path, json.dumps(doc, indent=2))
+    if verification_error or balance_error:
+        print(f"DONE WITH POST-LOOP ERRORS ({run_id}): {len(new_rows)} "
+              f"new rows, spent ${spent:.2f}; see receipt_verification_error / "
+              f"balance_read_error in {out_path}.", file=sys.stderr)
+        return 8
     print(f"DONE ({run_id}): {len(new_rows)} new rows, spent ${spent:.2f}, "
           f"balance {bal_before} -> {bal_after} USDC (drop {bal_before - bal_after:.2f}), "
           f"ETH {eth_before} -> {eth_after}")

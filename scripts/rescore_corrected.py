@@ -149,13 +149,40 @@ def _ranking(rows, passed_key="passed"):
             lb.unservable_providers())
 
 
-def main():
-    assert OUT.resolve() != FROZEN_RESULTS.resolve(), "refusing to overwrite the original"
+def main(argv=None):
+    """Re-score the frozen live rows with the fixed normaliser/scorer.
+
+    The expected values (row count, Truvian/TxLens corrected pass
+    counts, unservable provider list) are CLI arguments defaulting to
+    the verified 6 Nov 2026 figures — they are verification asserts,
+    not inputs to the re-score. Pass different values only when
+    re-verifying against a different frozen file.
+    """
+    import argparse
+    parser = argparse.ArgumentParser(
+        description="Disclosed corrected re-score (read-only re-analysis; "
+                    "never overwrites the frozen live results)")
+    parser.add_argument("--expected-rows", type=int, default=60,
+                        help="frozen rows expected (default: 60)")
+    parser.add_argument("--expected-truvian", type=int, default=4,
+                        help="Truvian (8453) corrected passes (default: 4)")
+    parser.add_argument("--expected-txlens", type=int, default=2,
+                        help="TxLens (9002) corrected passes (default: 2)")
+    parser.add_argument("--expected-unservable", default="4433,900,9010",
+                        help="comma-separated unservable provider ids "
+                             "(default: 4433,900,9010)")
+    parser.add_argument("--out", default=str(OUT),
+                        help="output path (default: the frozen corrected "
+                             "results file; never the original results file)")
+    args = parser.parse_args(argv)
+    out = Path(args.out)
+    assert out.resolve() != FROZEN_RESULTS.resolve(), "refusing to overwrite the original"
+    expected_unservable = [p.strip() for p in args.expected_unservable.split(",") if p.strip()]
     traps_sha256 = hashlib.sha256(FROZEN_TRAPS.read_bytes()).hexdigest()
     frozen = json.loads(FROZEN_TRAPS.read_text())
     original = json.loads(FROZEN_RESULTS.read_text())
     rows = original["scores"]
-    assert len(rows) == 60, f"expected 60 frozen rows, got {len(rows)}"
+    assert len(rows) == args.expected_rows, f"expected {args.expected_rows} frozen rows, got {len(rows)}"
     traps = {}
     for t in frozen["traps"]:
         traps[t["trap_id"]] = Trap(
@@ -286,17 +313,17 @@ def main():
             "rows": value_excluded_rows,
         },
     }
-    OUT.write_text(json.dumps(doc, indent=2))
+    out.write_text(json.dumps(doc, indent=2))
 
     # Verification (asserts fail the run rather than writing a bad file).
-    assert corrected_table["8453"]["passed"] == 4, corrected_table["8453"]
-    assert corrected_table["9002"]["passed"] == 2, corrected_table["9002"]
+    assert corrected_table["8453"]["passed"] == args.expected_truvian, corrected_table["8453"]
+    assert corrected_table["9002"]["passed"] == args.expected_txlens, corrected_table["9002"]
     assert strict_table["8453"]["passed"] == 3, strict_table["8453"]
     assert strict_table["9002"]["passed"] == 2
     assert corrected_ranking == strict_ranking, (corrected_ranking, strict_ranking)
-    assert len(corrected_rows) == 60 and len(doc["strict_original"]["scores"]) == 60
-    assert corrected_unservable == ["4433", "900", "9010"], corrected_unservable
-    print(f"wrote {OUT}")
+    assert len(corrected_rows) == args.expected_rows and len(doc["strict_original"]["scores"]) == args.expected_rows
+    assert corrected_unservable == expected_unservable, corrected_unservable
+    print(f"wrote {out}")
     print(f"strict:    Truvian {strict_table['8453']['passed']}/12, "
           f"TxLens {strict_table['9002']['passed']}/12, "
           f"ranking {strict_ranking}, unservable {strict_unservable}")

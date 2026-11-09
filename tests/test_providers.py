@@ -297,7 +297,90 @@ class TestDirectAsk(unittest.TestCase):
         self.assertTrue(res.cost_missing)
         self.assertEqual(res.challenge_amount_usd, 0.01)
 
-    def test_returned_402_retries_with_payment(self):
+    def test_402_above_per_call_ceiling_refused_without_payment(self):
+        # F4: a $0.06 challenge exceeds the $0.05 per-call ceiling —
+        # refused before the signer is invoked, exactly one POST.
+        seen = {}
+
+        def signer(challenge):
+            seen["called"] = True
+            return {"X-PAYMENT": "mock-signed"}
+
+        def challenge_sep(amount):
+            def raising(method, url, body, headers):
+                raise TransportHTTPError(402, _json_body(
+                    {"amount_usd": amount, "payTo": "0xPAYTO",
+                     "asset": "0xcc194e1a843B658526D0D5C431f670028582Ae17",
+                     "network": "eip155:11155111"}), {})
+            return raising
+
+        t = FakeTransport([(_is_miners, catalogue_handler),
+                           (_is_ask, challenge_sep(0.06))])
+        client = DirectAskClient(transport=t, payment_provider=signer)
+        with self.assertRaises(PaymentRequiredError) as ctx:
+            client.buy_result(INTENT, MINER, {})
+        self.assertIn("per-call ceiling", str(ctx.exception))
+        self.assertNotIn("called", seen)
+        self.assertEqual(len([c for c in t.calls if c[0] == "POST"]), 1)
+
+    def test_402_at_per_call_ceiling_allowed(self):
+        # Boundary: exactly $0.05 signs and serves.
+        def ask(m, u, b, h):
+            if "X-PAYMENT" in h:
+                return served_handler()(m, u, b, h)
+            raise TransportHTTPError(402, _json_body({"amount_usd": 0.05}), {})
+        t = FakeTransport([(_is_miners, catalogue_handler), (_is_ask, ask)])
+        res = DirectAskClient(
+            transport=t,
+            payment_provider=lambda ch: {"X-PAYMENT": "mock-signed"}).buy_result(
+            INTENT, MINER, {})
+        self.assertTrue(res.charged)
+        self.assertEqual(res.challenge_amount_usd, 0.05)
+
+    def test_spend_guard_refuses_challenge_over_remaining_cap(self):
+        # F4: the runner's spend guard sees the live challenge amount
+        # and refuses before payment when it would exceed the cap.
+        seen = {}
+
+        def signer(challenge):
+            seen["called"] = True
+            return {"X-PAYMENT": "mock-signed"}
+
+        def challenge_sep(amount):
+            def raising(method, url, body, headers):
+                raise TransportHTTPError(402, _json_body(
+                    {"amount_usd": amount, "payTo": "0xPAYTO",
+                     "asset": "0xcc194e1a843B658526D0D5C431f670028582Ae17",
+                     "network": "eip155:11155111"}), {})
+            return raising
+
+        t = FakeTransport([(_is_miners, catalogue_handler),
+                           (_is_ask, challenge_sep(0.02))])
+        client = DirectAskClient(
+            transport=t, payment_provider=signer,
+            spend_guard=lambda amount: amount <= 0.015)
+        with self.assertRaises(PaymentRequiredError) as ctx:
+            client.buy_result(INTENT, MINER, {})
+        self.assertIn("remaining spend cap", str(ctx.exception))
+        self.assertNotIn("called", seen)
+
+    def test_miner_entry_skips_catalogue_refetch(self):
+        # F12: a pre-fetched catalogue entry means zero catalogue GETs.
+        t = FakeTransport([(_is_miners, catalogue_handler),
+                           (_is_ask, served_handler())])
+        client = DirectAskClient(transport=t)
+        res = client.buy_result(INTENT, MINER, {},
+                                miner_entry={"id": MINER, "name": "MockMiner"})
+        self.assertEqual(res.answer, ANSWER)
+        self.assertEqual([c for c in t.calls if c[0] == "GET"], [])
+
+    def test_miner_entry_for_another_miner_refused(self):
+        t = FakeTransport([(_is_miners, catalogue_handler),
+                           (_is_ask, served_handler())])
+        with self.assertRaises(UnknownMinerError):
+            DirectAskClient(transport=t).buy_result(
+                INTENT, MINER, {}, miner_entry={"id": "9005"})
+        self.assertEqual([c for c in t.calls if c[0] == "POST"], [])
         # A transport that RETURNS 402 (instead of raising) must also
         # retry with payment headers, not just raise.
         def ask(m, u, b, h):
@@ -396,6 +479,43 @@ class TestX402Provider(unittest.TestCase):
         with self.assertRaises(ValueError):
             provider({"amount_usd": 0.01, "network": "eip155:999999",
                       "pay_to": "0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b"})
+
+    def test_refuses_challenge_above_per_call_ceiling(self):
+        # F4: the signer itself refuses > $0.05, even if a caller
+        # bypasses the client's check. Boundary $0.05 signs.
+        import base64
+        from eth_account import Account
+        from traptest.x402 import make_x402_provider
+
+        key = Account.create().key
+        provider = make_x402_provider(key)
+        base = {
+            "network": "eip155:11155111",
+            "pay_to": "0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b",
+            "asset": "0xcc194e1a843B658526D0D5C431f670028582Ae17",
+            "token_name": "USD Coin",
+            "token_version": "2",
+            "x402_version": 2,
+            "raw": {
+                "accepts": [{
+                    "scheme": "exact", "network": "eip155:11155111",
+                    "amount": "50000",
+                    "asset": "0xcc194e1a843B658526D0D5C431f670028582Ae17",
+                    "payTo": "0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b",
+                    "extra": {"name": "USD Coin", "version": "2"},
+                }],
+                "resource": {"description": "Payment required",
+                             "mimeType": "application/json",
+                             "url": "https://devnode.telegraphprotocol.com/engine/v1/ask/9002"},
+            },
+        }
+        with self.assertRaises(ValueError) as ctx:
+            provider({**base, "amount_usd": 0.06})
+        self.assertIn("per-call ceiling", str(ctx.exception))
+        # Exactly $0.05 signs: value 50000 uUSDC on the wire.
+        headers = provider({**base, "amount_usd": 0.05})
+        payload = json.loads(base64.b64decode(headers["PAYMENT-SIGNATURE"]))
+        self.assertEqual(payload["payload"]["authorization"]["value"], "50000")
 
 
 if __name__ == "__main__":

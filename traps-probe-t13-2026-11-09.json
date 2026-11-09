@@ -1,0 +1,72 @@
+{
+  "data_kind": "FROZEN_TRAPS",
+  "freeze_time_utc": "2026-11-09T13:07:38Z",
+  "intent": "ONCHAIN_TX_LOOKUP_GENERAL",
+  "chain": "base-sepolia",
+  "scoring_version": "v2 (this set only)",
+  "probe_subset_note": "PROBE SUBSET ONLY \u2014 not a new trap set. Traps t13/t17/t23 copied byte-identical from traps-frozen-2026-11-09.json (sha256 940a00400477e0aefb38afe1da20fb98cc03b187e7218da252d322fd4699b5ba). t17 (reverted) and t23 (unknown) are present ONLY to satisfy the runner's mandatory-category validation; the per-run spend cap ($0.01) means only t13 is ever bought, and t17/t23 rows are recorded as skipped_cap, never scored. Probe one miner per run.",
+  "traps": [
+    {
+      "trap_id": "t13-token-transfer",
+      "category": "token_transfer",
+      "intent": "ONCHAIN_TX_LOOKUP_GENERAL",
+      "tx_hash": "0x193e3ae9ff0eb28b6989f74324f79e6faae7dd0c123aa5f845682cfe36228b45",
+      "expected_status": "confirmed",
+      "expected_from": "0x2735bd4edf19957a79deb609d72bf33e59849348",
+      "expected_to": "0x132fc7bda8416dffac445be7dc399fbf46eb69b1",
+      "expected_value": "0",
+      "expected_block": 56538934,
+      "value_basis": "tx value field, raw wei (scoring v2: native value, NOT Transfer event amount)",
+      "provenance": {
+        "source": "Base Sepolia public RPC",
+        "source_url": "https://base-sepolia-rpc.publicnode.com",
+        "block": 56538934,
+        "checked_at": "2026-11-09T13:07:38Z",
+        "checker": "freeze script (curl JSON-RPC), 9 Nov 2026",
+        "notes": "Scoring v2: expected_value is the NATIVE tx value (0 wei). Token contract 0x132fc7bda8416dffac445be7dc399fbf46eb69b1; first Transfer event amount 3000000 (raw token units) is recorded here as unscored context only \u2014 it is NOT the scored value. 1 Transfer event(s) in receipt."
+      },
+      "token_contract": "0x132fc7bda8416dffac445be7dc399fbf46eb69b1"
+    },
+    {
+      "trap_id": "t17-reverted-tx",
+      "category": "reverted_tx",
+      "intent": "ONCHAIN_TX_LOOKUP_GENERAL",
+      "tx_hash": "0x0e2fe627a1c9c6ce531b013cad0d0f7e434cd578bbd09597bccc81ba96d221a4",
+      "expected_status": "reverted",
+      "expected_from": "0xe4b1dc99529745ed27b88964b007435f0b3a3007",
+      "expected_to": "0x94cc0aac535ccdb3c01d6787d6413c739ae12bc4",
+      "expected_value": "607000000000000",
+      "expected_block": 56538803,
+      "value_basis": "tx value field, raw wei",
+      "provenance": {
+        "source": "Base Sepolia public RPC",
+        "source_url": "https://base-sepolia-rpc.publicnode.com",
+        "block": 56538803,
+        "checked_at": "2026-11-09T13:07:38Z",
+        "checker": "freeze script (curl JSON-RPC), 9 Nov 2026",
+        "notes": "Receipt status 0x0; non-zero tx value scored."
+      }
+    },
+    {
+      "trap_id": "t23-unknown-tx",
+      "category": "unknown_tx",
+      "intent": "ONCHAIN_TX_LOOKUP_GENERAL",
+      "tx_hash": "0xb6f6693dafbdc68d96186b86f6f436bcaf78ade8d209b82446632317a3d0185a",
+      "expected_status": "not_found",
+      "expected_from": null,
+      "expected_to": null,
+      "expected_value": null,
+      "expected_block": null,
+      "value_basis": null,
+      "strict_unknown": true,
+      "provenance": {
+        "source": "Base Sepolia public RPC",
+        "source_url": "https://base-sepolia-rpc.publicnode.com",
+        "block": null,
+        "checked_at": "2026-11-09T13:07:38Z",
+        "checker": "freeze script (curl JSON-RPC), 9 Nov 2026",
+        "notes": "Random well-formed hash; eth_getTransactionByHash and eth_getTransactionReceipt both returned null at freeze time. Scoring v2 (strict_unknown): a not_found answer carrying any invented from/to/value/block fails outright. If this hash ever appears on chain, retire the trap \u2014 do not re-score it."
+      }
+    }
+  ]
+}

@@ -1,0 +1,132 @@
+{
+  "data_kind": "LIVE",
+  "run": "run-20261109T131951Z-d0eb38",
+  "run_ids": [
+    "run-20261109T131951Z-d0eb38"
+  ],
+  "intent": "ONCHAIN_TX_LOOKUP_GENERAL",
+  "traps_file": "traps-probe-t13-2026-11-09.json",
+  "traps_sha256": "a546bed68101da123f347be384fd15a3ad3c7e8e6e665a421e764678ab4567eb",
+  "freeze_time_utc": "2026-11-09T13:07:38Z",
+  "provider_ids": [
+    "7307"
+  ],
+  "providers": {
+    "7307": "ChainWire Transaction Lookup"
+  },
+  "substitutions": [],
+  "spend_cap_usd": 0.01,
+  "total_cost_usd": 0.01,
+  "escrow_credit_usd": 0.0,
+  "burner_balance_before_usdc": 29.0,
+  "burner_eth_before": 0.05301184639784,
+  "scores": [
+    {
+      "data_kind": "LIVE",
+      "trap_id": "t13-token-transfer",
+      "category": "token_transfer",
+      "intent": "ONCHAIN_TX_LOOKUP_GENERAL",
+      "tx_hash": "0x193e3ae9ff0eb28b6989f74324f79e6faae7dd0c123aa5f845682cfe36228b45",
+      "scoring_version": "v1",
+      "provider_id": "7307",
+      "cost_usd": 0.01,
+      "signal_hash": "0xe5939d46d44e864cc8fa067e9425cb03fbd834388af926791153a3eb40dba140",
+      "receipt_present": true,
+      "receipt": "eyJyZWNlaXB0X2hhc2giOiIweDUyZTUwNjcyMDdhMDMyMjk2NDE1MTg0Y2Q0ZDJiZmM2ODM1YTYyOGE0NWI2ZjI1Y2I5NmJmYjRkYzI1ZjkzMGIiLCJyYWlsIjoieDQwMiIsInBheWVyIjoiMHgxNzBEZkE2N0QxZTM3OTE1ZDgxMzBlYUI5YkQzYjBhNEUxMTVmMEMwIiwibWluZXIiOiIzNTIiLCJpbnRlbnQiOiJPTkNIQUlOX1RYX0xPT0tVUF9HRU5FUkFMIiwiYW1vdW50X3V1c2RjIjoiMTAwMDAiLCJlcG9jaF9pZCI6MjA1MCwic2V0dGxlbWVudCI6Im9uY2hhaW4iLCJjaGFpbiI6ImVpcDE1NToxMTE1NTExMSIsInR4X2hhc2giOiIweGExOGFhYTVlZTk2MWYzZDZmYWU5NzFjMWI1MWZmMDhiZTIwY2M3YTMxOWY0NmM2ODU4MTc0ZjE0YTNkNWNhOGEiLCJ0aW1lc3RhbXAiOjE3OTQyMzA0MTB9",
+      "charged": true,
+      "answer": {
+        "tx_hash": "0x193e3ae9ff0eb28b6989f74324f79e6faae7dd0c123aa5f845682cfe36228b45",
+        "status": "confirmed",
+        "from": "0x2735bd4edf19957a79deb609d72bf33e59849348",
+        "to": "0x132fc7bda8416dffac445be7dc399fbf46eb69b1",
+        "block_number": 56538934,
+        "value_eth": 0
+      },
+      "normalised_answer": {
+        "tx_hash": "0x193e3ae9ff0eb28b6989f74324f79e6faae7dd0c123aa5f845682cfe36228b45",
+        "status": "confirmed",
+        "from": "0x2735bd4edf19957a79deb609d72bf33e59849348",
+        "to": "0x132fc7bda8416dffac445be7dc399fbf46eb69b1",
+        "block": 56538934,
+        "value": "0"
+      },
+      "normalisation_notes": [
+        "block_number -> block",
+        "value_eth 0 ETH -> 0 wei"
+      ],
+      "passed": true,
+      "fields": [
+        {
+          "field": "status",
+          "expected": "confirmed",
+          "actual": "confirmed",
+          "passed": true
+        },
+        {
+          "field": "from",
+          "expected": "0x2735bd4edf19957a79deb609d72bf33e59849348",
+          "actual": "0x2735bd4edf19957a79deb609d72bf33e59849348",
+          "passed": true
+        },
+        {
+          "field": "to",
+          "expected": "0x132fc7bda8416dffac445be7dc399fbf46eb69b1",
+          "actual": "0x132fc7bda8416dffac445be7dc399fbf46eb69b1",
+          "passed": true
+        },
+        {
+          "field": "value",
+          "expected": "0",
+          "actual": "0",
+          "passed": true
+        },
+        {
+          "field": "block",
+          "expected": "56538934",
+          "actual": "56538934",
+          "passed": true
+        }
+      ],
+      "receipt_verified_onchain": true,
+      "receipt_settlement_tx": "0xa18aaa5ee961f3d6fae971c1b51ff08be20cc7a319f46c6858174f14a3d5ca8a"
+    },
+    {
+      "data_kind": "LIVE",
+      "trap_id": "t17-reverted-tx",
+      "provider_id": "7307",
+      "passed": false,
+      "cost_usd": 0,
+      "signal_hash": null,
+      "receipt_present": false,
+      "receipt": null,
+      "charged": false,
+      "answer": null,
+      "normalised_answer": null,
+      "normalisation_notes": [],
+      "fields": [],
+      "error": "spend cap reached, not attempted",
+      "skipped_cap": true
+    },
+    {
+      "data_kind": "LIVE",
+      "trap_id": "t23-unknown-tx",
+      "provider_id": "7307",
+      "passed": false,
+      "cost_usd": 0,
+      "signal_hash": null,
+      "receipt_present": false,
+      "receipt": null,
+      "charged": false,
+      "answer": null,
+      "normalised_answer": null,
+      "normalisation_notes": [],
+      "fields": [],
+      "error": "spend cap reached, not attempted",
+      "skipped_cap": true
+    }
+  ],
+  "burner_balance_after_usdc": 28.99,
+  "burner_eth_after": 0.05301184639784,
+  "balance_drop_usdc": 0.01,
+  "receipt_verification_backfill": "Receipt verification flags backfilled 9 Nov 2026 (free Sepolia RPC reads only, no spend, no re-buy): the runner verified these receipts on-chain at run time (logs: 24/24, 5/5, 7/7, 1/1 x3) but a runner bug discarded the per-row flags before writing the file. Fixed in traptest/run.py the same day; this backfill re-ran the same verify_receipts() over the stored receipts and persisted the flags. No score, cost, or answer field was touched."
+}

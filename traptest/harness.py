@@ -17,6 +17,7 @@ DirectAskClient via its payment provider.
 """
 import hashlib
 import json
+import os
 import subprocess
 import tempfile
 from pathlib import Path
@@ -138,23 +139,115 @@ def eth_balance(addr, rpc_url=SEPOLIA_RPC):
                        rpc_url=rpc_url), 16) / 1e18
 
 
+def atomic_write_text(path, text):
+    """Write ``text`` to ``path`` atomically: temp file in the same
+    directory + fsync + rename + directory fsync. A crash mid-write
+    leaves either the old file or the new one, never a torn half-file
+    (F8 — the runner's per-row save must not corrupt the results file
+    if the process dies between rows)."""
+    path = Path(path)
+    fd, tmp = tempfile.mkstemp(dir=str(path.parent),
+                               prefix=path.name + ".", suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w") as f:
+            f.write(text)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp, path)
+        dfd = os.open(str(path.parent), os.O_DIRECTORY)
+        try:
+            os.fsync(dfd)
+        finally:
+            os.close(dfd)
+    except BaseException:
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
+        raise
+
+
+def _payment_status(error):
+    """``payment.status`` from the JSON payload embedded in an error
+    string, or None.
+
+    The live error is ``PurchaseFailedError: Ask failed (status 500):
+    {json}`` and the runner truncates it to 300 chars, so the JSON is
+    usually cut mid-string (the 24 live escrow rows end inside the
+    ``message`` value). Parse it structurally: json.loads when whole,
+    else repair the truncation by closing the open string and the
+    open objects and parse that. The status is read from the parsed
+    ``payment`` object's ``status`` field — never from a bare
+    substring search for "escrow" in free text (the old bug: any error
+    mentioning escrow, e.g. "escrow service unavailable", was credited
+    $0.01 it never settled). Only the exact status
+    ``escrow_credit_pending`` counts; anything else (or no payment
+    object at all) returns None.
+    """
+    if not error:
+        return None
+    start = error.find("{")
+    if start < 0:
+        return None
+    payload = error[start:]
+    for candidate in (payload,
+                      *(payload + q + "}" * n
+                        for q in ("", '"') for n in range(0, 5))):
+        try:
+            doc = json.loads(candidate)
+        except ValueError:
+            continue
+        if isinstance(doc, dict):
+            payment = doc.get("payment")
+            if isinstance(payment, dict):
+                return payment.get("status")
+            return None
+    return None
+
+
+def _truncate_error_for_storage(error):
+    """The stored ``error`` field keeps the historical format exactly:
+    ``"<TypeName>: "`` + the first 300 chars of the detail — the same
+    truncation the runner used to apply before calling fail_row. The
+    parse in :func:`_payment_status` runs on the FULL string passed
+    in, so a long nested upstream message can no longer push the
+    ``payment`` object past the cut (the live OnChain Intel rows lost
+    exactly that evidence to the 300-char cut; their credits survive
+    in the frozen files from the post-hoc balance repair, not from
+    this string)."""
+    if error is None:
+        return None
+    if ": " in error:
+        head, detail = error.split(": ", 1)
+        return f"{head}: {detail[:300]}"
+    return error
+
+
 def fail_row(trap, miner_id, error):
     """A scored row for a call that produced no answer.
 
     ``cost_usd`` is 0 (not billed for a served answer) — but a failed
     call can still settle $0.01 on-chain into Telegraph escrow credit,
     so the row records ``escrow_credit_usd`` at write time whenever
-    the error says so, instead of assuming the call cost $0. The
-    on-chain Transfer to payTo is the evidence; the row records it so
-    balance drops are never unexplained.
+    the error's JSON payload says so (``payment.status ==
+    "escrow_credit_pending"``, parsed structurally from the FULL
+    error string — see :func:`_payment_status`), instead of assuming
+    the call cost $0. The stored ``error`` field keeps the historical
+    300-char-detail truncation (see
+    :func:`_truncate_error_for_storage`), so the live data format is
+    unchanged. The on-chain Transfer to payTo is the evidence; the
+    row records it so balance drops are never unexplained. Per-call
+    on-chain escrow settlement verification is OUT of scope: this
+    records what the engine's error payload reports, it does not
+    re-verify the settlement transaction on-chain.
     """
     row = {"data_kind": "LIVE", "trap_id": trap.trap_id,
            "provider_id": miner_id, "passed": False,
            "cost_usd": 0, "signal_hash": None, "receipt_present": False,
            "receipt": None, "charged": False, "answer": None,
            "normalised_answer": None, "normalisation_notes": [],
-           "fields": [], "error": error}
-    if "escrow" in (error or "").lower():
+           "fields": [], "error": _truncate_error_for_storage(error)}
+    if _payment_status(error) == "escrow_credit_pending":
         row["escrow_credit_usd"] = CALL_PRICE_USD
     return row
 
@@ -175,6 +268,14 @@ def build_scored_row(trap, trap_dict, miner_id, intent, result):
         "category": trap_dict.get("category"),
         "intent": intent,
         "tx_hash": trap.tx_hash,
+        # Scoring version for this row: "v2-strict-unknown" only on
+        # traps that opt into the v2 unknown rule (expansion set,
+        # 9 Nov 2026); every other trap scores under v1, byte-identical
+        # to the frozen-12 run. The token-value basis change in the
+        # expansion set is a trap-design change, recorded on the trap
+        # file, not a scorer change.
+        "scoring_version": ("v2-strict-unknown" if getattr(trap, "strict_unknown", False)
+                            else "v1"),
         "provider_id": miner_id,
         "cost_usd": result.cost_usd,
         "signal_hash": result.signal_hash,
@@ -194,20 +295,54 @@ def build_scored_row(trap, trap_dict, miner_id, intent, result):
 def load_traps(path):
     """Load a trap-set JSON file -> (doc dict, [Trap], sha256 hex).
 
-    Validates: non-empty, unique trap ids (via traptest.traps).
-    The sha256 is recorded in every results file the runner writes.
+    Validates via :func:`traptest.trap_catalog.build_fixed_set` with
+    the provenance parsed from the trap file itself: every trap must
+    carry a ``provenance`` object ({source, source_url, block,
+    checked_at, checker, notes}) and a ``category``; the set must
+    contain the mandatory categories (reverted_tx, unknown_tx), stay
+    within MAX_TRAPS (30), and contain no pending trap (a pending
+    transaction's ground truth changes when it confirms, so it can
+    never be a fixed trap). A file failing any of these raises
+    ValueError — the runner turns that into exit 3 before any network
+    call or spend. The sha256 is recorded in every results file the
+    runner writes.
     """
-    from .traps import validate_trap_set
+    from .trap_catalog import GroundTruthProvenance, build_fixed_set
 
     path = Path(path)
     raw = path.read_bytes()
     doc = json.loads(raw.decode("utf-8"))
     traps_raw = doc["traps"]
-    traps = [Trap(trap_id=t["trap_id"], intent=t["intent"], tx_hash=t["tx_hash"],
-                  expected_status=t["expected_status"], expected_from=t["expected_from"],
-                  expected_to=t["expected_to"], expected_value=t["expected_value"],
-                  expected_block=t["expected_block"]) for t in traps_raw]
-    validate_trap_set(traps)
+    entries = []
+    for t in traps_raw:
+        trap = Trap(trap_id=t["trap_id"], intent=t["intent"], tx_hash=t["tx_hash"],
+                    expected_status=t["expected_status"], expected_from=t["expected_from"],
+                    expected_to=t["expected_to"], expected_value=t["expected_value"],
+                    expected_block=t["expected_block"],
+                    strict_unknown=bool(t.get("strict_unknown", False)))
+        if trap.expected_status == "pending":
+            raise ValueError(
+                f"trap {trap.trap_id!r}: pending transactions are never "
+                f"fixed traps — their ground truth changes when they confirm")
+        prov_raw = t.get("provenance")
+        if not isinstance(prov_raw, dict):
+            raise ValueError(
+                f"trap {trap.trap_id!r}: missing provenance — every trap "
+                f"in a fixed set must record how its ground truth was "
+                f"checked against public chain data (provenance object "
+                f"with source, source_url, block, checked_at, checker)")
+        prov = GroundTruthProvenance(
+            trap_id=t["trap_id"],
+            category=t.get("category") or "",
+            source_name=prov_raw.get("source") or "",
+            source_url=prov_raw.get("source_url") or "",
+            tx_reference=t["tx_hash"],
+            block_reference=prov_raw.get("block"),
+            checked_at=prov_raw.get("checked_at") or "",
+            checker=prov_raw.get("checker") or "",
+            notes=prov_raw.get("notes") or "")
+        entries.append((trap, prov))
+    traps = build_fixed_set(entries)
     return doc, traps, hashlib.sha256(raw).hexdigest()
 
 

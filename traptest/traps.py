@@ -21,6 +21,11 @@ class Trap:
     expected_to: str | None = None
     expected_value: str | None = None  # as returned by the provider, compared as string
     expected_block: int | None = None
+    # Scoring v2 opt-in (expansion set only, 9 Nov 2026): when True
+    # and expected_status is "not_found", a not_found answer carrying
+    # any invented from/to/value/block fails outright. Defaults to
+    # False so the frozen-12 scoring path is byte-identical.
+    strict_unknown: bool = False
 
     def __post_init__(self):
         if not self.trap_id or not self.intent or not self.tx_hash:

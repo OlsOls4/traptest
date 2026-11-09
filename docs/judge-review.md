@@ -1,6 +1,28 @@
 # TrapTest — Independent Judge Review (prep only, 27 Oct 2026)
 
-**Role:** strict Telegraph Season II judge, scoring against the official criteria.
+> **CORRECTION — 9 Nov 2026: the rubric in this file is SUPERSEDED.**
+> This review (27 Oct) scored against the then-assumed rubric — Technical 35
+> (min 24/35), Commercial 30, Adoption 15, Integration 10, Proof 10 — which
+> was never the Evaluator rubric. The **correct rubric is the Evaluator
+> TRACK 03 rubric, verified live 8 Nov 2026** from the rules page: **/100,
+> need 70+ AND pass 28/40 on Measurement validity** — Measurement validity
+> **40 (minimum 28/40)**, Integrity **15**, Reproducibility **10**,
+> Coverage/improvement **10**, Documentation **5**, Organic growth **20**
+> (5+5+5+5). Every score table in this file (§1, §6-Nov addendum, §8-Nov
+> addendum) was computed under the OLD rubric and is preserved below as
+> history, labelled as such — **none of it is a score under the correct
+> rubric and none of it is comparable to one**. Where this file states the
+> old rubric as "official criteria", that claim is wrong and is annotated
+> in place. The substance that survives the rubric change — the risk
+> register (§2), the adoption-ceiling honesty rule (§4, now mapping to
+> Organic growth /20 rather than Adoption /15), and the live-evidence
+> record — is kept intact. Evaluator pool: $2,000 = 4×$300 delivery +
+> $500/$300 excellence; direct /dashboard/eval submission confirmed
+> eligible for the delivery awards (Ahmed Ali, 8 Nov 2026).
+
+**Role:** strict Telegraph Season II judge, scoring against the official criteria
+**[as understood 27 Oct 2026 — see the 9 Nov correction banner: this was the
+assumed rubric, not the verified Evaluator TRACK 03 rubric]**.
 **Scope reviewed:** `~/workspace/hackathon-ideation/telegraph/IDEATION.md` (full),
 `~/workspace/telegraph-traptest/README.md`, and `traptest/*.py`
 (`traps.py`, `scoring.py`, `leaderboard.py`, `providers.py`) plus
@@ -19,11 +41,14 @@ The idea is genuinely strong; the current artefact is not yet a submission.
 
 ## 1. Scored assessment of the current prep
 
-Official criteria: /100, need 70+, with Technical 35 (minimum 24/35),
+**[SUPERSEDED RUBRIC — see correction banner at top. The criteria below
+were the assumed rubric on 27 Oct 2026, not the verified Evaluator TRACK 03
+rubric. This section is history, not a current score.]**
+Assumed criteria at the time: /100, need 70+, with Technical 35 (minimum 24/35),
 Commercial 30, Real independent adoption/retention 15, Telegraph
 integration quality 10, Proof/demo/tutorial/repeatability 10.
 
-### As-is score (prep framework only, 27 Oct 2026)
+### As-is score (prep framework only, 27 Oct 2026, OLD rubric)
 
 | Criterion | Score | Why — credit given and credit withheld |
 |---|---|---|
@@ -32,7 +57,7 @@ integration quality 10, Proof/demo/tutorial/repeatability 10.
 | Real independent adoption / retention (/15) | **0** | Nothing to score. There are no users, no repeat users, no external buyers, and no retention signal. This is honest, not a penalty for dishonesty — but it is a zero, and see §4 for the ceiling even after a perfect build. |
 | Telegraph integration quality (/10) | **2** | Credit: the intended integration is the right one — Direct Ask (`POST /engine/v1/ask/{minerId}`) per competitor, price from the live 402 challenge, evidence fields (`cost_usd`, `signal_hash`, receipt) named correctly, and miner IDs re-fetched at run time rather than hardcoded. Withheld: none of it has been executed. `fetch_intents`/`fetch_miners` exist but are untested against the live Engine response shape (they assume `intents`/`miners`/`data` keys), and no Telegraph request, transaction, or accounting evidence exists. An intended integration scores almost nothing. |
 | Proof / demo / tutorial / repeatability (/10) | **2** | Credit: 5 mock unit tests pass and are explicitly labelled mock-only (good discipline — they are never presented as event evidence), and the README freezes a truth list. Withheld: no demo video, no how-to-run for a live loop, no receipts, no reviewer input path, no failure case demonstrated, no trap set a reviewer could re-run. |
-| **Total** | **25 / 100** | **FAILS 70+ overall and FAILS the 24/35 technical minimum (13/35).** |
+| **Total** | **25 / 100** | **FAILS 70+ overall and FAILS the 24/35 technical minimum (13/35). [OLD rubric — historical.]** |
 
 ### Technical-minimum risk, stated honestly
 
@@ -44,7 +69,7 @@ competing providers, scored against a frozen trap set, with verified receipts
 and a run a reviewer can repeat with a new input. Until that loop exists,
 no amount of polish to the scoring module moves the technical score over 24.
 
-### Projected score IF the planned build completes fully
+### Projected score IF the planned build completes fully (OLD rubric — historical projection only, not under the correct Evaluator rubric)
 
 This is a projection, not a score — it assumes the day-1 gates pass, the
 live loop works, the demo and receipts are complete, and the reviewer can replay it:
@@ -56,7 +81,7 @@ live loop works, the demo and receipts are complete, and the reviewer can replay
 | Adoption (/15) | 3–6 | **Structural ceiling — see §4.** Even a perfect build cannot honestly claim independent adoption by 1 Dec. |
 | Integration (/10) | 9 | Achievable if purchases are genuinely autonomous, per-provider, and receipted. |
 | Proof (/10) | 8–9 | Achievable with a 2–5 min demo, how-to-run, receipts bundle, and a reviewer failure case. |
-| **Total** | **65–76, central ~71** | **Borderline.** A completed TrapTest is a plausible pass, not a safe one. It passes only if Technical lands at the top of its range *and* Commercial is argued tightly, because Adoption cannot rescue a shortfall elsewhere. |
+| **Total** | **65–76, central ~71** | **Borderline [OLD rubric projection — historical].** A completed TrapTest is a plausible pass, not a safe one. It passes only if Technical lands at the top of its range *and* Commercial is argued tightly, because Adoption cannot rescue a shortfall elsewhere. |
 
 Implication for the build: there is no slack. Every item in §2 must be fixed;
 dropping any one of them plausibly drops the total below 70.
@@ -219,9 +244,15 @@ What undermines it, and why it cannot be assumed:
   judged as a script, with a $2,000 Evaluators pool rather than the $3,000
   Apps & Agents pool), then a website project submission with a leaderboard
   UI may be judged as an App anyway — or may not fit either route cleanly.
-- The prize consequence matters: Evaluators $2,000 vs Apps & Agents $3,000
-  (of the $7,000 main pool). Choosing Evaluator-led caps the prize even if
-  it wins, and a single entry cannot be submitted to both tracks — the
+- The prize consequence matters: Evaluator pool **$2,000 = 4×$300 delivery +
+  $500/$300 excellence** (verified 8 Nov 2026). **[CORRECTED 9 Nov 2026:
+  the original text here quoted "Evaluators $2,000 vs Apps & Agents $3,000
+  (of the $7,000 main pool)" — the Apps-pool figure and the $7,000 total
+  were from the unverified pre-8-Nov reading and are not the Evaluator terms
+  that apply to this entry. The Evaluator $2,000 figure itself stands.]**
+  Direct /dashboard/eval submission was confirmed eligible for the delivery
+  awards by Ahmed Ali (8 Nov 2026), so the delivery-award lane is open to
+  this entry; a single entry cannot be submitted to both tracks — the
   rules allow multiple tracks only as separate, distinct entries.
 - TrapTest's strongest defence against this risk is that its core loop
   already satisfies the Apps bar: it makes genuinely autonomous
@@ -233,19 +264,38 @@ What undermines it, and why it cannot be assumed:
 
 **Confirm before submitting (live browser, Evaluator track selected):**
 
+> **[RESOLVED 8 Nov 2026 — see bracketed answers. Kept as history; the
+> checklist below no longer blocks submission.]**
+
 1. Does Season II accept Evaluator entries through the H2 website
    submission flow, or through a separate script-submission route?
+   **[RESOLVED 8 Nov: no sign-in on the hackathon website and none needed;
+   sign in on anjoman.ai and submit material at
+   anjoman.ai/dashboard/eval. No GitHub bounty issue exists for
+   ONCHAIN_TX_LOOKUP_GENERAL, so there is nothing to /claim.]**
 2. What artefact does an Evaluator entry submit — a scoring script, a
    report, a live leaderboard, or all three — and is a UI leaderboard
    counted as Evaluator work or as an App?
+   **[RESOLVED 8 Nov: evaluation material (preference pairs + truth
+   source) submitted directly at /dashboard/eval; 12 pairs + 1 truth
+   source ADMITTED 8 Nov 11:20–11:21.]**
 3. Does an Evaluator entry need to show an autonomous purchase, or is
    scoring answers purchased by the evaluator sufficient?
+   **[RESOLVED 8 Nov: direct /dashboard/eval submission qualifies for the
+   4×$300 delivery awards (Ahmed Ali, 8 Nov 13:36).]**
 4. Which prize pool applies to a TrapTest-shaped entry, and can one entry
    win a delivery award in one track only?
+   **[RESOLVED 8 Nov: Evaluator pool $2,000 = 4×$300 delivery + $500/$300
+   excellence; direct submission eligible for delivery awards.]**
 5. Is there any Evaluator-specific field or format (e.g. Intent selection,
    script link) that the Apps submission form does not have?
+   **[OPEN: the final submission form does not exist yet — it opens later
+   and will be shared in Discord before the 1 Dec deadline.]**
 
-**Recommendation:** confirm items 1–5 first. If the Evaluator route is
+**Recommendation:** confirm items 1–5 first. **[UPDATE 9 Nov 2026: items
+1–4 are confirmed/resolved as annotated above (8 Nov); only item 5 — the
+final submission form — remains open, because the form does not exist yet.]**
+If the Evaluator route is
 confirmed and fits a leaderboard-plus-script artefact, submit as Evaluator
 (the framing is then honest and the work matches the track). If it is
 unclear or script-only, submit as Apps & Agents — the loop satisfies the
@@ -255,6 +305,14 @@ submission format is known. Do not submit the same artefact to both tracks.
 ---
 
 ## 4. Adoption-ceiling honesty — how the submission must phrase it
+
+**[RUBRIC MAPPING — 9 Nov 2026: this section was written against Adoption
+/15 in the old rubric. Under the correct Evaluator rubric it maps to
+Organic growth /20 (5+5+5+5 — dated public updates, tutorial/education,
+evidence an independent developer reproduced the work, developer
+activation). The substance is unchanged: no independent adoption can
+honestly be claimed, and the "3–6" ceiling below is a ceiling on the
+adoption-like credit, not a score under the current rubric.]**
 
 **The ceiling:** no TrapTest submission can honestly claim real independent
 adoption or retention by 1 Dec 2026. Testnet use is explicitly not adoption,
@@ -302,7 +360,10 @@ adoption/commercial sections):**
   buyer has yet paid or committed."
 
 **Scoring consequence to accept:** budget Adoption at 3–6/15 in every
-projection. The entry passes, if it passes, on Technical + Commercial +
+projection **[OLD rubric; under the correct rubric this is the adoption-like
+share of Organic growth /20, which is likewise capped near the bottom by the
+same honesty rule — no independent adoption, no retention, no public
+reproduction evidenced yet]**. The entry passes, if it passes, on Technical + Commercial +
 Integration + Proof — which is why §2's fixes are non-negotiable. Do not
 try to close the Adoption gap with wording; a judge rewards the honesty
 and penalises the inflation.
@@ -374,7 +435,7 @@ credit is exactly $0.50. All 24 served receipts verified on-chain
   step outside this build. If it fails, the Apps & Agents fallback from
   §3 still applies.
 
-### Re-score on live evidence (projection, same criteria)
+### Re-score on live evidence (projection, same OLD criteria — historical only, not under the correct Evaluator rubric)
 
 | Criterion | Prep | Live | Why |
 |---|---|---|---|
@@ -404,8 +465,8 @@ credit is exactly $0.50. All 24 served receipts verified on-chain
 
 ## Conclusion (prep review, 27 Oct 2026 — preserved)
 
-- **As-is score: 25/100 — fails 70+ and fails the 24/35 technical minimum (13/35).**
-- **Projected completed score: 65–76, central ~71 — a borderline pass, with no slack.**
+- **As-is score: 25/100 — fails 70+ and fails the 24/35 technical minimum (13/35). [OLD rubric, 27 Oct 2026 — historical only.]**
+- **Projected completed score: 65–76, central ~71 — a borderline pass, with no slack. [OLD rubric, 27 Oct 2026 — historical only.]**
 - **Single biggest risk: Risk 1 — free testnet USDC/gas acquisition.**
   It is binary and it gates everything: without funded testnet purchases
   there is no live loop, no receipts, no leaderboard, and no reviewer
@@ -425,16 +486,22 @@ credit is exactly $0.50. All 24 served receipts verified on-chain
 re-scores: Judge A 65/100, Judge B 59–62 (central ~60). After the improvement round,
 fresh independent judge (revised artifacts only): **66/100 (range 64–69) on the frozen
 snapshot rubric (T35/C30/A15/I10/P10) — FAIL, narrowly; 61/100 (58–64) on the live
-Apps-view weights (T35/C25/A10/I5/P5 + Organic growth 20).** Breakdown: T29, C19, A2,
+Apps-view weights (T35/C25/A10/I5/P5 + Organic growth 20). [Both rubrics here
+are OLD/superseded for this entry — see the 9 Nov correction banner at the
+top. The correct Evaluator TRACK 03 rubric was verified live 8 Nov; the
+features council re-scored 62–63/100 under it on 9 Nov.]** Breakdown: T29, C19, A2,
 I8, P8 frozen. The entry does NOT pass 70 on either rubric on central estimate.
 The shortfall is structural (zero independent adoption, zero public distribution,
 repo push unconfirmed, video local-only) — not code quality.
 
 **Rubric warning (researchers, live fetch 8 Nov 11:03 UTC).** The live rules page
 defaults to the Apps & Agents view: T35 (min 24), C25, A10, I5, P5, + Organic growth /
-education / developer activation 20 — NOT the frozen snapshot rubric. The
-Evaluator-view rubric is UNVERIFIED and needs a live-browser check with the Evaluator
-track selected. The 20-point growth category (≥3 dated public updates, a tutorial,
+education / developer activation 20 — NOT the frozen snapshot rubric. **[CORRECTED
+9 Nov 2026: the Evaluator-view rubric was VERIFIED live 8 Nov (rules page
+TRACK 03): Measurement validity 40 (minimum 28/40), Integrity 15,
+Reproducibility 10, Coverage/improvement 10, Documentation 5, Organic growth
+20 (5+5+5+5); need 70/100 AND pass 28/40. It is no longer unverified.]** The
+20-point growth category (≥3 dated public updates, a tutorial,
 evidence an independent developer reproduced the work) has no verified activity behind
 it yet. The live weights punish this entry *more* than the frozen rubric.
 
@@ -454,8 +521,10 @@ contributors (activation threshold met).** Staged fixes for t04/t06/t10 rejected
 answers exist in `anjoman-material/review-fixes-2026-11-08/` — NOT yet applied or
 re-submitted. Truth source still UNVALIDATED (Anjoman sandbox validator not run).
 Whether direct /dashboard/eval submission without a bounty /claim qualifies for the
-4×$300 verified-delivery awards is UNVERIFIED — entry may be excellence-only
-($500/$300); ask organisers in #hackathon.
+4×$300 verified-delivery awards is **[RESOLVED 8 Nov 13:36 — Ahmed Ali
+confirmed it DOES qualify for the delivery awards, so TrapTest is eligible
+for the full $2,000 Evaluator pool. The "excellence-only" risk in the
+original text no longer applies.]**
 
 **What the improvement round changed (verified 8 Nov).** Shared `traptest/normalise.py`
 (Decimal) + `traptest/receipts.py` (status AND Transfer-log verification); stale token
@@ -469,7 +538,10 @@ tests 42 → **91/91 passing**; stale-string sweep 8 Nov (zero "re-cut in progre
 "42 tests", "nothing yet", "PREP ONLY" across README/pack/how-to-run/leaderboard/
 anjoman README). Frozen files sha256-verified untouched.
 
-**Remaining open items.** (1) Evaluator-view rubric verification (live browser).
+**Remaining open items.** (1) ~~Evaluator-view rubric verification (live browser).~~
+**[RESOLVED 8 Nov 2026 — Evaluator TRACK 03 rubric verified live: Validity 40
+(min 28/40), Integrity 15, Reproducibility 10, Coverage 10, Docs 5, Organic
+growth 20; need 70/100 + pass 28/40.]**
 (2) Repo push: live-build files not yet confirmed pushed to github.com/OlsOls4/traptest
 (no local .git). (3) Anjoman pair re-submission with fixes + truth-source validation.
 (4) Publish/distribute — the highest-upside move (+~8 live / +2–3 frozen): public repo,

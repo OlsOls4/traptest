@@ -1,0 +1,152 @@
+{
+  "data_kind": "FROZEN_TRAPS",
+  "freeze_time_utc": "2026-11-09T13:07:38Z",
+  "intent": "ONCHAIN_TX_LOOKUP_GENERAL",
+  "chain": "base-sepolia",
+  "scoring_version": "v2 (this set only)",
+  "completion_subset_note": "COMPLETION SUBSET \u2014 not a new trap set. Traps t18-t24 copied byte-identical from traps-frozen-2026-11-09.json (sha256 940a00400477e0aefb38afe1da20fb98cc03b187e7218da252d322fd4699b5ba). Reason: the --append run for ChainWire 1707307 on the full set hit the file-cumulative spend cap after 5 calls (t13-t17), and the runner records cap-skipped rows as scored pairs, so a re-run would skip t18-t24 without buying them. This subset buys only the 7 remaining traps; t13-t17 for 1707307 live in results-live/expansion-run-2026-11-09.json. No trap was re-bought.",
+  "traps": [
+    {
+      "trap_id": "t18-reverted-tx",
+      "category": "reverted_tx",
+      "intent": "ONCHAIN_TX_LOOKUP_GENERAL",
+      "tx_hash": "0xd12c080abff322137722d0d0b52bd10462df67c758c919b069b4165da28c34f3",
+      "expected_status": "reverted",
+      "expected_from": "0xc8d7ed44b78b5f040e7cfa3dcc88d7c957fc1d11",
+      "expected_to": "0x1dc2307cc5eba0bf4b80e16860fa56bb8de69bc2",
+      "expected_value": null,
+      "expected_block": 56538921,
+      "value_basis": null,
+      "provenance": {
+        "source": "Base Sepolia public RPC",
+        "source_url": "https://base-sepolia-rpc.publicnode.com",
+        "block": 56538921,
+        "checked_at": "2026-11-09T13:07:38Z",
+        "checker": "freeze script (curl JSON-RPC), 9 Nov 2026",
+        "notes": "Receipt status 0x0; reverted contract call (code present at `to`); tx value 0, unscored."
+      }
+    },
+    {
+      "trap_id": "t19-multi-recipient-tx",
+      "category": "multi_recipient_tx",
+      "intent": "ONCHAIN_TX_LOOKUP_GENERAL",
+      "tx_hash": "0xbe9c4e130e9b5cb15f80d67f0501a294f5e73cb21b35e0fcbb56bf59a71e5a7b",
+      "expected_status": "confirmed",
+      "expected_from": "0xb01caea8c6c47bbf4f4b4c5080ca642043359c2e",
+      "expected_to": "0xdb9b1e94b5b69df7e401ddbede43491141047db3",
+      "expected_value": null,
+      "expected_block": 56538940,
+      "value_basis": null,
+      "provenance": {
+        "source": "Base Sepolia public RPC",
+        "source_url": "https://base-sepolia-rpc.publicnode.com",
+        "block": 56538940,
+        "checked_at": "2026-11-09T13:07:38Z",
+        "checker": "freeze script (curl JSON-RPC), 9 Nov 2026",
+        "notes": "3 Transfer events in receipt to 3 distinct recipients; recipient list is a note, not scored."
+      }
+    },
+    {
+      "trap_id": "t20-multi-recipient-tx",
+      "category": "multi_recipient_tx",
+      "intent": "ONCHAIN_TX_LOOKUP_GENERAL",
+      "tx_hash": "0x97d40bb550d8dfa767b8aa5c2113b5396e627fb0eba5bd9d8b7f6cf6222a0cad",
+      "expected_status": "confirmed",
+      "expected_from": "0x5d7df7b73a0d67b4a11297475184dc645be56cc4",
+      "expected_to": "0xec40494b5df080f01976b0869b73ae9b11d86cef",
+      "expected_value": null,
+      "expected_block": 56538886,
+      "value_basis": null,
+      "provenance": {
+        "source": "Base Sepolia public RPC",
+        "source_url": "https://base-sepolia-rpc.publicnode.com",
+        "block": 56538886,
+        "checked_at": "2026-11-09T13:07:38Z",
+        "checker": "freeze script (curl JSON-RPC), 9 Nov 2026",
+        "notes": "3 Transfer events in receipt to 3 distinct recipients; recipient list is a note, not scored."
+      }
+    },
+    {
+      "trap_id": "t21-plain-transfer",
+      "category": "plain_transfer",
+      "intent": "ONCHAIN_TX_LOOKUP_GENERAL",
+      "tx_hash": "0xe6a8f1dfe8b8db282637acfda533ebbb292c9ee7217c02bc2be48c0e2aff0396",
+      "expected_status": "confirmed",
+      "expected_from": "0x625119fee5bbdb7290f17a6fdd9826bc28e07329",
+      "expected_to": "0xe5bca0fec55afb385522e9e13df1a6e9a86beae0",
+      "expected_value": "100000000000000000",
+      "expected_block": 56538787,
+      "value_basis": "tx value field, raw wei",
+      "provenance": {
+        "source": "Base Sepolia public RPC",
+        "source_url": "https://base-sepolia-rpc.publicnode.com",
+        "block": 56538787,
+        "checked_at": "2026-11-09T13:07:38Z",
+        "checker": "freeze script (curl JSON-RPC), 9 Nov 2026",
+        "notes": "Large-value plain transfer: 100000000000000000 wei. Zero-value plain transfers already covered by frozen t01."
+      }
+    },
+    {
+      "trap_id": "t22-plain-transfer",
+      "category": "plain_transfer",
+      "intent": "ONCHAIN_TX_LOOKUP_GENERAL",
+      "tx_hash": "0x140df41bdc5cec83a61e26f68d901e7d3ca5dbdfa197ded24cf47091cc7ff359",
+      "expected_status": "confirmed",
+      "expected_from": "0xc3af235c41376a8c07d9db5c0d06ec5cc1c52a3e",
+      "expected_to": "0x8dd195d59154e10ce56c36a47e7db8c837212c09",
+      "expected_value": "100000000000000000",
+      "expected_block": 56538730,
+      "value_basis": "tx value field, raw wei",
+      "provenance": {
+        "source": "Base Sepolia public RPC",
+        "source_url": "https://base-sepolia-rpc.publicnode.com",
+        "block": 56538730,
+        "checked_at": "2026-11-09T13:07:38Z",
+        "checker": "freeze script (curl JSON-RPC), 9 Nov 2026",
+        "notes": "Large-value plain transfer: 100000000000000000 wei. Zero-value plain transfers already covered by frozen t01."
+      }
+    },
+    {
+      "trap_id": "t23-unknown-tx",
+      "category": "unknown_tx",
+      "intent": "ONCHAIN_TX_LOOKUP_GENERAL",
+      "tx_hash": "0xb6f6693dafbdc68d96186b86f6f436bcaf78ade8d209b82446632317a3d0185a",
+      "expected_status": "not_found",
+      "expected_from": null,
+      "expected_to": null,
+      "expected_value": null,
+      "expected_block": null,
+      "value_basis": null,
+      "strict_unknown": true,
+      "provenance": {
+        "source": "Base Sepolia public RPC",
+        "source_url": "https://base-sepolia-rpc.publicnode.com",
+        "block": null,
+        "checked_at": "2026-11-09T13:07:38Z",
+        "checker": "freeze script (curl JSON-RPC), 9 Nov 2026",
+        "notes": "Random well-formed hash; eth_getTransactionByHash and eth_getTransactionReceipt both returned null at freeze time. Scoring v2 (strict_unknown): a not_found answer carrying any invented from/to/value/block fails outright. If this hash ever appears on chain, retire the trap \u2014 do not re-score it."
+      }
+    },
+    {
+      "trap_id": "t24-unknown-tx",
+      "category": "unknown_tx",
+      "intent": "ONCHAIN_TX_LOOKUP_GENERAL",
+      "tx_hash": "0x3d371e73d60c751787cff99e973eed82f22f3346dadd01dee612fc74dd5ab25b",
+      "expected_status": "not_found",
+      "expected_from": null,
+      "expected_to": null,
+      "expected_value": null,
+      "expected_block": null,
+      "value_basis": null,
+      "strict_unknown": true,
+      "provenance": {
+        "source": "Base Sepolia public RPC",
+        "source_url": "https://base-sepolia-rpc.publicnode.com",
+        "block": null,
+        "checked_at": "2026-11-09T13:07:38Z",
+        "checker": "freeze script (curl JSON-RPC), 9 Nov 2026",
+        "notes": "Random well-formed hash; eth_getTransactionByHash and eth_getTransactionReceipt both returned null at freeze time. Scoring v2 (strict_unknown): a not_found answer carrying any invented from/to/value/block fails outright. If this hash ever appears on chain, retire the trap \u2014 do not re-score it."
+      }
+    }
+  ]
+}

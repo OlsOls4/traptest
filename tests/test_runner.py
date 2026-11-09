@@ -47,6 +47,13 @@ T01 = {
     "expected_to": "0x" + "22" * 20,
     "expected_value": "1000000000000000",
     "expected_block": 123,
+    "provenance": {
+        "source": "Mock Explorer",
+        "source_url": "https://example.invalid/tx/mock-t01",
+        "block": 123, "checked_at": "2026-11-06",
+        "checker": "mock-checker",
+        "notes": "mock fixture, NOT event evidence",
+    },
 }
 T02 = {
     "trap_id": "t02-plain-transfer",
@@ -58,7 +65,52 @@ T02 = {
     "expected_to": "0x" + "44" * 20,
     "expected_value": "0",
     "expected_block": 456,
+    "provenance": {
+        "source": "Mock Explorer",
+        "source_url": "https://example.invalid/tx/mock-t02",
+        "block": 456, "checked_at": "2026-11-06",
+        "checker": "mock-checker",
+        "notes": "mock fixture, NOT event evidence",
+    },
 }
+T03 = {
+    "trap_id": "t03-reverted-tx",
+    "category": "reverted_tx",
+    "intent": INTENT,
+    "tx_hash": "0x" + "33" * 32,
+    "expected_status": "reverted",
+    "expected_from": "0x" + "55" * 20,
+    "expected_to": "0x" + "66" * 20,
+    "expected_value": None,
+    "expected_block": 789,
+    "provenance": {
+        "source": "Mock Explorer",
+        "source_url": "https://example.invalid/tx/mock-t03",
+        "block": 789, "checked_at": "2026-11-06",
+        "checker": "mock-checker",
+        "notes": "mock fixture, NOT event evidence",
+    },
+}
+T04 = {
+    "trap_id": "t04-unknown-tx",
+    "category": "unknown_tx",
+    "intent": INTENT,
+    "tx_hash": "0x" + "44" * 32,
+    "expected_status": "not_found",
+    "expected_from": None,
+    "expected_to": None,
+    "expected_value": None,
+    "expected_block": None,
+    "provenance": {
+        "source": "Mock Explorer",
+        "source_url": "https://example.invalid/tx/mock-t04-search",
+        "block": None, "checked_at": "2026-11-06",
+        "checker": "mock-checker",
+        "notes": "mock fixture: explorer search returned no record",
+    },
+}
+ALL_TRAPS = (T01, T02, T03, T04)
+BY_TX = {t["tx_hash"]: t for t in ALL_TRAPS}
 
 
 def _json_body(obj):
@@ -95,7 +147,7 @@ class FakeTransport:
                      "asset": ASSET, "network": "eip155:11155111"}), {})
             params = json.loads(body.decode("utf-8"))["params"]
             tx = params["tx_hash"]
-            trap = T01 if tx == T01["tx_hash"] else T02
+            trap = BY_TX[tx]
             if miner == "8453" and tx == T02["tx_hash"]:
                 answer = {"status": "not_found",
                           "from": trap["expected_from"],
@@ -108,11 +160,18 @@ class FakeTransport:
                           "from": trap["expected_from"],
                           "to": trap["expected_to"],
                           "value_eth": "0.001", "block_number": 123}
-            else:
+            elif tx == T03["tx_hash"]:
+                answer = {"status": "reverted",
+                          "from": trap["expected_from"],
+                          "to": trap["expected_to"],
+                          "block": 789}
+            elif tx == T02["tx_hash"]:
                 answer = {"status": "confirmed",
                           "from": trap["expected_from"],
                           "to": trap["expected_to"],
                           "value": "0", "block": 456}
+            else:  # T04 unknown_tx: any invented field would fail.
+                answer = {"status": "not_found"}
             return _HttpResponse(200, _json_body(
                 {"answer": answer, "cost_usd": 0.01,
                  "signal_hash": "mock-sig-" + miner}),
@@ -149,7 +208,7 @@ class RunnerTestBase(unittest.TestCase):
         self.traps_path = self.dir / "traps.json"
         self.traps_path.write_text(json.dumps({
             "data_kind": "TRAPS", "freeze_time_utc": "2026-11-06T00:00:00Z",
-            "intent": INTENT, "traps": [T01, T02]}, indent=2))
+            "intent": INTENT, "traps": list(ALL_TRAPS)}, indent=2))
         self.traps_sha256 = hashlib.sha256(
             self.traps_path.read_bytes()).hexdigest()
         self.out = self.dir / "results" / "replay.json"
@@ -168,9 +227,11 @@ class RunnerTestBase(unittest.TestCase):
 
     def _run(self, extra=None, transport=None, **kwargs):
         transport = transport if transport is not None else FakeTransport()
+        call_kwargs = dict(balance_reader=_stub_balances,
+                           receipt_verifier=_stub_receipts)
+        call_kwargs.update(kwargs)  # callers may override either stub
         code = main(self._args(extra), today=TODAY, transport=transport,
-                    balance_reader=_stub_balances,
-                    receipt_verifier=_stub_receipts, **kwargs)
+                    **call_kwargs)
         return code, transport
 
 
@@ -181,26 +242,28 @@ class TestRunnerEndToEnd(RunnerTestBase):
     def test_freeze_buy_score_leaderboard(self):
         code, t = self._run()
         self.assertEqual(code, 0)
-        # Buys happened only via the fake transport: 4 buys x 2 POSTs
+        # Buys happened only via the fake transport: 8 buys x 2 POSTs
         # (402 challenge, then paid retry).
-        self.assertEqual(len(t.posts), 8)
+        self.assertEqual(len(t.posts), 16)
         paid = [c for c in t.posts
                 if any(k.lower() in ("x-payment", "payment-signature")
                        for k in c[2])]
-        self.assertEqual(len(paid), 4)  # one paid retry per buy
+        self.assertEqual(len(paid), 8)  # one paid retry per buy
+        # F12: the catalogue was fetched ONCE for provider resolution;
+        # each buy reuses its pre-fetched entry, no re-fetch per buy.
+        self.assertEqual(len(t.gets), 1)
         doc = json.loads(self.out.read_text())
         self.assertEqual(doc["data_kind"], "LIVE")
         self.assertEqual(doc["traps_sha256"], self.traps_sha256)
         self.assertIn("run", doc)
         self.assertTrue(doc["run"].startswith("run-"))
-        self.assertEqual(doc["total_cost_usd"], 0.04)
+        self.assertEqual(doc["total_cost_usd"], 0.08)
         rows = doc["scores"]
-        self.assertEqual(len(rows), 4)
+        self.assertEqual(len(rows), 8)
         self.assertEqual({(r["trap_id"], r["provider_id"]) for r in rows},
-                         {("t01-plain-transfer", "9002"),
-                          ("t02-plain-transfer", "9002"),
-                          ("t01-plain-transfer", "8453"),
-                          ("t02-plain-transfer", "8453")})
+                         {(trap["trap_id"], mid)
+                          for trap in ALL_TRAPS
+                          for mid in ("9002", "8453")})
         # Normalisation ran: t01 answers arrived as value_eth /
         # block_number and were scored against wei / int truth.
         t01 = [r for r in rows if r["trap_id"] == "t01-plain-transfer"]
@@ -214,9 +277,9 @@ class TestRunnerEndToEnd(RunnerTestBase):
         t02_8453 = [r for r in rows if r["trap_id"] == "t02-plain-transfer"
                     and r["provider_id"] == "8453"][0]
         self.assertFalse(t02_8453["passed"])
-        # Leaderboard re-ranks from the same rows: 9002 (2/2) first.
+        # Leaderboard re-ranks from the same rows: 9002 (4/4) first.
         board = Leaderboard()
-        by_id = {t["trap_id"]: t for t in (T01, T02)}
+        by_id = {t["trap_id"]: t for t in ALL_TRAPS}
         for r in rows:
             trap = Trap(trap_id=r["trap_id"], intent=INTENT,
                         tx_hash=r["tx_hash"],
@@ -231,8 +294,8 @@ class TestRunnerEndToEnd(RunnerTestBase):
                                    receipt_present=r["receipt_present"]))
         ranked = board.ranked()
         self.assertEqual([s.provider_id for s in ranked], ["9002", "8453"])
-        self.assertEqual(ranked[0].passed, 2)
-        self.assertEqual(ranked[1].passed, 1)
+        self.assertEqual(ranked[0].passed, 4)
+        self.assertEqual(ranked[1].passed, 3)
 
 
 class TestRunnerNoOverwrite(RunnerTestBase):
@@ -311,25 +374,28 @@ class TestRunnerAppendNoDuplicates(RunnerTestBase):
         code1, t1 = self._run(["--append"])
         self.assertEqual(code1, 0)
         doc1 = json.loads(self.out.read_text())
-        self.assertEqual(len(doc1["scores"]), 4)
+        self.assertEqual(len(doc1["scores"]), 8)
         code2, t2 = self._run(["--append"])
         self.assertEqual(code2, 0)
         doc2 = json.loads(self.out.read_text())
-        self.assertEqual(len(doc2["scores"]), 4)
+        self.assertEqual(len(doc2["scores"]), 8)
         pairs = [(r["trap_id"], r["provider_id"]) for r in doc2["scores"]]
         self.assertEqual(len(pairs), len(set(pairs)))
         self.assertEqual(len(doc2["run_ids"]), 2)
         self.assertNotEqual(doc2["run_ids"][0], doc2["run_ids"][1])
         self.assertEqual(t2.posts, [])  # nothing re-bought
-        self.assertEqual(doc2["total_cost_usd"], 0.04)
+        self.assertEqual(doc2["total_cost_usd"], 0.08)
 
     def test_append_with_different_trap_set_refused(self):
         code1, _ = self._run(["--append"])
         self.assertEqual(code1, 0)
         other = self.dir / "other-traps.json"
+        # A different but PROVENANCE-VALID trap set (one id renamed),
+        # so the refusal comes from the sha256 mismatch, not the
+        # provenance gate (exit 7, not 3).
         other.write_text(json.dumps({
             "intent": INTENT,
-            "traps": [dict(T01, trap_id="t99-other")]}))
+            "traps": [dict(T01, trap_id="t99-other"), T02, T03, T04]}))
         err = io.StringIO()
         with redirect_stderr(err):
             code = main(["--marker", str(self.marker),
@@ -342,7 +408,183 @@ class TestRunnerAppendNoDuplicates(RunnerTestBase):
                         receipt_verifier=_stub_receipts)
         self.assertEqual(code, 7)
         self.assertIn("different trap set", err.getvalue())
-        self.assertEqual(len(json.loads(self.out.read_text())["scores"]), 4)
+        self.assertEqual(len(json.loads(self.out.read_text())["scores"]), 8)
+
+
+class TestRunnerProvenanceEnforcement(RunnerTestBase):
+    """(F3) a trap set without provenance, with a pending trap, without
+    a mandatory category, or over MAX_TRAPS exits 3 before any network
+    call — the provenance gate runs before the catalogue fetch."""
+
+    def _write_traps(self, traps):
+        path = self.dir / "bad-traps.json"
+        path.write_text(json.dumps({"intent": INTENT, "traps": traps}))
+        return path
+
+    def _run_with_traps(self, traps_path):
+        err = io.StringIO()
+        t = FakeTransport()
+        with redirect_stderr(err):
+            code = main(["--marker", str(self.marker),
+                         "--traps", str(traps_path),
+                         "--providers", "9002",
+                         "--key", str(self.key),
+                         "--out", str(self.out)],
+                        today=TODAY, transport=t,
+                        balance_reader=_stub_balances,
+                        receipt_verifier=_stub_receipts)
+        return code, t, err.getvalue()
+
+    def test_provenance_less_trap_set_exits_3_before_network(self):
+        bare = [dict(t) for t in ALL_TRAPS]
+        for t in bare:
+            t.pop("provenance", None)
+        code, t, err = self._run_with_traps(self._write_traps(bare))
+        self.assertEqual(code, 3)
+        self.assertIn("provenance", err)
+        self.assertEqual(t.calls, [])
+        self.assertFalse(self.out.exists())
+
+    def test_pending_trap_exits_3_before_network(self):
+        pending = dict(T01, expected_status="pending")
+        code, t, err = self._run_with_traps(
+            self._write_traps([pending, T03, T04]))
+        self.assertEqual(code, 3)
+        self.assertIn("pending", err)
+        self.assertEqual(t.calls, [])
+
+    def test_missing_mandatory_category_exits_3_before_network(self):
+        code, t, err = self._run_with_traps(self._write_traps([T01, T02]))
+        self.assertEqual(code, 3)
+        self.assertIn("mandatory", err)
+        self.assertEqual(t.calls, [])
+
+    def test_over_max_traps_exits_3_before_network(self):
+        traps = []
+        for i in range(30):
+            traps.append(dict(
+                T03, trap_id=f"t-r{i:02d}",
+                tx_hash="0x" + f"{i:02x}" * 32,
+                provenance=dict(T03["provenance"], block=789 + i)))
+        traps.append(dict(T04, trap_id="t-u30",
+                          tx_hash="0x" + "ff" * 32))
+        self.assertEqual(len(traps), 31)
+        code, t, err = self._run_with_traps(self._write_traps(traps))
+        self.assertEqual(code, 3)
+        self.assertIn("over the cap", err)
+        self.assertEqual(t.calls, [])
+
+
+class TestRunnerReceiptVerificationPersisted(RunnerTestBase):
+    """(9 Nov 2026) receipt verification flags must survive in the
+    output file: the verifier mutates the in-memory rows, and the
+    final doc rewrite used to re-read the file from disk, silently
+    discarding every receipt_verified_onchain flag (the 8 Nov replay
+    file and the expansion files all showed zero flags despite
+    '24/24 settled' logs)."""
+
+    def test_verification_flags_persisted_in_output_file(self):
+        def verifying_verifier(rows):
+            verified = 0
+            for r in rows:
+                if r.get("receipt_present"):
+                    r["receipt_verified_onchain"] = True
+                    r["receipt_settlement_tx"] = "0x" + "ab" * 32
+                    verified += 1
+            return verified, len(rows)
+
+        code, t = self._run(receipt_verifier=verifying_verifier)
+        self.assertEqual(code, 0)
+        doc = json.loads(self.out.read_text())
+        served = [r for r in doc["scores"] if r["receipt_present"]]
+        self.assertEqual(len(served), 8)
+        for r in served:
+            self.assertTrue(r.get("receipt_verified_onchain"), r["trap_id"])
+            self.assertEqual(r.get("receipt_settlement_tx"), "0x" + "ab" * 32)
+
+
+class TestRunnerPostLoopFailures(RunnerTestBase):
+    """(F8) receipt verification / balance read failures after the buy
+    loop exit non-zero CLEANLY: rows stay saved, the error is recorded
+    in the output doc, no traceback escapes."""
+
+    def test_receipt_verifier_failure_exits_8_with_error_recorded(self):
+        def boom(rows):
+            raise RuntimeError("Sepolia RPC down")
+
+        err = io.StringIO()
+        with redirect_stderr(err):
+            code, t = self._run(receipt_verifier=boom)
+        self.assertEqual(code, 8)
+        self.assertNotIn("Traceback", err.getvalue())
+        doc = json.loads(self.out.read_text())
+        self.assertEqual(len(doc["scores"]), 8)  # rows survived
+        self.assertEqual(doc["total_cost_usd"], 0.08)
+        self.assertIn("receipt_verification_error", doc)
+        self.assertIn("Sepolia RPC down",
+                      doc["receipt_verification_error"])
+        self.assertIn("burner_balance_after_usdc", doc)  # balances ok
+
+    def test_balance_reader_failure_exits_8_with_error_recorded(self):
+        # Fail only the POST-loop read: the pre-loop read (before any
+        # buy) succeeds, the after-read fails.
+        calls = []
+
+        def boom(addr):
+            calls.append(addr)
+            if len(calls) > 1:
+                raise RuntimeError("Sepolia RPC down")
+            return 30.0, 0.05
+
+        err = io.StringIO()
+        with redirect_stderr(err):
+            code, t = self._run(balance_reader=boom)
+        self.assertEqual(code, 8)
+        self.assertNotIn("Traceback", err.getvalue())
+        doc = json.loads(self.out.read_text())
+        self.assertEqual(len(doc["scores"]), 8)
+        self.assertIn("balance_read_error", doc)
+        self.assertIn("Sepolia RPC down", doc["balance_read_error"])
+        self.assertNotIn("burner_balance_after_usdc", doc)
+        self.assertNotIn("balance_drop_usdc", doc)
+
+
+class TestRunnerSpendGuard(RunnerTestBase):
+    """(F4) the cap is charged against the live challenge amount, not
+    the assumed $0.01: a $0.02 challenge against a $0.015 remaining
+    cap is refused before any payment is attempted."""
+
+    def test_challenge_above_remaining_cap_refused_without_payment(self):
+        class PriceyTransport(FakeTransport):
+            def __call__(self, method, url, body, headers):
+                self.calls.append((method, url, dict(headers or {}), body))
+                if method == "GET" and url.endswith(f"/intents/{INTENT}/miners"):
+                    return _HttpResponse(200, _json_body({"miners": [
+                        {"id": "9002", "name": "TxLens", "cost_per_call": "0.00"},
+                        {"id": "8453", "name": "Truvian", "cost_per_call": "0.00"},
+                    ]}), {"Content-Type": "application/json"})
+                if method == "POST" and "/v1/ask/" in url:
+                    raise TransportHTTPError(402, _json_body(
+                        {"amount_usd": 0.02, "payTo": PAY_TO,
+                         "asset": ASSET, "network": "eip155:11155111"}), {})
+                raise AssertionError(f"unexpected call {method} {url}")
+
+        t = PriceyTransport()
+        code = main(self._args(["--spend-cap", "0.015"]), today=TODAY,
+                    transport=t, balance_reader=_stub_balances,
+                    receipt_verifier=_stub_receipts)
+        self.assertEqual(code, 0)
+        # No paid retry was ever attempted: the guard refused the
+        # $0.02 challenge before the signer was invoked.
+        paid = [c for c in t.posts
+                if any(k.lower() in ("x-payment", "payment-signature")
+                       for k in c[2])]
+        self.assertEqual(paid, [])
+        doc = json.loads(self.out.read_text())
+        self.assertEqual(doc["total_cost_usd"], 0)
+        self.assertTrue(all("spend cap" in (r.get("error") or "")
+                            for r in doc["scores"]))
+        self.assertEqual(len(doc["scores"]), 8)
 
 
 if __name__ == "__main__":

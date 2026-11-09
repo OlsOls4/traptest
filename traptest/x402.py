@@ -28,7 +28,7 @@ import time
 
 from eth_account import Account
 
-from .providers import USDC_BY_NETWORK
+from .providers import MAX_CALL_USD, USDC_BY_NETWORK
 
 X402_VERSION = 1
 
@@ -76,6 +76,13 @@ def make_x402_provider(private_key, validity_seconds: int = 3600):
             raise ValueError("402 challenge has no pay_to; refusing to sign")
         if amount_usd is None or float(amount_usd) <= 0:
             raise ValueError("402 challenge has no positive amount; refusing to sign")
+        if float(amount_usd) > MAX_CALL_USD:
+            # Per-call spend ceiling (F4): the signer is the last line
+            # of defence — even a caller that bypasses the client's
+            # check cannot sign more than $0.05 on one call.
+            raise ValueError(
+                f"402 challenge amount ${float(amount_usd):.2f} exceeds "
+                f"the per-call ceiling of ${MAX_CALL_USD:.2f}; refusing to sign")
         if not asset:
             raise ValueError(f"no known USDC contract for network {network!r}; refusing to sign")
         chain_id = _chain_id(network)

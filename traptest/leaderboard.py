@@ -33,10 +33,21 @@ class ProviderStats:
     passed: int = 0
     total_cost_usd: float = 0.0
     receipts: int = 0
+    fields_correct: int = 0
+    fields_scored: int = 0
 
     @property
     def pass_rate(self) -> float:
         return self.passed / self.traps_run if self.traps_run else 0.0
+
+    @property
+    def field_accuracy(self) -> float | None:
+        """Field-weighted accuracy (co-primary metric, expansion set,
+        9 Nov 2026): correct scored fields / all scored fields.
+        None when no fields were scored."""
+        if not self.fields_scored:
+            return None
+        return self.fields_correct / self.fields_scored
 
     @property
     def failed(self) -> int:
@@ -60,6 +71,10 @@ class Leaderboard:
         stats.traps_run += 1
         if score.passed:
             stats.passed += 1
+        for f in (score.fields or ()):
+            stats.fields_scored += 1
+            if f.passed:
+                stats.fields_correct += 1
         if score.cost_usd is not None:
             stats.total_cost_usd += float(score.cost_usd)
         if score.receipt_present:

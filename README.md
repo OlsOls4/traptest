@@ -1,6 +1,8 @@
 # TrapTest — live build (6 Nov 2026, corrected re-score 8 Nov 2026)
 
-**Status: LIVE RUN COMPLETE 6 Nov 2026, corrected re-score 8 Nov 2026.
+**Status: LIVE RUN COMPLETE 6 Nov 2026, corrected re-score 8 Nov 2026,
+re-run 8 Nov 2026 (24 calls, $0.24, scores stable). Repo PUBLIC
+(https://github.com/OlsOls4/traptest, commits 0fb660f3 + 02f61d4).
 Registered 27 Oct 2026 (Olly McBride, Individual, Discord ols0817, project
 TrapTest). 12 frozen traps × 5 providers = 60 scored rows, all event-period
 (1 Nov–1 Dec 2026), in `results-live/full-run-2026-11-06.json`
@@ -8,11 +10,18 @@ TrapTest). 12 frozen traps × 5 providers = 60 scored rows, all event-period
 `results-live/results-corrected-2026-11-08.json`
 (`data_kind: CORRECTED_REANALYSIS`), rendered at `docs/leaderboard/`.
 Corrected: Truvian 8453 — 4/12, TxLens 9002 — 2/12, LiveCert 4433 / Sigil
-9010 / OnChain Intel 900 — 0/12 served (unservable). Billed $0.26 total
-including $0.02 smoke tests ($0.24 in the run file + $0.02 smoke); $0.24
-settled into Telegraph escrow credit, NOT billed; wallet 30.00 → 29.50 test
-USDC. Demo video v2 (2026-11-08) in
-`docs/demo-video/traptest-demo-2026-11-08.mp4` — DONE 8 Nov 2026, 2:42 (161.6 s), 1280×720.**
+9010 / OnChain Intel 900 — 0/12 served (unservable). Billed $0.50 total
+($0.26 on 6 Nov incl. $0.02 smoke + $0.24 re-run 8 Nov); $0.24 settled
+into Telegraph escrow credit, NOT billed; wallet 30.00 → 29.26 test USDC.
+Demo video v2 (2026-11-08) PUBLIC at https://youtu.be/993JOD3JRXs —
+2:42 (161.6 s), 1280×720, audio approved by the user. Anjoman evaluation
+material ADMITTED 8 Nov 11:20–11:21 (12 preference pairs + 1 truth source);
+rollover VERIFIED 8 Nov 17:36 — all 13 rows eligible, pool 702 rows,
+5 eligible submitters. Bounties repo starred. X post 1 LIVE
+(https://x.com/OlsOls4/status/2119431200389447911); posts 2/3 scheduled
+10/12 Nov; milestone post scheduled 14 Nov 09:00. Final submission form
+still does not exist — it opens later and will be shared in Discord
+before the 1 Dec deadline.**
 
 **In 60 seconds:** TrapTest is a lie-detector for Telegraph's intelligence
 market. It buys fixed trap transaction queries — queries whose correct answer
@@ -22,17 +31,12 @@ A provider that returns a stale or wrong answer is shown failing, with its
 receipt, so builders choosing a provider can see whose answers can be
 trusted — not just who is ranked first.
 
-**Submission status:**
-- Submitted: evaluation material admitted on Anjoman 8 Nov 11:20–11:21 (12 preference pairs + 1 truth source; pool went 4 → 5 contributors, activation threshold met). Final project submission form does not exist yet — it opens later and will be shared in Discord before the 1 Dec deadline.
-- Done and ready: live run (60 rows), corrected re-score, leaderboard page,
-  how-to-run, submission pack, evaluation material for Anjoman
-  (`anjoman-material/`), demo video v2 (2026-11-08, 2:42).
-- Not yet: final submission form (does
-  not exist yet — it opens later and will be shared in Discord before the
-  1 Dec deadline); repo push state (live-build files not yet confirmed
-  pushed — open item, see submission pack).
-- Next step: apply the staged Anjoman pair fixes (t04/t06/t10) and re-submit;
-  confirm repo push state; watch Discord for the final submission form.
+**Submission status (9 Nov 2026):**
+- Submitted: evaluation material admitted on Anjoman 8 Nov 11:20–11:21 (12 preference pairs + 1 truth source; pool went 4 → 5 contributors, activation threshold met). Rollover verified 8 Nov 17:36 — all 13 rows eligible, pool 702 rows, 5 eligible submitters. Final project submission form does not exist yet — it opens later and will be shared in Discord before the 1 Dec deadline.
+- Done and ready: live run (60 rows), corrected re-score, 8 Nov re-run (24 calls, scores stable), leaderboard page, how-to-run, submission pack, evaluation material for Anjoman (`anjoman-material/`), demo video v2 PUBLIC (https://youtu.be/993JOD3JRXs, audio approved), repo public (commits 0fb660f3 + 02f61d4), bounties repo starred, X post 1 live (https://x.com/OlsOls4/status/2119431200389447911).
+- Not yet: final submission form (does not exist yet — it opens later and will be shared in Discord before the 1 Dec deadline); X posts 2/3 (scheduled 10/12 Nov); milestone post (scheduled 14 Nov 09:00).
+- Next step: apply the staged Anjoman pair fixes (t04/t06/t10) and re-submit; watch Discord for the final submission form.
+- Expansion set DONE 9 Nov 2026 (t13–t24, scoring v2, separate leaderboard section): ChainWire 1707307 — 11/12 (field 46/47); Truvian 8453 — 2/12 (field 39/49); TxLens 9002 — 2/12 (field 2/47); Verity 9001 / INTERLOCK 9007 unservable; ChainWire 7317307 / 7307 t13-pass probes only. Combined 24-trap (NOT one uniform measure): Truvian 6/24, TxLens 4/24. Expansion task spend $0.42 (cap $0.50); wallet 29.26 → 28.84 test USDC. New pairs are LOCAL ONLY — no Anjoman upload (user decision).
 
 TrapTest (Telegraph Hackathon Season II, Evaluator-led): trap queries with known
 ground truth are bought from competing transaction-intelligence providers on
@@ -49,8 +53,12 @@ testnet, scored pass/fail against the truth, and published as a live leaderboard
   from the live 402 challenge, never from the catalogue `cost_per_call` field.
 - Evidence per served call: `cost_usd`, `signal_hash`, Telegraph receipt
   (`X-TELEGRAPH-RECEIPT`).
-- Judging: /100, Technical 35 (min 24), Commercial 30, Adoption 15,
-  Integration 10, Proof 10; need 70+.
+- Judging (TRACK 03 Evaluator rubric, verified live 8 Nov 2026): /100 —
+  Measurement validity 40 (minimum 28/40 to qualify), Integrity and
+  robustness 15, Reproducibility and protocol compatibility 10, Useful
+  evaluation coverage and demonstrated improvement 10, Documentation and
+  integration clarity 5, Organic growth / education / developer activation
+  20 (5+5+5+5); need 70/100 AND pass 28/40 on Measurement validity.
 - Live results (6 Nov 2026, frozen trap set `traps-frozen-2026-11-06.json`,
   frozen 13:59 UTC; corrected re-score 8 Nov 2026 in
   `results-live/results-corrected-2026-11-08.json`): Truvian 8453 — 4/12
@@ -65,8 +73,63 @@ testnet, scored pass/fail against the truth, and published as a live leaderboard
   including $0.02 smoke tests ($0.24 in the run file + $0.02 smoke);
   $0.24 settled into Telegraph escrow credit, not billed (Sigil + OnChain
   Intel, $0.12 each — failed calls that still settled); burner 3
-  wallet 30.00 → 29.50 test USDC (drop $0.50 incl. $0.02 smoke tests).
+  wallet 30.00 → 29.26 test USDC (cumulative drop $0.74: $0.50 billed —
+  $0.26 on 6 Nov incl. $0.02 smoke + $0.24 re-run 8 Nov — plus $0.24
+  escrow credit). 8 Nov re-run (`results-live/replay-2026-11-08.json`):
+  24 calls, $0.24, scores stable (Truvian 4/12, TxLens 2/12), wallet
+  29.50 → 29.26.
   All 24 served receipts verified on-chain.
+- Expansion set (9 Nov 2026, `traps-frozen-2026-11-09.json`, frozen
+  13:07:38 UTC, SHA-256
+  `940a00400477e0aefb38afe1da20fb98cc03b187e7218da252d322fd4699b5ba`,
+  ADDITIVE — the frozen 12 are untouched): 2 traps per category,
+  t13–t24, under scoring v2 (disclosed, never retroactive): token
+  traps score the NATIVE tx value (0 wei for t13/t14, scored
+  explicitly — the frozen t03/t04 scored the Transfer-event amount,
+  which no provider returns in `value`); unknown traps carry the
+  strict-unknown rule (a `not_found` answer with any invented
+  from/to/value/block fails outright); field-weighted accuracy is a
+  co-primary metric alongside pass rate. Results (36 served rows in
+  `docs/leaderboard/results-expansion.json`, all receipts verified
+  on-chain): ChainWire 1707307 (Cross-Checked) — 11/12 (field accuracy
+  46/47; only t17 fails — reverted tx value returned 0, expected
+  607000000000000 wei); Truvian 8453 — 2/12 (t17, t18; field 39/49);
+  TxLens 9002 — 2/12 (t23, t24 only; field 2/47). Truvian's t23/t24
+  fail ONLY under the v2 rule, on its `from` source label ("Truvian
+  onchain lookup over public JSON-RPC") — a provenance string, not a
+  hallucinated sender address; reported as a schema-convention
+  artefact. Verity 9001 (HTTP 500 upstream 404) and INTERLOCK 9007
+  (HTTP 503 `no_compatible_miner`) served 0 — unservable. ChainWire
+  7317307 / 7307 each served and passed the t13 probe only (full sets
+  not run — the task's $0.50 cap allowed one full new-miner set, run
+  on 1707307); not ranked on 1 trap. Combined 24-trap numbers
+  (frozen 12 + expansion 12) are NOT one uniform measure (different
+  semantics per set): Truvian 6/24 (field 76/96), TxLens 4/24 (field
+  4/94); ChainWire ran the expansion set only. Providers diverge on
+  ≥3 traps on the expansion set (TxLens vs Truvian: 4; ChainWire vs
+  either incumbent: 9). Expansion task spend $0.42 total (hard cap
+  $0.50): $0.24 expansion run + $0.12 ChainWire 1707307 full set +
+  $0.03 probes billed + $0.03 Verity escrow credit (failed calls that
+  still settled); wallet 29.26 → 28.84 test USDC. The 7 cap-skipped
+  rows in the expansion run file (1707307 t18–t24, file-cumulative
+  cap) are excluded from scoring; the 7 bought rows are in
+  `results-live/expansion-run-1707307-rest-2026-11-09.json`. New pairs
+  are LOCAL ONLY — no Anjoman upload of the expansion set (user
+  decision). Tests: 140, all passing (`python3 -m unittest discover
+  -s tests`, 9 Nov 2026).
+- Comparator WASM: KILLED with evidence 9 Nov 2026 — see
+  `docs/comparator-wasm-kill.md` (one-integer scoring cannot express
+  multi-field strict scoring; generic fallback already scores the
+  intent; activation blocked by platform bug #171; Sireadell reg 118
+  pending since 3 Nov).
+- Ground truth re-checked 9 Nov 2026 against a SECOND public Base
+  Sepolia RPC (`https://sepolia.base.org`, not the freeze-time source):
+  22/24 txs match the frozen ground truth on every scored field —
+  see `results-live/ground-truth-recheck-2026-11-09.json`. The two
+  exceptions (t03/t04) differ on `value` only because the frozen file
+  records the Transfer-event amount (documented v1 flaw), while the
+  native tx value is 0; the second RPC's own receipts confirm the
+  frozen event amounts exactly (950000 and 2000000000000000000).
 - Payment: Direct Ask 402, $0.01/call, settlement Ethereum Sepolia
   (eip155:11155111), accepted token `0xcc194e1a843B658526D0D5C431f670028582Ae17`
   ("USD Coin") — NOT Circle faucet USDC. The token has an open mint
@@ -167,17 +230,31 @@ testnet, scored pass/fail against the truth, and published as a live leaderboard
 
 From the repo root, with your own burner funded as in
 `docs/how-to-run.md` §1 (these buy traps on testnet at $0.01 per served
-call):
+call; the per-run hard spend cap defaults to $0.30 — see
+`traptest/run.py` `DEFAULT_SPEND_CAP_USD`). Validate first without
+spending or writing anything, with the parametrised runner:
 
 ```bash
-python3 scripts/full_run.py   # 12 frozen traps × TxLens (9002) + LiveCert (4433)
-python3 scripts/mini_run.py   # 12 frozen traps × Sigil (9010) → OnChain Intel (900) → Truvian (8453)
+python3 -m traptest.run --traps traps-frozen-2026-11-06.json \
+    --providers 9002,8453 --out results-live/replay-<date>.json --dry-run
+```
+
+Then run it (same command without `--dry-run`). The historical
+6 Nov scripts replay the same shapes but now REQUIRE `--out` pointing
+at a NEW file — they refuse the frozen results file and refuse an
+`--out` that already exists (and they have no `--dry-run` flag; use
+the parametrised runner above to dry-run):
+
+```bash
+python3 scripts/full_run.py --out results-live/full-replay.json   # 12 frozen traps × TxLens (9002) + LiveCert (4433)
+python3 scripts/mini_run.py --out results-live/mini-replay.json   # 12 frozen traps × Sigil (9010) → OnChain Intel (900) → Truvian (8453)
 ```
 
 Both scripts read the FROZEN trap set (`traps-frozen-2026-11-06.json`, never
 edited), buy via Direct Ask with the x402 provider, score with
-`traptest/scoring.py`, and append to `results-live/full-run-2026-11-06.json`
-(`data_kind: LIVE`). The leaderboard renders the corrected re-score
+`traptest/scoring.py`, and write `data_kind: LIVE` rows to the NEW
+`--out` file (never to the frozen 6 Nov file). The leaderboard renders
+the corrected re-score
 (`results-live/results-corrected-2026-11-08.json`, copied to
 `docs/leaderboard/results.json`).
 

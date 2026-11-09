@@ -171,3 +171,36 @@ missing `checked_at`/`checker`. `pending` is rejected outright (see §5).
 - `tests/test_trap_catalog.py` — mock fixtures only; covers
   provenance mismatches, mandatory categories, size cap, and cost
   maths. Not event evidence.
+
+## 8. Scoring v2 — expansion set only (9 Nov 2026, t13–t24)
+
+Disclosed, never retroactive. The frozen 12 keep the semantics above
+exactly, including the token_transfer value basis (Transfer-event
+amount). The expansion set changes two things, recorded on its trap
+file (`traps-frozen-2026-11-09.json`, `scoring_semantics`):
+
+1. **Token value basis:** expansion token traps score the NATIVE tx
+   value field (raw wei), not the Transfer-event amount. A native
+   value of 0 is scored as `"0"` explicitly. Rationale: the frozen
+   t03/t04 scored the event amount, which no provider returns in
+   `value` — unwinnable in practice, so the category could not
+   discriminate. The first Transfer amount is still recorded in the
+   trap notes as unscored context.
+2. **Strict-unknown rule:** expansion unknown traps carry
+   `strict_unknown=true` (`Trap.strict_unknown`, default False). A
+   `not_found` answer carrying any invented from/to/value/block fails
+   outright, where the v1 scorer skips expected-None fields. The v1
+   path is byte-identical for traps without the flag.
+3. **Field-weighted accuracy** is published as a co-primary metric
+   alongside pass rate for the expansion set (`scoring.field_accuracy`,
+   `Leaderboard` field counts): pass rate is trap-level (all fields
+   must match), field accuracy counts every scored field.
+
+Live note (9 Nov 2026): Truvian's expansion t23/t24 fail ONLY under
+the strict-unknown rule, on its `from` field carrying its source label
+("Truvian onchain lookup over public JSON-RPC") — a provenance string,
+not a hallucinated sender address (the same label appears on frozen
+t11, which passed under v1). The rule stands as frozen; the fail is
+reported as a schema-convention artefact, not as invented data. The
+rule was NOT refined after seeing the answers — that would be tuning
+the test to the results.

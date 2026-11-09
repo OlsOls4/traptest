@@ -1,0 +1,440 @@
+{
+  "data_kind": "LIVE",
+  "run": "run-20261109T132354Z-e48a75",
+  "run_ids": [
+    "run-20261109T132354Z-e48a75"
+  ],
+  "intent": "ONCHAIN_TX_LOOKUP_GENERAL",
+  "traps_file": "traps-expansion-rest-1707307-2026-11-09.json",
+  "traps_sha256": "3afe942ea5c829786da28df75a5e8c0f2e60324f7762be42c41af6697242c4a0",
+  "freeze_time_utc": "2026-11-09T13:07:38Z",
+  "provider_ids": [
+    "1707307"
+  ],
+  "providers": {
+    "1707307": "ChainWire Cross-Checked Transaction Lookup"
+  },
+  "substitutions": [],
+  "spend_cap_usd": 0.3,
+  "total_cost_usd": 0.07,
+  "escrow_credit_usd": 0.0,
+  "burner_balance_before_usdc": 28.91,
+  "burner_eth_before": 0.05301184639784,
+  "scores": [
+    {
+      "data_kind": "LIVE",
+      "trap_id": "t18-reverted-tx",
+      "category": "reverted_tx",
+      "intent": "ONCHAIN_TX_LOOKUP_GENERAL",
+      "tx_hash": "0xd12c080abff322137722d0d0b52bd10462df67c758c919b069b4165da28c34f3",
+      "scoring_version": "v1",
+      "provider_id": "1707307",
+      "cost_usd": 0.01,
+      "signal_hash": "0x5e5cb4465575e226fe2e9fff935cd6e7f55e311632476f10d044c94688dbf1ec",
+      "receipt_present": true,
+      "receipt": "eyJyZWNlaXB0X2hhc2giOiIweDY3ZTgzMzIyOWE1MzM5MTM4YTFjMzQxZjA4NGI5NDZmYzM3N2Q0ZjczMTE4MTg2NGI3ODQwZWIwZWE0NzBhNzYiLCJyYWlsIjoieDQwMiIsInBheWVyIjoiMHgxNzBEZkE2N0QxZTM3OTE1ZDgxMzBlYUI5YkQzYjBhNEUxMTVmMEMwIiwibWluZXIiOiI1MDUxIiwiaW50ZW50IjoiT05DSEFJTl9UWF9MT09LVVBfR0VORVJBTCIsImFtb3VudF91dXNkYyI6IjEwMDAwIiwiZXBvY2hfaWQiOjIwNTAsInNldHRsZW1lbnQiOiJvbmNoYWluIiwiY2hhaW4iOiJlaXAxNTU6MTExNTUxMTEiLCJ0eF9oYXNoIjoiMHhjMjVkNGM5NDVlYTExM2I0YWQ0MzlmY2I5OTc0MzJiOWFlM2MyZGZmM2YwZWM2Mjk2NmZiODE2MDZlYzg0MTIxIiwidGltZXN0YW1wIjoxNzk0MjMwNjUyfQ==",
+      "charged": true,
+      "answer": {
+        "tx_hash": "0xd12c080abff322137722d0d0b52bd10462df67c758c919b069b4165da28c34f3",
+        "status": "reverted",
+        "from": "0xc8d7ed44b78b5f040e7cfa3dcc88d7c957fc1d11",
+        "to": "0x1dc2307cc5eba0bf4b80e16860fa56bb8de69bc2",
+        "block_number": 56538921,
+        "value_eth": 0
+      },
+      "normalised_answer": {
+        "tx_hash": "0xd12c080abff322137722d0d0b52bd10462df67c758c919b069b4165da28c34f3",
+        "status": "reverted",
+        "from": "0xc8d7ed44b78b5f040e7cfa3dcc88d7c957fc1d11",
+        "to": "0x1dc2307cc5eba0bf4b80e16860fa56bb8de69bc2",
+        "block": 56538921,
+        "value": "0"
+      },
+      "normalisation_notes": [
+        "block_number -> block",
+        "value_eth 0 ETH -> 0 wei"
+      ],
+      "passed": true,
+      "fields": [
+        {
+          "field": "status",
+          "expected": "reverted",
+          "actual": "reverted",
+          "passed": true
+        },
+        {
+          "field": "from",
+          "expected": "0xc8d7ed44b78b5f040e7cfa3dcc88d7c957fc1d11",
+          "actual": "0xc8d7ed44b78b5f040e7cfa3dcc88d7c957fc1d11",
+          "passed": true
+        },
+        {
+          "field": "to",
+          "expected": "0x1dc2307cc5eba0bf4b80e16860fa56bb8de69bc2",
+          "actual": "0x1dc2307cc5eba0bf4b80e16860fa56bb8de69bc2",
+          "passed": true
+        },
+        {
+          "field": "block",
+          "expected": "56538921",
+          "actual": "56538921",
+          "passed": true
+        }
+      ],
+      "receipt_verified_onchain": true,
+      "receipt_settlement_tx": "0xc25d4c945ea113b4ad439fcb997432b9ae3c2dff3f0ec62966fb81606ec84121"
+    },
+    {
+      "data_kind": "LIVE",
+      "trap_id": "t19-multi-recipient-tx",
+      "category": "multi_recipient_tx",
+      "intent": "ONCHAIN_TX_LOOKUP_GENERAL",
+      "tx_hash": "0xbe9c4e130e9b5cb15f80d67f0501a294f5e73cb21b35e0fcbb56bf59a71e5a7b",
+      "scoring_version": "v1",
+      "provider_id": "1707307",
+      "cost_usd": 0.01,
+      "signal_hash": "0x517810a17a31cfa5e70395b2c911b458068b2107e28114635eb6ac974aed888f",
+      "receipt_present": true,
+      "receipt": "eyJyZWNlaXB0X2hhc2giOiIweDVkYTU5YjA3ZjBjOTA0M2I3MDg5ZjIxNTdmMmY0NGM1MjI2YzAyZTMwOWU0NjE0YThkYjBhM2NkZmViMmRkM2QiLCJyYWlsIjoieDQwMiIsInBheWVyIjoiMHgxNzBEZkE2N0QxZTM3OTE1ZDgxMzBlYUI5YkQzYjBhNEUxMTVmMEMwIiwibWluZXIiOiI1MDUxIiwiaW50ZW50IjoiT05DSEFJTl9UWF9MT09LVVBfR0VORVJBTCIsImFtb3VudF91dXNkYyI6IjEwMDAwIiwiZXBvY2hfaWQiOjIwNTAsInNldHRsZW1lbnQiOiJvbmNoYWluIiwiY2hhaW4iOiJlaXAxNTU6MTExNTUxMTEiLCJ0eF9oYXNoIjoiMHgxYWU5OTEwN2EzNjQzZTcyZTAwYjkyMWRkOGQ0MTJiYjQyZGUzZjI5YzExYTE5ZDdiNTY2MjMzYzUxY2FjZjk3IiwidGltZXN0YW1wIjoxNzk0MjMwNjc1fQ==",
+      "charged": true,
+      "answer": {
+        "tx_hash": "0xbe9c4e130e9b5cb15f80d67f0501a294f5e73cb21b35e0fcbb56bf59a71e5a7b",
+        "status": "confirmed",
+        "from": "0xb01caea8c6c47bbf4f4b4c5080ca642043359c2e",
+        "to": "0xdb9b1e94b5b69df7e401ddbede43491141047db3",
+        "block_number": 56538940,
+        "value_eth": 0
+      },
+      "normalised_answer": {
+        "tx_hash": "0xbe9c4e130e9b5cb15f80d67f0501a294f5e73cb21b35e0fcbb56bf59a71e5a7b",
+        "status": "confirmed",
+        "from": "0xb01caea8c6c47bbf4f4b4c5080ca642043359c2e",
+        "to": "0xdb9b1e94b5b69df7e401ddbede43491141047db3",
+        "block": 56538940,
+        "value": "0"
+      },
+      "normalisation_notes": [
+        "block_number -> block",
+        "value_eth 0 ETH -> 0 wei"
+      ],
+      "passed": true,
+      "fields": [
+        {
+          "field": "status",
+          "expected": "confirmed",
+          "actual": "confirmed",
+          "passed": true
+        },
+        {
+          "field": "from",
+          "expected": "0xb01caea8c6c47bbf4f4b4c5080ca642043359c2e",
+          "actual": "0xb01caea8c6c47bbf4f4b4c5080ca642043359c2e",
+          "passed": true
+        },
+        {
+          "field": "to",
+          "expected": "0xdb9b1e94b5b69df7e401ddbede43491141047db3",
+          "actual": "0xdb9b1e94b5b69df7e401ddbede43491141047db3",
+          "passed": true
+        },
+        {
+          "field": "block",
+          "expected": "56538940",
+          "actual": "56538940",
+          "passed": true
+        }
+      ],
+      "receipt_verified_onchain": true,
+      "receipt_settlement_tx": "0x1ae99107a3643e72e00b921dd8d412bb42de3f29c11a19d7b566233c51cacf97"
+    },
+    {
+      "data_kind": "LIVE",
+      "trap_id": "t20-multi-recipient-tx",
+      "category": "multi_recipient_tx",
+      "intent": "ONCHAIN_TX_LOOKUP_GENERAL",
+      "tx_hash": "0x97d40bb550d8dfa767b8aa5c2113b5396e627fb0eba5bd9d8b7f6cf6222a0cad",
+      "scoring_version": "v1",
+      "provider_id": "1707307",
+      "cost_usd": 0.01,
+      "signal_hash": "0x35cb91963a5ade4c1ec1063d039eae1953d7a38d24bcee243c68ba8f6a43b056",
+      "receipt_present": true,
+      "receipt": "eyJyZWNlaXB0X2hhc2giOiIweDE5ZmFiNzBhZThmYTc0NGI5MWMyODU4OGY3ZmU4NWYzOGU1M2NkMzg3ZTc1MTA0OTA2YjAxZjkwZjM1NjYyNmQiLCJyYWlsIjoieDQwMiIsInBheWVyIjoiMHgxNzBEZkE2N0QxZTM3OTE1ZDgxMzBlYUI5YkQzYjBhNEUxMTVmMEMwIiwibWluZXIiOiI1MDUxIiwiaW50ZW50IjoiT05DSEFJTl9UWF9MT09LVVBfR0VORVJBTCIsImFtb3VudF91dXNkYyI6IjEwMDAwIiwiZXBvY2hfaWQiOjIwNTAsInNldHRsZW1lbnQiOiJvbmNoYWluIiwiY2hhaW4iOiJlaXAxNTU6MTExNTUxMTEiLCJ0eF9oYXNoIjoiMHg3Y2FjMDliNmIwMDZkNjFiZjlkZGIyNGQxZmEyZDlhOGZhOWMyMDViZTM1OTM3NjczZGIwNGI1ZmNmNGNkYjEyIiwidGltZXN0YW1wIjoxNzk0MjMwNjk2fQ==",
+      "charged": true,
+      "answer": {
+        "tx_hash": "0x97d40bb550d8dfa767b8aa5c2113b5396e627fb0eba5bd9d8b7f6cf6222a0cad",
+        "status": "confirmed",
+        "from": "0x5d7df7b73a0d67b4a11297475184dc645be56cc4",
+        "to": "0xec40494b5df080f01976b0869b73ae9b11d86cef",
+        "block_number": 56538886,
+        "value_eth": 0
+      },
+      "normalised_answer": {
+        "tx_hash": "0x97d40bb550d8dfa767b8aa5c2113b5396e627fb0eba5bd9d8b7f6cf6222a0cad",
+        "status": "confirmed",
+        "from": "0x5d7df7b73a0d67b4a11297475184dc645be56cc4",
+        "to": "0xec40494b5df080f01976b0869b73ae9b11d86cef",
+        "block": 56538886,
+        "value": "0"
+      },
+      "normalisation_notes": [
+        "block_number -> block",
+        "value_eth 0 ETH -> 0 wei"
+      ],
+      "passed": true,
+      "fields": [
+        {
+          "field": "status",
+          "expected": "confirmed",
+          "actual": "confirmed",
+          "passed": true
+        },
+        {
+          "field": "from",
+          "expected": "0x5d7df7b73a0d67b4a11297475184dc645be56cc4",
+          "actual": "0x5d7df7b73a0d67b4a11297475184dc645be56cc4",
+          "passed": true
+        },
+        {
+          "field": "to",
+          "expected": "0xec40494b5df080f01976b0869b73ae9b11d86cef",
+          "actual": "0xec40494b5df080f01976b0869b73ae9b11d86cef",
+          "passed": true
+        },
+        {
+          "field": "block",
+          "expected": "56538886",
+          "actual": "56538886",
+          "passed": true
+        }
+      ],
+      "receipt_verified_onchain": true,
+      "receipt_settlement_tx": "0x7cac09b6b006d61bf9ddb24d1fa2d9a8fa9c205be35937673db04b5fcf4cdb12"
+    },
+    {
+      "data_kind": "LIVE",
+      "trap_id": "t21-plain-transfer",
+      "category": "plain_transfer",
+      "intent": "ONCHAIN_TX_LOOKUP_GENERAL",
+      "tx_hash": "0xe6a8f1dfe8b8db282637acfda533ebbb292c9ee7217c02bc2be48c0e2aff0396",
+      "scoring_version": "v1",
+      "provider_id": "1707307",
+      "cost_usd": 0.01,
+      "signal_hash": "0x2847ee9870e287f150844d63a27edd76e5cda31459d028a8ffbedb80ea9b6431",
+      "receipt_present": true,
+      "receipt": "eyJyZWNlaXB0X2hhc2giOiIweDBkNDE2ZjkyOTU3Mjg3M2IzZDAwYjYxNzMzOTAzZWJiZDc5NDgwMzEzNmVhODdmYjkzNGY4M2Q2N2JhZTMwZmUiLCJyYWlsIjoieDQwMiIsInBheWVyIjoiMHgxNzBEZkE2N0QxZTM3OTE1ZDgxMzBlYUI5YkQzYjBhNEUxMTVmMEMwIiwibWluZXIiOiI1MDUxIiwiaW50ZW50IjoiT05DSEFJTl9UWF9MT09LVVBfR0VORVJBTCIsImFtb3VudF91dXNkYyI6IjEwMDAwIiwiZXBvY2hfaWQiOjIwNTAsInNldHRsZW1lbnQiOiJvbmNoYWluIiwiY2hhaW4iOiJlaXAxNTU6MTExNTUxMTEiLCJ0eF9oYXNoIjoiMHhmNTA2YTdhOWQ4YWRmYzc3MzY0NTNmMWI3OWM2NDI3Yjc3ZDk1OGY5MWMyZjAzMDAwZGM3MzE3ZDkwNjI1NDczIiwidGltZXN0YW1wIjoxNzk0MjMwNzExfQ==",
+      "charged": true,
+      "answer": {
+        "tx_hash": "0xe6a8f1dfe8b8db282637acfda533ebbb292c9ee7217c02bc2be48c0e2aff0396",
+        "status": "confirmed",
+        "from": "0x625119fee5bbdb7290f17a6fdd9826bc28e07329",
+        "to": "0xe5bca0fec55afb385522e9e13df1a6e9a86beae0",
+        "block_number": 56538787,
+        "value_eth": 0.1
+      },
+      "normalised_answer": {
+        "tx_hash": "0xe6a8f1dfe8b8db282637acfda533ebbb292c9ee7217c02bc2be48c0e2aff0396",
+        "status": "confirmed",
+        "from": "0x625119fee5bbdb7290f17a6fdd9826bc28e07329",
+        "to": "0xe5bca0fec55afb385522e9e13df1a6e9a86beae0",
+        "block": 56538787,
+        "value": "100000000000000000"
+      },
+      "normalisation_notes": [
+        "block_number -> block",
+        "value_eth 0.1 ETH -> 100000000000000000 wei"
+      ],
+      "passed": true,
+      "fields": [
+        {
+          "field": "status",
+          "expected": "confirmed",
+          "actual": "confirmed",
+          "passed": true
+        },
+        {
+          "field": "from",
+          "expected": "0x625119fee5bbdb7290f17a6fdd9826bc28e07329",
+          "actual": "0x625119fee5bbdb7290f17a6fdd9826bc28e07329",
+          "passed": true
+        },
+        {
+          "field": "to",
+          "expected": "0xe5bca0fec55afb385522e9e13df1a6e9a86beae0",
+          "actual": "0xe5bca0fec55afb385522e9e13df1a6e9a86beae0",
+          "passed": true
+        },
+        {
+          "field": "value",
+          "expected": "100000000000000000",
+          "actual": "100000000000000000",
+          "passed": true
+        },
+        {
+          "field": "block",
+          "expected": "56538787",
+          "actual": "56538787",
+          "passed": true
+        }
+      ],
+      "receipt_verified_onchain": true,
+      "receipt_settlement_tx": "0xf506a7a9d8adfc7736453f1b79c6427b77d958f91c2f03000dc7317d90625473"
+    },
+    {
+      "data_kind": "LIVE",
+      "trap_id": "t22-plain-transfer",
+      "category": "plain_transfer",
+      "intent": "ONCHAIN_TX_LOOKUP_GENERAL",
+      "tx_hash": "0x140df41bdc5cec83a61e26f68d901e7d3ca5dbdfa197ded24cf47091cc7ff359",
+      "scoring_version": "v1",
+      "provider_id": "1707307",
+      "cost_usd": 0.01,
+      "signal_hash": "0x20373de3a6f9ab63ab0ecaefa7303ce06704dfe8d05d66d9789c90c5de1b97d9",
+      "receipt_present": true,
+      "receipt": "eyJyZWNlaXB0X2hhc2giOiIweDdmMDYwODA5ZThiYjMwMjMzMmJiYjJjOGI2OTdhNWFmODc3ZjcyMzU4Yzg0MDQxNGYzZjA5YzVhOTUxYjYzYzIiLCJyYWlsIjoieDQwMiIsInBheWVyIjoiMHgxNzBEZkE2N0QxZTM3OTE1ZDgxMzBlYUI5YkQzYjBhNEUxMTVmMEMwIiwibWluZXIiOiI1MDUxIiwiaW50ZW50IjoiT05DSEFJTl9UWF9MT09LVVBfR0VORVJBTCIsImFtb3VudF91dXNkYyI6IjEwMDAwIiwiZXBvY2hfaWQiOjIwNTAsInNldHRsZW1lbnQiOiJvbmNoYWluIiwiY2hhaW4iOiJlaXAxNTU6MTExNTUxMTEiLCJ0eF9oYXNoIjoiMHhlMDY1N2E1M2U1NWUzNzY1MjQ3ZTQyNGJlM2EzYjg2MGVhNGNkZmVkZDY0ODI1ZjdiNDM4YzgyMzM2NTY2NGFiIiwidGltZXN0YW1wIjoxNzk0MjMwNzM2fQ==",
+      "charged": true,
+      "answer": {
+        "tx_hash": "0x140df41bdc5cec83a61e26f68d901e7d3ca5dbdfa197ded24cf47091cc7ff359",
+        "status": "confirmed",
+        "from": "0xc3af235c41376a8c07d9db5c0d06ec5cc1c52a3e",
+        "to": "0x8dd195d59154e10ce56c36a47e7db8c837212c09",
+        "block_number": 56538730,
+        "value_eth": 0.1
+      },
+      "normalised_answer": {
+        "tx_hash": "0x140df41bdc5cec83a61e26f68d901e7d3ca5dbdfa197ded24cf47091cc7ff359",
+        "status": "confirmed",
+        "from": "0xc3af235c41376a8c07d9db5c0d06ec5cc1c52a3e",
+        "to": "0x8dd195d59154e10ce56c36a47e7db8c837212c09",
+        "block": 56538730,
+        "value": "100000000000000000"
+      },
+      "normalisation_notes": [
+        "block_number -> block",
+        "value_eth 0.1 ETH -> 100000000000000000 wei"
+      ],
+      "passed": true,
+      "fields": [
+        {
+          "field": "status",
+          "expected": "confirmed",
+          "actual": "confirmed",
+          "passed": true
+        },
+        {
+          "field": "from",
+          "expected": "0xc3af235c41376a8c07d9db5c0d06ec5cc1c52a3e",
+          "actual": "0xc3af235c41376a8c07d9db5c0d06ec5cc1c52a3e",
+          "passed": true
+        },
+        {
+          "field": "to",
+          "expected": "0x8dd195d59154e10ce56c36a47e7db8c837212c09",
+          "actual": "0x8dd195d59154e10ce56c36a47e7db8c837212c09",
+          "passed": true
+        },
+        {
+          "field": "value",
+          "expected": "100000000000000000",
+          "actual": "100000000000000000",
+          "passed": true
+        },
+        {
+          "field": "block",
+          "expected": "56538730",
+          "actual": "56538730",
+          "passed": true
+        }
+      ],
+      "receipt_verified_onchain": true,
+      "receipt_settlement_tx": "0xe0657a53e55e3765247e424be3a3b860ea4cdfedd64825f7b438c823365664ab"
+    },
+    {
+      "data_kind": "LIVE",
+      "trap_id": "t23-unknown-tx",
+      "category": "unknown_tx",
+      "intent": "ONCHAIN_TX_LOOKUP_GENERAL",
+      "tx_hash": "0xb6f6693dafbdc68d96186b86f6f436bcaf78ade8d209b82446632317a3d0185a",
+      "scoring_version": "v2-strict-unknown",
+      "provider_id": "1707307",
+      "cost_usd": 0.01,
+      "signal_hash": "0xdfffb6506c4fd81eb87fbde58a782102f474896d20597304d276ff41d5d7f338",
+      "receipt_present": true,
+      "receipt": "eyJyZWNlaXB0X2hhc2giOiIweDBjZGUyOGUyNWU0YTYwMmYzMjBhYzA2Mjg2NzlmYmU1M2I0MDM1ZTI0MjBhMjU4NzgxNTE0Mzc0NWZjN2Q0ZGUiLCJyYWlsIjoieDQwMiIsInBheWVyIjoiMHgxNzBEZkE2N0QxZTM3OTE1ZDgxMzBlYUI5YkQzYjBhNEUxMTVmMEMwIiwibWluZXIiOiI1MDUxIiwiaW50ZW50IjoiT05DSEFJTl9UWF9MT09LVVBfR0VORVJBTCIsImFtb3VudF91dXNkYyI6IjEwMDAwIiwiZXBvY2hfaWQiOjIwNTAsInNldHRsZW1lbnQiOiJvbmNoYWluIiwiY2hhaW4iOiJlaXAxNTU6MTExNTUxMTEiLCJ0eF9oYXNoIjoiMHhjNWMxMWU4ZGFlMzQzY2U3MWU1OTI5MjQwOWY2YjY3YTg4MWRkNmIwMDZlODY5ZTlkYTM2M2VhMTY4YzY5MmViIiwidGltZXN0YW1wIjoxNzk0MjMwNzU1fQ==",
+      "charged": true,
+      "answer": {
+        "tx_hash": "0xb6f6693dafbdc68d96186b86f6f436bcaf78ade8d209b82446632317a3d0185a",
+        "status": "not_found",
+        "from": null,
+        "to": null,
+        "block_number": null,
+        "value_eth": null
+      },
+      "normalised_answer": {
+        "tx_hash": "0xb6f6693dafbdc68d96186b86f6f436bcaf78ade8d209b82446632317a3d0185a",
+        "status": "not_found",
+        "from": null,
+        "to": null,
+        "block_number": null,
+        "value_eth": null
+      },
+      "normalisation_notes": [],
+      "passed": true,
+      "fields": [
+        {
+          "field": "status",
+          "expected": "not_found",
+          "actual": "not_found",
+          "passed": true
+        }
+      ],
+      "receipt_verified_onchain": true,
+      "receipt_settlement_tx": "0xc5c11e8dae343ce71e59292409f6b67a881dd6b006e869e9da363ea168c692eb"
+    },
+    {
+      "data_kind": "LIVE",
+      "trap_id": "t24-unknown-tx",
+      "category": "unknown_tx",
+      "intent": "ONCHAIN_TX_LOOKUP_GENERAL",
+      "tx_hash": "0x3d371e73d60c751787cff99e973eed82f22f3346dadd01dee612fc74dd5ab25b",
+      "scoring_version": "v2-strict-unknown",
+      "provider_id": "1707307",
+      "cost_usd": 0.01,
+      "signal_hash": "0xa8cc789abce6b295541391e17ea1497ada8823be6b4c704e54cae0af217232a6",
+      "receipt_present": true,
+      "receipt": "eyJyZWNlaXB0X2hhc2giOiIweDI1N2Q3NGM2NjE4YTY0ZmExYjE2OGMwNGQ4YWMwOTE1YjIwMzg2MjU4OGRjZDg2MjY0ZTlkNzhiYzMzY2EyNjMiLCJyYWlsIjoieDQwMiIsInBheWVyIjoiMHgxNzBEZkE2N0QxZTM3OTE1ZDgxMzBlYUI5YkQzYjBhNEUxMTVmMEMwIiwibWluZXIiOiI1MDUxIiwiaW50ZW50IjoiT05DSEFJTl9UWF9MT09LVVBfR0VORVJBTCIsImFtb3VudF91dXNkYyI6IjEwMDAwIiwiZXBvY2hfaWQiOjIwNTAsInNldHRsZW1lbnQiOiJvbmNoYWluIiwiY2hhaW4iOiJlaXAxNTU6MTExNTUxMTEiLCJ0eF9oYXNoIjoiMHhiNzU0NjM2ZjE4ZWY3NzExYzExYWM2ZjkyYjlhOGRmNDdiYjNjNjFlNDIzZWJkZmIwOTk3Y2Y3MmZmMzZiM2Q3IiwidGltZXN0YW1wIjoxNzk0MjMwNzY4fQ==",
+      "charged": true,
+      "answer": {
+        "tx_hash": "0x3d371e73d60c751787cff99e973eed82f22f3346dadd01dee612fc74dd5ab25b",
+        "status": "not_found",
+        "from": null,
+        "to": null,
+        "block_number": null,
+        "value_eth": null
+      },
+      "normalised_answer": {
+        "tx_hash": "0x3d371e73d60c751787cff99e973eed82f22f3346dadd01dee612fc74dd5ab25b",
+        "status": "not_found",
+        "from": null,
+        "to": null,
+        "block_number": null,
+        "value_eth": null
+      },
+      "normalisation_notes": [],
+      "passed": true,
+      "fields": [
+        {
+          "field": "status",
+          "expected": "not_found",
+          "actual": "not_found",
+          "passed": true
+        }
+      ],
+      "receipt_verified_onchain": true,
+      "receipt_settlement_tx": "0xb754636f18ef7711c11ac6f92b9a8df47bb3c61e423ebdfb0997cf72ff36b3d7"
+    }
+  ],
+  "burner_balance_after_usdc": 28.84,
+  "burner_eth_after": 0.05301184639784,
+  "balance_drop_usdc": 0.07,
+  "receipt_verification_backfill": "Receipt verification flags backfilled 9 Nov 2026 (free Sepolia RPC reads only, no spend, no re-buy): the runner verified these receipts on-chain at run time (logs: 24/24, 5/5, 7/7, 1/1 x3) but a runner bug discarded the per-row flags before writing the file. Fixed in traptest/run.py the same day; this backfill re-ran the same verify_receipts() over the stored receipts and persisted the flags. No score, cost, or answer field was touched."
+}

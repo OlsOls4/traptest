@@ -1,0 +1,76 @@
+{
+  "data_kind": "LIVE",
+  "run": "run-20261109T132054Z-2c097c",
+  "run_ids": [
+    "run-20261109T132054Z-2c097c"
+  ],
+  "intent": "ONCHAIN_TX_LOOKUP_GENERAL",
+  "traps_file": "traps-probe-t13-2026-11-09.json",
+  "traps_sha256": "a546bed68101da123f347be384fd15a3ad3c7e8e6e665a421e764678ab4567eb",
+  "freeze_time_utc": "2026-11-09T13:07:38Z",
+  "provider_ids": [
+    "9007"
+  ],
+  "providers": {
+    "9007": "INTERLOCK On-Chain Transaction Lookup"
+  },
+  "substitutions": [],
+  "spend_cap_usd": 0.01,
+  "total_cost_usd": 0.0,
+  "escrow_credit_usd": 0.0,
+  "burner_balance_before_usdc": 28.96,
+  "burner_eth_before": 0.05301184639784,
+  "scores": [
+    {
+      "data_kind": "LIVE",
+      "trap_id": "t13-token-transfer",
+      "provider_id": "9007",
+      "passed": false,
+      "cost_usd": 0,
+      "signal_hash": null,
+      "receipt_present": false,
+      "receipt": null,
+      "charged": false,
+      "answer": null,
+      "normalised_answer": null,
+      "normalisation_notes": [],
+      "fields": [],
+      "error": "PurchaseFailedError: Ask failed (status 503): {\"error\":\"no_compatible_miner\",\"intent\":\"ONCHAIN_TX_LOOKUP_GENERAL\",\"message\":\"miner interlock-onchain-tx-lookup cannot take this request's params: /miner/onchain-tx-lookup has no field for required param(s) tx_hash, chain\",\"schema_version\":1}"
+    },
+    {
+      "data_kind": "LIVE",
+      "trap_id": "t17-reverted-tx",
+      "provider_id": "9007",
+      "passed": false,
+      "cost_usd": 0,
+      "signal_hash": null,
+      "receipt_present": false,
+      "receipt": null,
+      "charged": false,
+      "answer": null,
+      "normalised_answer": null,
+      "normalisation_notes": [],
+      "fields": [],
+      "error": "PurchaseFailedError: Ask failed (status 503): {\"error\":\"no_compatible_miner\",\"intent\":\"ONCHAIN_TX_LOOKUP_GENERAL\",\"message\":\"miner interlock-onchain-tx-lookup cannot take this request's params: /miner/onchain-tx-lookup has no field for required param(s) tx_hash, chain\",\"schema_version\":1}"
+    },
+    {
+      "data_kind": "LIVE",
+      "trap_id": "t23-unknown-tx",
+      "provider_id": "9007",
+      "passed": false,
+      "cost_usd": 0,
+      "signal_hash": null,
+      "receipt_present": false,
+      "receipt": null,
+      "charged": false,
+      "answer": null,
+      "normalised_answer": null,
+      "normalisation_notes": [],
+      "fields": [],
+      "error": "PurchaseFailedError: Ask failed (status 503): {\"error\":\"no_compatible_miner\",\"intent\":\"ONCHAIN_TX_LOOKUP_GENERAL\",\"message\":\"miner interlock-onchain-tx-lookup cannot take this request's params: /miner/onchain-tx-lookup has no field for required param(s) tx_hash, chain\",\"schema_version\":1}"
+    }
+  ],
+  "burner_balance_after_usdc": 28.96,
+  "burner_eth_after": 0.05301184639784,
+  "balance_drop_usdc": 0.0
+}

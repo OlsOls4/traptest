@@ -18,6 +18,7 @@
   details { margin: .75rem 0; border: 1px solid #ddd; border-radius: 8px; padding: .5rem 1rem; }
   summary { cursor: pointer; font-weight: 600; }
   .muted { color: #555; }
+  .stamp { background: #f3f4f6; border-left: 4px solid #1d4ed8; padding: .5rem .75rem; font-weight: 600; }
   .verdict { border: 2px solid #1d4ed8; border-radius: 8px; padding: 1rem; margin: 1rem 0; background: #eff6ff; }
   .livebox { border: 2px dashed #888; border-radius: 8px; padding: 1rem; margin: 1rem 0; background: #fafafa; }
   code { background: #f3f4f6; padding: .1rem .3rem; border-radius: 4px; }
@@ -48,10 +49,10 @@ pass or fail, with receipts. It matters because a wrong answer sold as intellige
 money and trust, and three of the five providers could not serve a single trap.</p>
 <p class="muted">Links:
 <a href="https://github.com/OlsOls4/traptest">repo</a> &middot;
-<a href="../how-to-run.md">how-to-run</a> &middot;
-<a href="../demo-video/traptest-demo-2026-11-08.mp4">demo video v2 (2026-11-08, 2:42)</a> &middot;
-<a href="../../traps-frozen-2026-11-06.json">frozen trap file</a> &middot;
-<a href="https://anjoman.ai/dashboard/eval">submit evaluation material (anjoman.ai/dashboard/eval)</a>
+<a href="https://github.com/OlsOls4/traptest/blob/main/docs/how-to-run.md">how-to-run</a> &middot;
+<a href="https://youtu.be/993JOD3JRXs">demo video v2 (2026-11-08, 2:42, YouTube)</a> &middot;
+<a href="../../traps-frozen-2026-11-06.json">frozen trap file</a> (SHA-256 <code id="traps-sha">loading&hellip;</code>) &middot;
+<a href="https://anjoman.ai/dashboard/eval">Anjoman eval pool: 702 eligible rows, 5 submitters</a>
 </p>
 <p class="muted">Intent: <code>ONCHAIN_TX_LOOKUP_GENERAL</code> &middot; n=12 traps per provider &middot;
 Ranking: pass rate, then traps run, then lower total testnet cost, then provider id — the same
@@ -66,7 +67,7 @@ provider field is a failure, never a pass (<code>traptest/scoring.py</code>).</p
       <strong>TxLens (9002) 2nd — 2/12</strong> (t11, t12 only); field accuracy 2/47.
       Truvian 4/12 vs TxLens 2/12 differ by two traps — treat a small margin as evidence, not a
       proven gap.</li>
-    <li><strong>Unservable — not a 0% pass rate:</strong> LiveCert (4433) served 0/12
+    <li><strong>Unservable — no pass rate:</strong> LiveCert (4433) served 0/12
       (HTTP 503 <code>no_compatible_miner</code> on all 12); Sigil (9010) served 0/12
       (HTTP 500, upstream 404); OnChain Intel (900) served 0/12 (HTTP 500, upstream 400,
       "Could not determine a supported chain"). No pass rate is computed for a provider that
@@ -84,11 +85,15 @@ provider field is a failure, never a pass (<code>traptest/scoring.py</code>).</p
 <div class="livebox">
   <strong>Reproduce this run yourself (no live in-page loop)</strong>
   <p>This page does not buy answers in the browser. To re-run the scored run, fund your own
-  burner wallet as in <a href="../how-to-run.md">how-to-run.md §1</a> (funding steps), then run
+  burner wallet as in <a href="https://github.com/OlsOls4/traptest/blob/main/docs/how-to-run.md">how-to-run.md §1</a> (funding steps), then run
   these two commands from the repo root — each buys traps via Direct Ask on testnet at $0.01
   per served call, so only run them if you accept that testnet spend:</p>
   <pre><code>python3 scripts/full_run.py   # 12 frozen traps × TxLens (9002) + LiveCert (4433)
 python3 scripts/mini_run.py   # 12 frozen traps × Sigil (9010) → OnChain Intel (900) → Truvian (8453)</code></pre>
+  <p>One-command dry-run replay (validates traps, key, providers and output path; spends
+  nothing, writes nothing — build the 1-trap replay file and fund a burner first, see
+  <a href="https://github.com/OlsOls4/traptest/blob/main/docs/how-to-run.md">how-to-run.md §4</a>):</p>
+  <pre><code>python3 -m traptest.run --traps traps-replay-2026-11-08.json --providers 9002,8453 --key .burner-replay.key --out results-live/replay-2026-11-08.json --dry-run</code></pre>
   <p class="muted">Prefer to spend nothing? Inspect the pre-run evidence instead: this page renders the
   frozen 6 Nov run with every receipt and settlement link, and
   <code>results-live/results-corrected-2026-11-08.json</code> holds the full corrected re-score.
@@ -99,11 +104,32 @@ python3 scripts/mini_run.py   # 12 frozen traps × Sigil (9010) → OnChain Inte
 <p class="muted">Data source: <span id="source">results.json (same folder)</span> &middot; <label>Load a different results file: <input type="file" id="file-input" accept=".json,application/json"></label></p>
 
 <h2>Ranked providers — corrected (8 Nov 2026)</h2>
+<p class="stamp" id="frozen-stamp"><strong>Run 6 Nov 2026 &middot; re-scored 8 Nov &middot; frozen snapshot, not live-updating.</strong></p>
 <div class="tablewrap"><table id="ranked">
-  <thead><tr><th>Rank</th><th>Provider</th><th>Pass rate</th><th>Passed / run</th><th>Field accuracy</th><th>Total testnet cost (USD)</th><th>Receipts</th></tr></thead>
+  <thead><tr><th>Rank</th><th>Provider</th><th>Pass rate</th><th>Passed / run</th><th>Field accuracy</th><th>Field-acc. rank</th><th>Total testnet cost (USD)</th><th>Receipts</th></tr></thead>
   <tbody></tbody>
 </table></div>
+<p id="frozen-sensitivity" class="muted"></p>
 <p id="unranked" class="muted"></p>
+
+<h2>Unservable — no pass rate</h2>
+<div class="tablewrap"><table id="unservable-table">
+  <thead><tr><th>Provider</th><th>Traps served</th><th>Error on every call</th><th>Settled into escrow credit (USD)</th><th>Receipts</th></tr></thead>
+  <tbody></tbody>
+</table></div>
+<p class="muted">These providers served nothing, so no pass rate exists for them — they are never
+ranked and never shown with a percentage. Failed calls can still settle: $0.01 per
+Sigil/OnChain Intel call went on-chain into Telegraph escrow credit (not billed), $0.12 per
+provider; LiveCert's HTTP 503s settled nothing.</p>
+
+<h2>Comparison matrix — which traps each served provider passed</h2>
+<p class="muted">12 traps &times; 2 served providers. Truvian and TxLens agree on 10 traps and diverge on
+t07 and t08 (both reverted-tx traps: Truvian PASS, TxLens FAIL). Unservable providers served
+no trap, so they have no column here.</p>
+<div class="tablewrap"><table id="matrix">
+  <thead></thead>
+  <tbody></tbody>
+</table></div>
 
 <h2>Strict original (6 Nov 2026 run, as scored then — preserved verbatim)</h2>
 <div class="tablewrap"><table id="strict">
@@ -123,6 +149,73 @@ field accuracy 36/47 → 37/47). Never present corrected numbers as the original
 excluded): 0 passes for every provider in that view. The frozen traps were not edited; this view
 is shown alongside the corrected table, not instead of it, and it changes no pass count.</p>
 
+<h2>Expansion set t13–t24 (9 Nov 2026) — a separate measure, not a re-score</h2>
+<p class="muted">Data source: <code>results-expansion.json</code> in this folder (36 served rows:
+12 traps &times; TxLens 9002 + Truvian 8453 + ChainWire 1707307), built by
+<code>scripts/build_expansion_leaderboard.py</code> from the single clean run file
+<code>results-live/expansion-clean-run-2026-11-09.json</code> (run
+<code>run-20261109T162426Z-56816b</code>) — one uninterrupted 12-trap run per provider, not
+stitched. Frozen-set numbers above are untouched. <span id="exp-load-error"></span></p>
+<p class="muted">Superseded headline source (one line): the earlier ChainWire 11/12 was stitched
+across two runs (<code>expansion-run-2026-11-09.json</code> +
+<code>expansion-run-1707307-rest-2026-11-09.json</code>); those files stay on disk unchanged
+as the superseded record, and the clean run above replaces them as the headline.</p>
+<div class="verdict" id="exp-verdict">
+  <strong>Verdict (expansion set, 9 Nov 2026 — n=12 traps per provider, scoring v2)</strong>
+  <ul id="exp-verdict-list"><li>Loading expansion results&hellip;</li></ul>
+</div>
+<div class="tablewrap"><table id="ranked-exp">
+  <thead><tr><th>Rank</th><th>Provider</th><th>Pass rate</th><th>Passed / run</th><th>Field accuracy</th><th>Field-acc. rank</th><th>Total testnet cost (USD)</th><th>Receipts</th></tr></thead>
+  <tbody><tr><td colspan="8">Loading&hellip;</td></tr>
+</table></div>
+<p id="unranked-exp" class="muted"></p>
+<h3>Unservable (expansion probes) — no pass rate</h3>
+<div class="tablewrap"><table id="unservable-exp-table">
+  <thead><tr><th>Provider</th><th>Traps served</th><th>Error on probe</th><th>Settled into escrow credit (USD)</th><th>Receipts</th></tr></thead>
+  <tbody><tr><td colspan="5">Loading&hellip;</td></tr>
+</table></div>
+<p class="muted" id="probed-only"></p>
+<h3>Comparison matrix — expansion set (12 traps &times; 3 served providers)</h3>
+<p class="muted">ChainWire 1707307 diverges from Truvian on 11 traps and from TxLens on 9;
+TxLens and Truvian diverge on 4 (t17/t18 reverted: Truvian PASS, TxLens FAIL; t23/t24 unknown: TxLens PASS,
+Truvian FAIL under the v2 strict-unknown rule — see the source-label note below).</p>
+<div class="tablewrap"><table id="matrix-exp">
+  <thead></thead>
+  <tbody></tbody>
+</table></div>
+<h3>Sensitivity — pass rate with the status field excluded (does the ranking change?)</h3>
+<p class="muted">Truvian returns no <code>status</code> at all on confirmed transactions, so its
+2/12 binary pass rate understates it. This view passes a trap iff every non-status field
+passes — identical to inferring its missing status as confirmed from its correct
+block/from/to/value. Field accuracy is the ranked co-primary alongside pass rate in both
+ranked tables above (see the Field-acc. rank column).</p>
+<p class="muted" id="sensitivity-answer"></p>
+<div class="tablewrap"><table id="sensitivity-exp">
+  <thead><tr><th>Provider</th><th>Strict pass</th><th>Status-excluded pass</th><th>Field acc. excl. status</th><th>Fails only on status</th><th>Strict rank</th><th>Status-excl. rank</th></tr></thead>
+  <tbody><tr><td colspan="7">Loading&hellip;</td></tr>
+</table></div>
+<p class="muted">Combined 24-trap counts (frozen 12 + expansion 12) are NOT rendered on this page:
+the two sets use different scoring semantics (frozen: token value = Transfer-event amount;
+expansion: token value = native tx value, plus the strict-unknown rule), so a combined
+number is not one uniform measure. The counts live only in
+<code>results-expansion.json</code> (<code>combined_24_trap</code>) as data, never as a
+headline. ChainWire 1707307 ran the expansion set only and has no combined number.</p>
+<h3>Scoring-v2 disclosure (expansion set only)</h3>
+<p class="muted">Token traps t13/t14 score the <strong>native tx value</strong> (0 wei, scored
+explicitly) — the frozen t03/t04 scored the Transfer-event amount, which no provider returns
+in <code>value</code>. Unknown traps carry the <strong>strict-unknown rule</strong>: a
+<code>not_found</code> answer with any invented from/to/value/block fails outright. Truvian's
+t23/t24 fail <em>only</em> under that rule, and only because its <code>from</code> field carries
+its source label &ldquo;Truvian onchain lookup over public JSON-RPC&rdquo; — a provenance string,
+not a hallucinated sender address (the same label appears on frozen t11, which passed under
+v1). The rule stands as frozen; the fail is a schema-convention artefact, not invented data.
+Contract-interaction value and multi-recipient recipient lists remain unscored, as stated on
+each trap. Field-weighted accuracy is a co-primary metric alongside pass rate for this set.
+Expansion trap file: <a href="../../traps-frozen-2026-11-09.json">traps-frozen-2026-11-09.json</a>
+(SHA-256 <code id="exp-traps-sha">loading&hellip;</code>).</p>
+<h3>Per-trap detail — expansion set</h3>
+<div id="detail-exp"></div>
+
 <h2>Per-trap detail (every scored answer, pass and fail — corrected scoring)</h2>
 <div id="detail"></div>
 
@@ -140,8 +233,9 @@ Telegraph escrow credit (not billed).</p>
 <p class="muted">How to open: serve this folder locally — <code>python3 -m http.server</code> from <code>docs/leaderboard/</code> — then open <code>http://localhost:8000/</code>. Opening the file directly (<code>file://</code>) blocks the <code>results.json</code> fetch in most browsers; use the file picker above instead. No hosting, account, or paid service is involved.</p>
 
 <script>
-var NAMES = {"8453": "Truvian", "9002": "TxLens", "4433": "LiveCert", "9010": "Sigil", "900": "OnChain Intel"};
+var NAMES = {"8453": "Truvian", "9002": "TxLens", "4433": "LiveCert", "9010": "Sigil", "900": "OnChain Intel", "1707307": "ChainWire (Cross-Checked)", "7317307": "ChainWire (Canonical)", "7307": "ChainWire", "9001": "Verity", "9007": "INTERLOCK"};
 var EXPLORER = "https://sepolia.etherscan.io/tx/";
+var BASE_SEPOLIA = "https://sepolia.basescan.org/tx/";
 function esc(s) {
   return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
     return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
@@ -155,12 +249,24 @@ function receiptHash(row) {
     return decoded.receipt_hash || null;
   } catch (e) { return null; }
 }
+function receiptTx(row) {
+  // Prefer the recorded settlement tx; fall back to the tx_hash inside the
+  // base64 receipt (Truvian rows record no receipt_settlement_tx, but every
+  // served receipt carries its settlement tx_hash).
+  if (row.receipt_settlement_tx) return row.receipt_settlement_tx;
+  if (!row.receipt) return null;
+  try {
+    var decoded = JSON.parse(atob(row.receipt));
+    return decoded.tx_hash || null;
+  } catch (e) { return null; }
+}
 function receiptCell(row) {
   if (!row.receipt_present) return "n/a (not served)";
   var h = receiptHash(row);
   var shown = h ? esc(h.slice(0, 18)) + "&hellip;" : esc(String(row.receipt).slice(0, 18)) + "&hellip;";
-  var link = row.receipt_settlement_tx ?
-    " <a href=\"" + EXPLORER + esc(row.receipt_settlement_tx) + "\">settlement tx</a>" :
+  var tx = receiptTx(row);
+  var link = tx ?
+    " <a href=\"" + EXPLORER + esc(tx) + "\">settlement tx</a>" :
     " <span class='muted'>(no settlement tx recorded in results file)</span>";
   return "<code title=\"" + esc(h || row.receipt) + "\">" + shown + "</code>" + link;
 }
@@ -177,15 +283,29 @@ function render(data) {
   var fieldAcc = isCorrected ? data.corrected.field_accuracy : null;
   function isPassed(s) { return isCorrected ? !!s.corrected_passed : !!s.passed; }
   function isServed(s) { return s.served === true || !!s.receipt_present; }
+  // Trap tx hashes are provider-independent ground truth, but only served
+  // rows carry tx_hash in this file — build the lookup from them so every
+  // row (including unserved ones) can link its trap tx.
+  var trapTxById = {};
+  scores.forEach(function (s) { if (s.tx_hash) trapTxById[s.trap_id] = s.tx_hash; });
+  // Frozen trap-file SHA, rendered from the data file.
+  var shaEl = document.getElementById("traps-sha");
+  if (shaEl) shaEl.textContent = data.traps_sha256 || "not recorded in this file";
+  // Unservable providers are determined BEFORE ranking and are never ranked:
+  // a provider that served zero traps gets no pass rate at all
+  // (mirrors traptest/leaderboard.py ranked(), which excludes them).
+  var unservable = isCorrected ? (data.corrected.unservable || []) : (data.unranked_providers || []).map(function (u) { return u.provider_id; });
   var stats = {};
   scores.forEach(function (s) {
-    var st = stats[s.provider_id] || (stats[s.provider_id] = {provider_id: s.provider_id, run: 0, passed: 0, cost: 0, receipts: 0});
+    var st = stats[s.provider_id] || (stats[s.provider_id] = {provider_id: s.provider_id, run: 0, passed: 0, served: 0, cost: 0, escrow: 0, receipts: 0});
     st.run += 1;
     if (isPassed(s)) st.passed += 1;
+    if (isServed(s)) st.served += 1;
     if (s.cost_usd != null) st.cost += Number(s.cost_usd);
+    if (s.escrow_credit_usd != null) st.escrow += Number(s.escrow_credit_usd);
     if (s.receipt_present) st.receipts += 1;
   });
-  var ranked = Object.keys(stats).map(function (k) { return stats[k]; }).filter(function (s) { return s.run > 0; });
+  var ranked = Object.keys(stats).map(function (k) { return stats[k]; }).filter(function (s) { return s.served > 0 && unservable.indexOf(s.provider_id) === -1; });
   ranked.sort(function (a, b) {
     var ra = a.passed / a.run, rb = b.passed / b.run;
     if (rb !== ra) return rb - ra;
@@ -193,6 +313,16 @@ function render(data) {
     if (a.cost !== b.cost) return a.cost - b.cost;
     return a.provider_id < b.provider_id ? -1 : 1;
   });
+  // Field accuracy is a ranked co-primary: competition rank ("1224",
+  // ties share a rank) by field accuracy, alongside the pass-rate rank.
+  function fieldAccRank(id) {
+    if (!fieldAcc || !fieldAcc[id] || fieldAcc[id].accuracy == null) return "—";
+    var better = 0;
+    Object.keys(fieldAcc).forEach(function (other) {
+      if (fieldAcc[other].accuracy != null && fieldAcc[other].accuracy > fieldAcc[id].accuracy) better += 1;
+    });
+    return String(better + 1);
+  }
   var tbody = document.querySelector("#ranked tbody");
   tbody.innerHTML = ranked.map(function (s, i) {
     var fa = fieldAcc && fieldAcc[s.provider_id] ?
@@ -201,13 +331,53 @@ function render(data) {
     var receiptLabel = served === 0 ? "n/a (not served)" : s.receipts + " / " + served;
     return "<tr><td>" + (i + 1) + "</td><td>" + providerLabel(s.provider_id) + "</td><td>" +
       (100 * s.passed / s.run).toFixed(0) + "%</td><td>" + s.passed + " / " + s.run + "</td><td>" +
-      esc(fa) + "</td><td>" + s.cost.toFixed(4) + "</td><td>" + receiptLabel + "</td></tr>";
-  }).join("") || "<tr><td colspan='7'>No scored traps yet.</td></tr>";
-  var unservable = isCorrected ? (data.corrected.unservable || []) : (data.unranked_providers || []).map(function (u) { return u.provider_id; });
+      esc(fa) + "</td><td>" + fieldAccRank(s.provider_id) + "</td><td>" + s.cost.toFixed(4) + "</td><td>" + receiptLabel + "</td></tr>";
+  }).join("") || "<tr><td colspan='8'>No scored traps yet.</td></tr>";
+  // Frozen-set sensitivity: pass rate with the status field excluded,
+  // computed from the corrected per-field scores above.
+  var frozenSens = document.getElementById("frozen-sensitivity");
+  if (frozenSens) {
+    frozenSens.textContent = "Sensitivity (frozen set, status excluded — a trap passes iff " +
+      "every non-status field passes): " + ranked.map(function (s) {
+        var excl = scores.filter(function (x) {
+          return x.provider_id === s.provider_id && isServed(x) &&
+            (x.fields || []).filter(function (f) { return f.field !== "status"; })
+              .every(function (f) { return f.passed; });
+        }).length;
+        return (NAMES[s.provider_id] || s.provider_id) + " " + s.passed + "/" + s.run +
+          " \u2192 " + excl + "/" + s.run;
+      }).join("; ") + ". Order unchanged; the margin widens.";
+  }
   var reasons = {"4433": "HTTP 503 no_compatible_miner", "9010": "HTTP 500 upstream 404", "900": "HTTP 500 upstream 400 \u201cCould not determine a supported chain\u201d"};
   document.getElementById("unranked").textContent = unservable.length ?
     "Unservable (zero served traps — never shown as passing, and no pass rate is computed for them): " +
     unservable.map(function (id) { return (NAMES[id] || id) + " (" + id + ") — " + (reasons[id] || ""); }).join("; ") : "";
+  // Unservable tier: its own table, with NO pass-rate column at all.
+  var unBody = document.querySelector("#unservable-table tbody");
+  unBody.innerHTML = unservable.map(function (id) {
+    var st = stats[id] || {run: 0, served: 0, escrow: 0};
+    return "<tr><td>" + providerLabel(id) + "</td><td>" + st.served + " / " + st.run + "</td><td>" +
+      esc(reasons[id] || "") + "</td><td>" + st.escrow.toFixed(2) + "</td><td>n/a (not served)</td></tr>";
+  }).join("") || "<tr><td colspan='5'>No unservable providers in this file.</td></tr>";
+  // Comparison matrix: 12 traps x served providers, PASS/FAIL per cell.
+  var trapIds = [];
+  scores.forEach(function (s) { if (trapIds.indexOf(s.trap_id) === -1) trapIds.push(s.trap_id); });
+  trapIds.sort();
+  document.querySelector("#matrix thead").innerHTML = "<tr><th>Trap</th><th>Category</th>" +
+    ranked.map(function (s) { return "<th>" + providerLabel(s.provider_id) + "</th>"; }).join("") + "</tr>";
+  document.querySelector("#matrix tbody").innerHTML = trapIds.map(function (tid) {
+    var cat = "";
+    var cells = ranked.map(function (s) {
+      var row = null;
+      scores.forEach(function (x) { if (x.provider_id === s.provider_id && x.trap_id === tid) row = x; });
+      if (!row) return "<td>&mdash;</td>";
+      if (!cat) cat = row.category || tid.slice(4).replace(/-/g, "_");
+      if (!isServed(row)) return "<td>&mdash;</td>";
+      var p = isPassed(row);
+      return "<td class='" + (p ? "pass" : "fail") + "'>" + (p ? "PASS" : "FAIL") + "</td>";
+    }).join("");
+    return "<tr><td>" + esc(tid) + "</td><td>" + esc(cat) + "</td>" + cells + "</tr>";
+  }).join("");
   // Strict original table (verbatim from the file when present).
   var strictBody = document.querySelector("#strict tbody");
   if (isCorrected && data.strict_original && data.strict_original.table) {
@@ -230,7 +400,10 @@ function render(data) {
     veBody.innerHTML = "<tr><td colspan='3'>Value-excluded view not included in this file.</td></tr>";
   }
   var detail = document.getElementById("detail");
-  detail.innerHTML = ranked.map(function (s) {
+  // Per-trap detail covers EVERY provider: ranked first, then the unservable
+  // tier (their rows carry the returned error and the escrow settlement).
+  var detailOrder = ranked.concat(unservable.map(function (id) { return stats[id]; }).filter(function (s) { return !!s; }));
+  detail.innerHTML = detailOrder.map(function (s) {
     var rows = scores.filter(function (x) { return x.provider_id === s.provider_id; }).map(function (x) {
       var passed = isPassed(x);
       var fields = (x.fields || []).map(function (f) {
@@ -243,14 +416,183 @@ function render(data) {
         "<p class='muted'>No fields scored — this trap was not served.</p>";
       var err = x.error ? "<p><strong>Error returned:</strong></p><pre>" + esc(x.error) + "</pre>" : "";
       var note = (isCorrected && x.correction_note) ? "<p class='muted'>Correction: " + esc(x.correction_note) + "</p>" : "";
-      return "<details><summary>" + esc(x.trap_id) + " — <span class='" + (passed ? "pass" : "fail") + "'>" +
-        (passed ? "PASS" : "FAIL") + "</span> · cost " + (x.cost_usd == null ? "n/a" : Number(x.cost_usd).toFixed(4)) +
-        " USD · receipt " + receiptCell(x) +
+      // Category: unserved rows carry none in the file, so derive it from
+      // the trap id (t01-plain-transfer -> plain_transfer).
+      var cat = x.category || x.trap_id.slice(4).replace(/-/g, "_");
+      var costText = x.cost_usd == null ? "n/a" : Number(x.cost_usd).toFixed(4) + " USD";
+      if (x.escrow_credit_usd != null && Number(x.escrow_credit_usd) > 0)
+        costText += " · $" + Number(x.escrow_credit_usd).toFixed(2) + " settled into escrow credit";
+      var trapTxHash = x.tx_hash || trapTxById[x.trap_id];
+      var trapTx = trapTxHash ?
+        " · trap tx <a href=\"" + BASE_SEPOLIA + esc(trapTxHash) + "\">" + esc(trapTxHash.slice(0, 10)) + "&hellip;</a>" : "";
+      return "<details><summary>" + esc(x.trap_id) + " (" + esc(cat) + ") — <span class='" + (passed ? "pass" : "fail") + "'>" +
+        (passed ? "PASS" : "FAIL") + "</span> · cost " + costText +
+        " · receipt " + receiptCell(x) + trapTx +
         (x.signal_hash ? " · signal " + esc(x.signal_hash) : "") + "</summary>" + body + err + note + "</details>";
     }).join("");
     return "<h3>" + providerLabel(s.provider_id) + "</h3>" + rows;
   }).join("");
 }
+/* ---- Expansion set (t13-t24, 9 Nov 2026) — rendered from
+   results-expansion.json as a SEPARATE section. It reuses esc(),
+   providerLabel() and receiptCell() above, but has its own tables:
+   the frozen-set render above is untouched. ---- */
+function renderExpansion(data) {
+  if (!data || data.data_kind !== "LIVE") {
+    document.getElementById("exp-load-error").textContent =
+      "Expansion file is not labelled LIVE — refusing to render it.";
+    return;
+  }
+  var scores = data.scores || [];
+  var shaEl = document.getElementById("exp-traps-sha");
+  if (shaEl) shaEl.textContent = data.traps_sha256 || "not recorded in this file";
+  function isServed(s) { return s.served === true || !!s.receipt_present; }
+  var stats = {};
+  scores.forEach(function (s) {
+    var st = stats[s.provider_id] || (stats[s.provider_id] = {provider_id: s.provider_id, run: 0, passed: 0, served: 0, cost: 0, receipts: 0, fc: 0, fs: 0});
+    st.run += 1;
+    if (s.passed) st.passed += 1;
+    if (isServed(s)) st.served += 1;
+    if (s.cost_usd != null) st.cost += Number(s.cost_usd);
+    if (s.receipt_present) st.receipts += 1;
+    (s.fields || []).forEach(function (f) { st.fs += 1; if (f.passed) st.fc += 1; });
+  });
+  var ranked = Object.keys(stats).map(function (k) { return stats[k]; }).filter(function (s) { return s.served > 0; });
+  ranked.sort(function (a, b) {
+    var ra = a.passed / a.run, rb = b.passed / b.run;
+    if (rb !== ra) return rb - ra;
+    if (b.run !== a.run) return b.run - a.run;
+    if (a.cost !== b.cost) return a.cost - b.cost;
+    return a.provider_id < b.provider_id ? -1 : 1;
+  });
+  // Field accuracy is a ranked co-primary: competition rank ("1224")
+  // by field accuracy from the data file, alongside the pass-rate rank.
+  var expFa = data.field_accuracy || {};
+  function expFieldAccRank(id) {
+    if (!expFa[id] || expFa[id].accuracy == null) return "—";
+    var better = 0;
+    Object.keys(expFa).forEach(function (other) {
+      if (expFa[other].accuracy != null && expFa[other].accuracy > expFa[id].accuracy) better += 1;
+    });
+    return String(better + 1);
+  }
+  document.querySelector("#ranked-exp tbody").innerHTML = ranked.map(function (s, i) {
+    return "<tr><td>" + (i + 1) + "</td><td>" + providerLabel(s.provider_id) + "</td><td>" +
+      (100 * s.passed / s.run).toFixed(0) + "%</td><td>" + s.passed + " / " + s.run + "</td><td>" +
+      s.fc + "/" + s.fs + "</td><td>" + expFieldAccRank(s.provider_id) + "</td><td>" + s.cost.toFixed(4) + "</td><td>" + s.receipts + " / " + s.served + "</td></tr>";
+  }).join("") || "<tr><td colspan='8'>No scored traps yet.</td></tr>";
+  var verdict = document.getElementById("exp-verdict-list");
+  if (verdict) {
+    var spend = data.spend_usd || {};
+    verdict.innerHTML = ranked.map(function (s) {
+      return "<li><strong>" + providerLabel(s.provider_id) + " — " + s.passed + "/" + s.run +
+        "</strong> (field accuracy " + s.fc + "/" + s.fs + ", field-accuracy rank " +
+        expFieldAccRank(s.provider_id) + ")</li>";
+    }).join("") +
+    "<li><strong>New serving provider:</strong> ChainWire 1707307 (Cross-Checked) 11/12 — " +
+    "the only fail is t17 (reverted with value: returned value 0, expected 607000000000000 wei). " +
+    "It passes both token traps the incumbents fail, and both unknown traps cleanly under v2.</li>" +
+    "<li><strong>Source:</strong> clean single-file run <code>" + esc((data.run_ids || [""])[0]) +
+    "</code> (" + esc(data.source_file || "") + ") — one uninterrupted 12-trap run per " +
+    "provider, 36/36 receipts verified on-chain at write time. It supersedes the stitched " +
+    "two-file run " + esc((data.superseded_run_ids || []).join(" + ")) + " (see note above).</li>" +
+    "<li><strong>Cost (clean re-run):</strong> $" + Number(spend.clean_run_billed || 0).toFixed(2) +
+    " billed ($0.12 per provider, cap $" + Number(spend.clean_run_spend_cap || 0).toFixed(2) +
+    "); wallet " + Number(spend.wallet_before_usdc || 0).toFixed(2) + " &rarr; " +
+    Number(spend.wallet_after_usdc || 0).toFixed(2) + " test USDC (drop $" +
+    Number(spend.balance_drop_usdc || 0).toFixed(2) + ", reconciles exactly).</li>" +
+    "<li><strong>Read Truvian honestly:</strong> 2/12 binary understates it — field accuracy " +
+    (expFa["8453"] ? expFa["8453"].correct + "/" + expFa["8453"].scored + " (" +
+      (100 * expFa["8453"].accuracy).toFixed(1) + "%)" : "—") +
+    ", and " + (data.sensitivity_status_excluded && data.sensitivity_status_excluded["8453"] ?
+      data.sensitivity_status_excluded["8453"].passed_status_excluded + "/" +
+      data.sensitivity_status_excluded["8453"].rows : "—") +
+    " with status excluded (see sensitivity table below). " +
+    "TxLens is 2/12 on every view (field accuracy " +
+    (expFa["9002"] ? expFa["9002"].correct + "/" + expFa["9002"].scored : "—") + ").</li>";
+  }
+  var unservable = data.unservable || [];
+  document.getElementById("unranked-exp").textContent = unservable.length ?
+    "Unservable (zero served traps — never shown as passing, and no pass rate is computed for them): " +
+    unservable.map(function (u) { return (NAMES[u.provider_id] || u.provider_id) + " (" + u.provider_id + ") — " + u.reason; }).join("; ") : "";
+  document.querySelector("#unservable-exp-table tbody").innerHTML = unservable.map(function (u) {
+    return "<tr><td>" + providerLabel(u.provider_id) + "</td><td>0</td><td>" +
+      esc(u.reason) + "</td><td>" + Number(u.escrow_credit_usd || 0).toFixed(2) +
+      "</td><td>n/a (not served)</td></tr>";
+  }).join("") || "<tr><td colspan='5'>No unservable providers in this file.</td></tr>";
+  var probed = data.probed_only || [];
+  document.getElementById("probed-only").textContent = probed.length ?
+    "Probed only (1 trap, not ranked): " + probed.map(function (p) {
+      return (NAMES[p.provider_id] || p.provider_id) + " (" + p.provider_id + ") — " + p.trap_id +
+        " " + (p.passed ? "PASS" : "FAIL") + ", receipt " +
+        (p.receipt_verified_onchain ? "verified on-chain" : "n/a");
+    }).join("; ") + ". " + (data.probed_only_note || "") : "";
+  var trapIds = [];
+  scores.forEach(function (s) { if (trapIds.indexOf(s.trap_id) === -1) trapIds.push(s.trap_id); });
+  trapIds.sort();
+  document.querySelector("#matrix-exp thead").innerHTML = "<tr><th>Trap</th><th>Category</th>" +
+    ranked.map(function (s) { return "<th>" + providerLabel(s.provider_id) + "</th>"; }).join("") + "</tr>";
+  document.querySelector("#matrix-exp tbody").innerHTML = trapIds.map(function (tid) {
+    var cat = "";
+    var cells = ranked.map(function (s) {
+      var row = null;
+      scores.forEach(function (x) { if (x.provider_id === s.provider_id && x.trap_id === tid) row = x; });
+      if (!row) return "<td>&mdash;</td>";
+      if (!cat) cat = row.category || tid.slice(4).replace(/-/g, "_");
+      if (!isServed(row)) return "<td>&mdash;</td>";
+      var p = !!row.passed;
+      return "<td class='" + (p ? "pass" : "fail") + "'>" + (p ? "PASS" : "FAIL") + "</td>";
+    }).join("");
+    return "<tr><td>" + esc(tid) + "</td><td>" + esc(cat) + "</td>" + cells + "</tr>";
+  }).join("");
+  // Sensitivity view: pass rate with the status field excluded,
+  // rendered from the data file (never hardcoded). The combined
+  // 24-trap counts are deliberately NOT rendered anywhere on this
+  // page — they live only in results-expansion.json (combined_24_trap).
+  var sens = data.sensitivity_status_excluded || {};
+  var sensAnswer = document.getElementById("sensitivity-answer");
+  if (sensAnswer) sensAnswer.textContent = data.sensitivity_note || "";
+  document.querySelector("#sensitivity-exp tbody").innerHTML = ranked.map(function (s) {
+    var se = sens[s.provider_id] || {};
+    return "<tr><td>" + providerLabel(s.provider_id) + "</td><td>" + s.passed + " / " + s.run +
+      "</td><td>" + (se.passed_status_excluded == null ? "—" : se.passed_status_excluded + " / " + se.rows) +
+      "</td><td>" + (se.field_correct_status_excluded == null ? "—" :
+        se.field_correct_status_excluded + "/" + se.field_scored_status_excluded) +
+      "</td><td>" + (se.fails_only_on_status == null ? "—" : se.fails_only_on_status) +
+      "</td><td>" + (se.strict_rank == null ? "—" : se.strict_rank) +
+      "</td><td>" + (se.status_excluded_rank == null ? "—" : se.status_excluded_rank) + "</td></tr>";
+  }).join("") || "<tr><td colspan='7'>No sensitivity data in this file.</td></tr>";
+  var detail = document.getElementById("detail-exp");
+  detail.innerHTML = ranked.map(function (s) {
+    var rows = scores.filter(function (x) { return x.provider_id === s.provider_id; }).map(function (x) {
+      var fields = (x.fields || []).map(function (f) {
+        return "<tr><td>" + esc(f.field) + "</td><td>" + esc(f.expected) + "</td><td>" +
+          (f.actual == null ? "<em>missing</em>" : esc(f.actual)) + "</td><td class='" +
+          (f.passed ? "pass" : "fail") + "'>" + (f.passed ? "PASS" : "FAIL") + "</td></tr>";
+      }).join("");
+      var body = fields ?
+        "<div class='tablewrap'><table><thead><tr><th>Field</th><th>Expected</th><th>Actual</th><th>Result</th></tr></thead><tbody>" + fields + "</tbody></table></div>" :
+        "<p class='muted'>No fields scored — this trap was not served.</p>";
+      var err = x.error ? "<p><strong>Error returned:</strong></p><pre>" + esc(x.error) + "</pre>" : "";
+      var cat = x.category || x.trap_id.slice(4).replace(/-/g, "_");
+      var costText = x.cost_usd == null ? "n/a" : Number(x.cost_usd).toFixed(4) + " USD";
+      var trapTx = x.tx_hash ?
+        " · trap tx <a href=\"" + BASE_SEPOLIA + esc(x.tx_hash) + "\">" + esc(x.tx_hash.slice(0, 10)) + "&hellip;</a>" : "";
+      return "<details><summary>" + esc(x.trap_id) + " (" + esc(cat) + ") — <span class='" + (x.passed ? "pass" : "fail") + "'>" +
+        (x.passed ? "PASS" : "FAIL") + "</span> · cost " + costText +
+        " · receipt " + receiptCell(x) + trapTx +
+        (x.signal_hash ? " · signal " + esc(x.signal_hash) : "") + "</summary>" + body + err + "</details>";
+    }).join("");
+    return "<h3>" + providerLabel(s.provider_id) + "</h3>" + rows;
+  }).join("");
+}
+fetch("results-expansion.json").then(function (r) {
+  if (!r.ok) throw new Error("HTTP " + r.status);
+  return r.json();
+}).then(renderExpansion).catch(function (e) {
+  document.getElementById("exp-load-error").textContent =
+    "Could not load results-expansion.json (" + e.message + ").";
+});
 fetch("results.json").then(function (r) {
   if (!r.ok) throw new Error("HTTP " + r.status);
   return r.json();
