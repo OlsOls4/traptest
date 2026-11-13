@@ -1,0 +1,86 @@
+# EXAMPLE ONLY — truth source for the illustrative intent ONCHAIN_METRIC_VERIFY.
+#
+# This file is a WORKED EXAMPLE for the starter kit. It is NOT a TrapTest
+# truth source, NOT a real Telegraph intent (ONCHAIN_METRIC_VERIFY does not
+# exist in the live catalogue — check the catalogue before using any intent
+# name), and it has NOT been submitted anywhere. Do not upload it to Anjoman.
+#
+# Format: miner YAML v1, following the same shape as the real TrapTest truth
+# source (anjoman-material/truth-source.yaml), which itself follows the
+# official Anjoman docs' Frankfurter truth-source example:
+#   - https://anjoman.ai/docs/scoring/contribute-evaluation-data
+#   - https://anjoman.ai/docs/miners/yaml-config
+# Every key used here is in the same documented shape as the real file:
+# version/kind/id/slug/protocol/name/description/base_url/auth/endpoints/
+# input_schema/output_schema/semantics.
+#
+# Source of truth: the Base Sepolia public JSON-RPC endpoint that the frozen
+# TrapTest ground truth was itself verified against
+# (traps-frozen-2026-11-06.json, provenance.source_url). Free, public, no key.
+#
+# Ground truth used by the example: block 56538934 contains 4 transactions,
+# verified live against this endpoint (eth_getBlockByNumber) during drafting,
+# 13 Nov 2026, and cross-checked by the t13 receipt in the same block.
+# A real truth source would be checked the same way before submission.
+version: '1'
+kind: miner
+id: 0
+slug: truth-base-sepolia-block-count-example
+protocol: generic
+name: Base Sepolia Public RPC — block transaction count (EXAMPLE)
+description: EXAMPLE ONLY. Free, public, no-key Base Sepolia JSON-RPC endpoint (PublicNode) that returns a block by number. Illustrative truth source for ONCHAIN_METRIC_VERIFY (not a real intent). Not submitted anywhere.
+base_url: https://base-sepolia-rpc.publicnode.com
+auth:
+  type: none
+endpoints:
+  - path: /block
+    external_path: /
+    method: POST
+    content_type: application/json
+    description: >
+      Fetch one Base Sepolia block by number (eth_getBlockByNumber).
+      Returns the block object with its transactions array — or null
+      when the block does not exist. The transaction count is the
+      length of the transactions array. PRIMARY endpoint for
+      ONCHAIN_METRIC_VERIFY: use this first, because the count lives
+      only in the block object.
+    intents:
+      - ONCHAIN_METRIC_VERIFY
+    params:
+      body:
+        required:
+          - name: jsonrpc
+            type: string
+            intents: ['*']
+            description: JSON-RPC version, always "2.0".
+          - name: method
+            type: string
+            intents: ['*']
+            description: JSON-RPC method, always "eth_getBlockByNumber" for this endpoint.
+          - name: params
+            type: array
+            intents: ['*']
+            description: JSON-RPC params array with exactly two elements — the block number (0x-prefixed hex) and false (full transaction objects not needed; hashes suffice to count).
+          - name: id
+            type: integer
+            intents: ['*']
+            description: JSON-RPC request id, always 1.
+input_schema:
+  type: object
+  required: [block_number, chain]
+  properties:
+    block_number:
+      type: integer
+    chain:
+      type: string
+      enum: ["base-sepolia"]
+output_schema:
+  type: object
+  properties:
+    block_number:
+      type: integer
+    tx_count:
+      type: integer
+semantics:
+  supported_intents:
+    - ONCHAIN_METRIC_VERIFY

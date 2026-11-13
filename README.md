@@ -15,8 +15,13 @@ trusted — not just who is ranked first.
 
 **Next step:**
 - Open the leaderboard (`docs/leaderboard/`, or the live link above) and check both ranked tables and both verdicts.
-- Verify in 60 seconds with no spend: the checks in `docs/how-to-run.md` §2 (149 tests + the static leaderboard page).
+- Verify in 60 seconds with no spend: the checks in `docs/how-to-run.md` §2 (165 tests + the static leaderboard page).
 - One-trap dry-run (validates traps, key, providers and output path; spends and writes nothing): `python3 -m traptest.run --traps traps-replay-2026-11-08.json --providers 9002,8453 --key .burner-replay.key --out results-live/replay-2026-11-08.json --dry-run`
+
+**New in the repo (13 Nov 2026):**
+- Starter kit — reuse the trap format on a new intent: `starter-kit/` (template + worked example; the example files are teaching examples only — never submit them to Anjoman as real material).
+- How to evaluate a tx-intelligence provider: `docs/how-to-evaluate-a-provider.md` — the method, the strict scoring rules, and the escrow and x402 payment findings.
+- Provider fix guides: `docs/provider-fix-guides/` — what Truvian, TxLens and ChainWire would need to change to improve their scores, each with a dated re-run offer.
 
 ## Build log (13 Nov 2026)
 
@@ -143,7 +148,7 @@ testnet, scored pass/fail against the truth, and published as a live leaderboard
   12 stored / 0 already there / 0 refused; Admitted ·12 new. The clean
   re-run (36 calls, $0.36) took the wallet 28.84 → 28.48 test USDC;
   cumulative 30.00 → 28.48 (drop $1.52: $1.25 billed + $0.27 escrow
-  credit). Tests: 149, all passing (`python3 -m unittest discover
+  credit). Tests: 165, all passing (`python3 -m unittest discover
   -s tests`, 13 Nov 2026).
 - Comparator WASM: KILLED with evidence 9 Nov 2026 — see
   `docs/comparator-wasm-kill.md` (one-integer scoring cannot express
