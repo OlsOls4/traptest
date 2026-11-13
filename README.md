@@ -11,7 +11,7 @@ trusted — not just who is ranked first.
 **Results:**
 - Expansion set (9 Nov 2026, t13–t24, scoring v2): ChainWire 1707307 — 11/12 (field accuracy 46/47).
 - Frozen set (6 Nov 2026, corrected re-score 8 Nov): Truvian 8453 — 4/12, TxLens 9002 — 2/12.
-- Leaderboard: `docs/leaderboard/` (live at https://olsols4.github.io/traptest/docs/leaderboard/) · Demo video v2: https://youtu.be/993JOD3JRXs (2:42, audio approved).
+- Leaderboard: `docs/leaderboard/` (live at https://olsols4.github.io/traptest/docs/leaderboard/) · Demo video v3: https://youtu.be/XB9LljuT9Ck (3:05; v2 at https://youtu.be/993JOD3JRXs).
 
 **Next step:**
 - Open the leaderboard (`docs/leaderboard/`, or the live link above) and check both ranked tables and both verdicts.
@@ -42,8 +42,9 @@ Corrected: Truvian 8453 — 4/12, TxLens 9002 — 2/12, LiveCert 4433 / Sigil
 into Telegraph escrow credit, NOT billed. Expansion 9 Nov: $0.42 task spend
 + $0.36 clean re-run. Wallet 30.00 → 28.48 test USDC (cumulative drop
 $1.52: $1.25 billed + $0.27 escrow credit).
-Demo video v2 (2026-11-08) PUBLIC at https://youtu.be/993JOD3JRXs —
-2:42 (161.6 s), 1280×720, audio approved by the user. Anjoman evaluation
+Demo video v3 (2026-11-13) PUBLIC at https://youtu.be/XB9LljuT9Ck —
+3:05 (184.8 s), 1280×720 (v2, 2026-11-08, at https://youtu.be/993JOD3JRXs,
+audio approved by the user). Anjoman evaluation
 material ADMITTED 8 Nov 11:20–11:21 (12 preference pairs + 1 truth source);
 rollover VERIFIED 8 Nov 17:36 — all 13 rows eligible (pool 702 rows,
 5 eligible submitters at that snapshot). Expansion pairs UPLOADED 9 Nov
@@ -60,8 +61,8 @@ Final submission form still does not exist — it opens later and will be
 shared in Discord before the 1 Dec deadline.**
 
 **Submission status (13 Nov 2026):**
-- Submitted: evaluation material admitted on Anjoman 8 Nov 11:20–11:21 (12 preference pairs + 1 truth source; pool went 4 → 5 contributors, activation threshold met). Rollover verified 8 Nov 17:36 — all 13 rows eligible (pool 702 rows, 5 eligible submitters at that snapshot). Expansion pairs uploaded 9 Nov 17:09 (browser): 12 stored, 0 already there, 0 refused; Admitted ·12 new; pool 1,045 → 1,057 rows from 6 contributors. Live pool API 13 Nov: 898 eligible, 1,057 total, 6 submitters. A signed-in dashboard re-check is still pending to confirm the 12 expansion rows' admitted-vs-eligible state. Final project submission form does not exist yet — it opens later and will be shared in Discord before the 1 Dec deadline.
-- Done and ready: live run (60 rows), corrected re-score, 8 Nov re-run (24 calls, scores stable), expansion clean re-run 9 Nov (36 calls, $0.36, 36/36 receipts verified), leaderboard page (both sets pre-rendered), how-to-run, submission pack, evaluation material for Anjoman (`anjoman-material/`; 24 preference pairs + 1 truth source submitted), demo video v2 PUBLIC (https://youtu.be/993JOD3JRXs, audio approved), repo public (head 5ba71220, 9 Nov 17:13Z), bounties repo starred, X posts 1–3 all live (posted by the user himself 8 + 12 Nov).
+- Submitted: evaluation material admitted on Anjoman 8 Nov 11:20–11:21 (12 preference pairs + 1 truth source; pool went 4 → 5 contributors, activation threshold met). Rollover verified 8 Nov 17:36 — all 13 rows eligible (pool 702 rows, 5 eligible submitters at that snapshot). Expansion pairs uploaded 9 Nov 17:09 (browser): 12 stored, 0 already there, 0 refused; Admitted ·12 new; pool 1,045 → 1,057 rows from 6 contributors. Live pool API 13 Nov: 898 eligible, 1,057 total, 6 submitters. A signed-in dashboard re-check 13 Nov confirmed all 12 expansion pairs eligible (Eligible ·25 total: 13 original + 12 expansion). Final project submission form does not exist yet — it opens later and will be shared in Discord before the 1 Dec deadline.
+- Done and ready: live run (60 rows), corrected re-score, 8 Nov re-run (24 calls, scores stable), expansion clean re-run 9 Nov (36 calls, $0.36, 36/36 receipts verified), leaderboard page (both sets pre-rendered), how-to-run, submission pack, evaluation material for Anjoman (`anjoman-material/`; 24 preference pairs + 1 truth source submitted), demo video v3 PUBLIC (https://youtu.be/XB9LljuT9Ck; v2 at https://youtu.be/993JOD3JRXs), repo public (main branch), bounties repo starred, X posts 1–3 all live (posted by the user himself 8 + 12 Nov).
 - Not yet: final submission form (does not exist yet — it opens later and will be shared in Discord before the 1 Dec deadline); milestone post (scheduled 14 Nov 09:00 GMT, revised draft approved 13 Nov).
 - Next step: the staged Anjoman pair fixes (t04/t06/t10) were re-uploaded 8 Nov 11:38 and did NOT take — the corrected rows went to a superseded-duplicates bucket and the original weaker pairs remain in effect (no replace control on the eval page; asking the organisers is the only route if replacement matters). Watch Discord for the final submission form.
 - Expansion set DONE 9 Nov 2026 (t13–t24, scoring v2, separate leaderboard section): ChainWire 1707307 — 11/12 (field 46/47); Truvian 8453 — 2/12 (field 39/49); TxLens 9002 — 2/12 (field 2/47); Verity 9001 / INTERLOCK 9007 unservable; ChainWire 7317307 / 7307 t13-pass probes only. Combined 24-trap (NOT one uniform measure): Truvian 6/24, TxLens 4/24. Expansion task spend $0.42 (cap $0.50); clean re-run $0.36; wallet 28.84 → 28.48 test USDC after the clean re-run (cumulative 30.00 → 28.48, drop $1.52: $1.25 billed + $0.27 escrow credit). Expansion pairs uploaded to Anjoman 9 Nov 17:09 (browser), 12 stored / 0 already there / 0 refused; Admitted ·12 new.

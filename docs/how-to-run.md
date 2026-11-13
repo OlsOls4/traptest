@@ -45,7 +45,7 @@ itself can be trusted.
 ```bash
 # From ~/workspace/telegraph-traptest/
 python3 -m unittest discover -s tests -v
-# Expected: 149 tests pass (scoring strictness + ranking + gates +
+# Expected: 165 tests pass (scoring strictness + ranking + gates +
 # parametrised-runner guards: no-overwrite, missing-key, dry-run,
 # append-without-duplicates).
 # These tests use MOCK fixtures and are NOT event evidence.
@@ -72,7 +72,7 @@ not combined with the frozen set).
 
 1. **Verify first — no spend. Stop here if you only want to verify.**
    Run the §2 prep checks above (`python3 -m unittest discover -s tests -v`
-   — expect 149 tests to pass) and open the static leaderboard page
+   — expect 165 tests to pass) and open the static leaderboard page
    (`docs/leaderboard/`, served locally). That is the whole 60-second
    verification: the pre-run evidence — the leaderboard, the corrected
    results file, and every receipt — costs nothing to inspect and is what a
