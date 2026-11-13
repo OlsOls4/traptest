@@ -52,7 +52,9 @@ sign; it is never written, logged, or committed.
 Gate failure: prints GATE REFUSED to stderr and exits 2, having made
 NO network call at all — the gate is checked before any client is
 constructed. --list-miners (free discovery only, no purchase) needs
-no key and no trap file.
+no key and no trap file, and --list-miners / --dry-run bypass the
+activation marker (they buy nothing); a real purchase still
+requires the marker.
 
 Exit codes: 0 ok · 2 gate refused · 3 missing --traps/--providers ·
 4 key file missing · 5 provider not in fresh catalogue ·
@@ -82,8 +84,14 @@ DEFAULT_INTENT = "ONCHAIN_TX_LOOKUP_GENERAL"
 DEFAULT_SPEND_CAP_USD = 0.30
 
 
-def check_gates(today=None, marker=None):
-    """Return (ok, reason). Pure: no network, no side effects."""
+def check_gates(today=None, marker=None, require_marker=True):
+    """Return (ok, reason). Pure: no network, no side effects.
+
+    ``require_marker`` is False for --list-miners and --dry-run:
+    neither buys anything, so neither needs the LIVE-ACTIVATED
+    marker (a fresh clone can discover miners and dry-run before
+    the marker exists). The date window is still enforced, and any
+    real purchase requires the marker. Added 13 Nov 2026."""
     today = today or datetime.now(timezone.utc).date()
     marker = Path(marker) if marker else DEFAULT_MARKER
     if today < WINDOW_OPEN:
@@ -91,13 +99,16 @@ def check_gates(today=None, marker=None):
             f"GATE REFUSED: today is {today.isoformat()} (UTC), before the "
             f"Season II window opens on {WINDOW_OPEN.isoformat()}. "
             "Live purchases are event-period only.")
-    if not marker.exists():
+    if require_marker and not marker.exists():
         return False, (
             f"GATE REFUSED: activation marker missing: {marker}. "
             "Create it only on day 1 after the free-testnet gate passes "
             "(faucet claim confirmed in a burner wallet); it is not created "
             "automatically.")
-    return True, f"gates passed: date {today.isoformat()}, marker {marker}"
+    if require_marker:
+        return True, f"gates passed: date {today.isoformat()}, marker {marker}"
+    return True, (f"gates passed: date {today.isoformat()} "
+                  "(marker not required: no purchase)")
 
 
 def _new_run_id():
@@ -140,7 +151,13 @@ def main(argv=None, today=None, transport=None, payment_provider=None,
                         help="activation marker file (default: ./LIVE-ACTIVATED)")
     args = parser.parse_args(argv)
 
-    ok, reason = check_gates(today=today, marker=args.marker)
+    # --list-miners and --dry-run buy nothing, so they bypass the
+    # LIVE-ACTIVATED marker (a fresh clone can discover miners and
+    # dry-run before the marker exists). Any real purchase still
+    # requires it — the gate below is the only thing that changes.
+    no_purchase = bool(args.list_miners or args.dry_run)
+    ok, reason = check_gates(today=today, marker=args.marker,
+                             require_marker=not no_purchase)
     if not ok:
         print(reason, file=sys.stderr)
         return 2
@@ -220,6 +237,7 @@ def main(argv=None, today=None, transport=None, payment_provider=None,
     out_path = Path(args.out) if args.out else None
     existing_doc = None
     existing_pairs = set()
+    retryable_pairs = set()  # cap-skipped pairs, re-buyable (see below)
     if out_path is not None and out_path.exists():
         if not args.append:
             print(f"REFUSED: output file already exists: {out_path}. "
@@ -240,9 +258,21 @@ def main(argv=None, today=None, transport=None, payment_provider=None,
                   "go in a new --out file.", file=sys.stderr)
             return 7
         existing_pairs = {(r.get("trap_id"), r.get("provider_id"))
-                          for r in existing_doc.get("scores") or []}
+                          for r in existing_doc.get("scores") or []
+                          if not r.get("skipped_cap")}
+        # Cap-skipped rows are NOT scored pairs: they were never
+        # attempted, so a re-run with a raised cap must be able to
+        # buy them. They are kept in the file as history and the
+        # stale row is replaced (not duplicated) when re-attempted —
+        # see the loop below. Added 13 Nov 2026.
+        retryable_pairs = {(r.get("trap_id"), r.get("provider_id"))
+                           for r in existing_doc.get("scores") or []
+                           if r.get("skipped_cap")}
         print(f"--append: {len(existing_pairs)} scored pairs already in "
-              f"{out_path}; they will not be re-bought.")
+              f"{out_path}; they will not be re-bought."
+              + (f" {len(retryable_pairs)} cap-skipped pairs are "
+                 f"retryable with a raised cap."
+                 if retryable_pairs else ""))
     if out_path is None and not args.dry_run:
         print("NO PURCHASE MADE: --out <results file> is required for a "
               "live run (the runner never overwrites; point it at a new "
@@ -307,6 +337,14 @@ def main(argv=None, today=None, transport=None, payment_provider=None,
               f"(catalogue cost_per_call is NOT a price — price comes "
               f"from the live 402 challenge)")
 
+    # Balance address: the payer of the key actually used (the x402
+    # provider exposes it as .payer), NOT the hardcoded burner 3 —
+    # the old code reported burner 3's balances even when --key
+    # pointed at a different burner. Burner 3 stays the default only
+    # when no key-derived payer is available (e.g. an injected
+    # provider without .payer). Fixed 13 Nov 2026.
+    payer_addr = getattr(payment_provider, "payer", None) or BURNER
+
     run_id = _new_run_id()
     if args.dry_run:
         n_new = sum(1 for t in traps for mid in provider_ids
@@ -316,13 +354,15 @@ def main(argv=None, today=None, transport=None, payment_provider=None,
               f"max cost ${n_new * CALL_PRICE_USD:.2f} at the "
               f"${CALL_PRICE_USD:.2f}/call docs figure (per-call ceiling "
               f"${MAX_CALL_USD:.2f}, cap ${args.spend_cap:.2f}), run-id "
-              f"would be {run_id}, output would go to "
+              f"would be {run_id}, payer would be {payer_addr}, output "
+              f"would go to "
               f"{out_path or '(no --out given)'}. "
               f"Nothing bought, nothing written.")
         return 0
 
-    bal_before, eth_before = balance_reader(BURNER)
-    print(f"burner before: {bal_before} test USDC, {eth_before} Sepolia ETH")
+    bal_before, eth_before = balance_reader(payer_addr)
+    print(f"burner before: {payer_addr} {bal_before} test USDC, "
+          f"{eth_before} Sepolia ETH")
 
     rows = list(existing_doc.get("scores") or []) if existing_doc else []
     new_rows = []
@@ -359,6 +399,7 @@ def main(argv=None, today=None, transport=None, payment_provider=None,
             "spend_cap_usd": args.spend_cap,
             "total_cost_usd": round(spent, 4),
             "escrow_credit_usd": round(escrow_credit, 4),
+            "burner_address": payer_addr,
             "burner_balance_before_usdc": bal_before,
             "burner_eth_before": eth_before,
             "scores": rows,
@@ -380,6 +421,14 @@ def main(argv=None, today=None, transport=None, payment_provider=None,
             if (trap.trap_id, miner_id) in existing_pairs:
                 print(f"{label}: already scored in {out_path} — skipping, no re-buy")
                 continue
+            if (trap.trap_id, miner_id) in retryable_pairs:
+                # Re-attempting a cap-skipped pair: drop its stale
+                # skipped row so the fresh row replaces it instead of
+                # duplicating the (trap, provider) pair in the file.
+                rows[:] = [r for r in rows
+                           if not (r.get("trap_id") == trap.trap_id
+                                   and r.get("provider_id") == miner_id
+                                   and r.get("skipped_cap"))]
             if spent + CALL_PRICE_USD > args.spend_cap:
                 print(f"CAP: stopping before {label} (spent {spent})")
                 row = {**fail_row(trap, miner_id, "spend cap reached, not attempted"),
@@ -456,7 +505,7 @@ def main(argv=None, today=None, transport=None, payment_provider=None,
     balance_error = None
     bal_after = eth_after = None
     try:
-        bal_after, eth_after = balance_reader(BURNER)
+        bal_after, eth_after = balance_reader(payer_addr)
     except Exception as e:  # noqa: BLE001 — any balance/RPC failure
         balance_error = f"{type(e).__name__}: {e}"
         print(f"BALANCE READ FAILED: {balance_error}. Rows are already "

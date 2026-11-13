@@ -587,5 +587,96 @@ class TestRunnerSpendGuard(RunnerTestBase):
         self.assertEqual(len(doc["scores"]), 8)
 
 
+class TestDryRunGateScoping(RunnerTestBase):
+    """(13 Nov 2026) --dry-run bypasses the marker; with a missing
+    key it still fails cleanly (exit 4, instructions, no traceback)."""
+
+    def test_dry_run_bypasses_missing_marker(self):
+        missing_marker = self.dir / "NO-MARKER"
+        code, t = self._run(["--dry-run", "--marker", str(missing_marker)])
+        # _run() passes --marker self.marker; the later --marker wins.
+        self.assertEqual(code, 0)
+        self.assertFalse(self.out.exists())
+        self.assertEqual(t.posts, [])
+
+    def test_dry_run_missing_key_clean_error_no_marker(self):
+        missing_marker = self.dir / "NO-MARKER"
+        missing_key = self.dir / "no-such.key"
+        err = io.StringIO()
+        t = FakeTransport()
+        with redirect_stderr(err):
+            code = main(["--marker", str(missing_marker),
+                         "--traps", str(self.traps_path),
+                         "--providers", "9002",
+                         "--key", str(missing_key),
+                         "--out", str(self.out), "--dry-run"],
+                        today=TODAY, transport=t,
+                        balance_reader=_stub_balances,
+                        receipt_verifier=_stub_receipts)
+        self.assertEqual(code, 4)
+        self.assertIn("KEY FILE MISSING", err.getvalue())
+        self.assertNotIn("Traceback", err.getvalue())
+        self.assertEqual(t.calls, [])  # no network, no spend
+        self.assertFalse(self.out.exists())
+
+
+class TestBurnerBalanceAddress(RunnerTestBase):
+    """(13 Nov 2026) balance reporting follows the --key actually
+    used: the output file records that key's payer address, and the
+    balance reader is called with it — never the hardcoded burner 3."""
+
+    def test_balance_uses_key_payer_address(self):
+        other_key = self.dir / "other-burner.key"
+        other_key.write_text("0x" + Account.create().key.hex())
+        expected = Account.from_key(other_key.read_text().strip()).address
+        self.assertNotEqual(expected, "0x170DfA67D1e37915d8130eaB9bD3b0a4E115f0C0")
+        seen = []
+
+        def reader(addr):
+            seen.append(addr)
+            return 12.5, 0.01
+
+        code = main(self._args(["--key", str(other_key)]), today=TODAY,
+                    transport=FakeTransport(), balance_reader=reader,
+                    receipt_verifier=_stub_receipts)
+        self.assertEqual(code, 0)
+        self.assertTrue(seen)
+        self.assertTrue(all(a == expected for a in seen), seen)
+        doc = json.loads(self.out.read_text())
+        self.assertEqual(doc["burner_address"], expected)
+        self.assertEqual(doc["burner_balance_before_usdc"], 12.5)
+        self.assertEqual(doc["burner_balance_after_usdc"], 12.5)
+
+
+class TestCapSkippedRetryable(RunnerTestBase):
+    """(13 Nov 2026) cap-skipped rows are not scored pairs: a re-run
+    with a raised cap re-buys them, replacing the stale skipped row
+    instead of duplicating the (trap, provider) pair."""
+
+    def test_cap_skipped_pairs_rebought_with_raised_cap(self):
+        # $0.015 cap: 1 buy ($0.01), then 7 cap-skipped rows.
+        code1, _ = self._run(["--spend-cap", "0.015"])
+        self.assertEqual(code1, 0)
+        doc1 = json.loads(self.out.read_text())
+        skipped = [r for r in doc1["scores"] if r.get("skipped_cap")]
+        self.assertEqual(len(skipped), 7)
+        self.assertEqual(len(doc1["scores"]), 8)
+        # Raised cap + --append: the 7 skipped pairs are bought now.
+        code2, t2 = self._run(["--append", "--spend-cap", "0.30"])
+        self.assertEqual(code2, 0)
+        doc2 = json.loads(self.out.read_text())
+        self.assertEqual(len(doc2["scores"]), 8)
+        self.assertFalse(any(r.get("skipped_cap") for r in doc2["scores"]))
+        pairs = [(r["trap_id"], r["provider_id"]) for r in doc2["scores"]]
+        self.assertEqual(len(pairs), len(set(pairs)))  # no duplicates
+        self.assertEqual(doc2["total_cost_usd"], 0.08)
+        self.assertEqual(len(t2.posts), 14)  # 7 buys x 402 + paid retry
+
+    def test_dry_run_counts_cap_skipped_pairs_as_new(self):
+        self._run(["--spend-cap", "0.015"])
+        code, _ = self._run(["--append", "--spend-cap", "0.30", "--dry-run"])
+        self.assertEqual(code, 0)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -15,13 +15,12 @@ answered IS ranked (at 0%) — failing answers are evidence; no
 answers are not a pass rate.
 
 ``traptest/leaderboard.py`` is the single source of truth for this
-aggregation. NOTE (follow-up, not done here): the leaderboard page
-(``docs/leaderboard/index.html``) re-implements the same aggregation
-in JavaScript and counts every row in ``results.json`` as a served
-trap, so it still ranks unservable providers as 0% rows. That page
-is owned by another worker — it should read the ``unservable`` tier
-from a Python-generated file (or import this module's output)
-instead of re-aggregating.
+aggregation. The leaderboard page (``docs/leaderboard/index.html``)
+reads the ``unservable`` tier from the data file and filters those
+providers out of the ranked table before ranking (verified 13 Nov
+2026) — it no longer ranks unservable providers as 0% rows. (An
+earlier NOTE here claimed the page still did; that was fixed, so
+the NOTE was removed.)
 """
 from dataclasses import dataclass, field
 

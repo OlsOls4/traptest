@@ -1,6 +1,9 @@
 # Verification note — expansion preference pairs (t13–t24)
 
-Prepared 9 Nov 2026. Local file only — NOT uploaded to Anjoman.
+Prepared 9 Nov 2026. UPLOADED to Anjoman 9 Nov 17:09 (browser): "Sent. 12 stored,
+0 already there, 0 refused", Admitted ·12 new; pool 1,045 → 1,057 rows from
+6 contributors. (This note was written before that browser upload and said
+"local file only" — that line was wrong after 17:09 and is corrected here.)
 Companion to `preference-pairs-expansion.jsonl` (12 lines, t13–t24 in order).
 
 ## Sources (read-only; none modified)

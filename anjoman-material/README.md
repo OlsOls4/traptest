@@ -1,8 +1,15 @@
 # Anjoman evaluation material — TrapTest (ONCHAIN_TX_LOOKUP_GENERAL)
 
 SUBMITTED 8 Nov 2026 11:20–11:21 — 12 preference pairs + 1 truth source admitted on
-Anjoman (pool went 4 → 5 contributors, activation threshold met). Staged fixes for the
-t04/t06/t10 rejected answers are in `review-fixes-2026-11-08/` and are NOT yet re-submitted.
+Anjoman (pool went 4 → 5 contributors, activation threshold met). EXPANSION
+UPLOADED 9 Nov 2026 17:09 (browser) — 12 expansion pairs (`preference-pairs-expansion.jsonl`),
+"Sent. 12 stored, 0 already there, 0 refused", Admitted ·12 new; pool 1,045 → 1,057 rows
+from 6 contributors. Live pool API 13 Nov: 898 eligible, 1,057 total, 6 submitters.
+A signed-in dashboard re-check is still pending to confirm the 12 expansion rows'
+admitted-vs-eligible state. Staged fixes for the
+t04/t06/t10 rejected answers are in `review-fixes-2026-11-08/` — they were re-submitted
+8 Nov 11:38 and did NOT take: the corrected rows went to a superseded-duplicates bucket
+and the original weaker pairs remain in effect (no replace control on the eval page).
 Prepared 8 Nov 2026 from the frozen trap set
 (`../traps-frozen-2026-11-06.json`, frozen 6 Nov 2026 13:59:42 UTC — never edited).
 
@@ -17,6 +24,8 @@ https://devnode.telegraphprotocol.com/engine/v1/intents/ONCHAIN_TX_LOOKUP_GENERA
 | File | What it is |
 |---|---|
 | `preference-pairs.jsonl` | 12 preference pairs, one per frozen trap (t01–t12, in order). Each line is exactly `{"prompt", "chosen", "rejected"}` — the row shape in the Anjoman docs (`label_kind` defaults to `preference_pair`). |
+| `preference-pairs-expansion.jsonl` | 12 expansion preference pairs, one per expansion trap (t13–t24, in order). UPLOADED to Anjoman 9 Nov 17:09 (browser): 12 stored, 0 already there, 0 refused; Admitted ·12 new. Verification note: `preference-pairs-expansion-VERIFY.md`. |
+| `preference-pairs.submitted-v1.jsonl` | Copy of `preference-pairs.jsonl` as submitted 8 Nov 11:20–11:21 (12 pairs, Admitted ·12). |
 | `truth-source.yaml` | Miner-YAML-format truth source: the Base Sepolia public JSON-RPC endpoint that the frozen ground truth was itself verified against. |
 | `README.md` | This file. |
 

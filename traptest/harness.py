@@ -268,14 +268,20 @@ def build_scored_row(trap, trap_dict, miner_id, intent, result):
         "category": trap_dict.get("category"),
         "intent": intent,
         "tx_hash": trap.tx_hash,
-        # Scoring version for this row: "v2-strict-unknown" only on
-        # traps that opt into the v2 unknown rule (expansion set,
-        # 9 Nov 2026); every other trap scores under v1, byte-identical
-        # to the frozen-12 run. The token-value basis change in the
-        # expansion set is a trap-design change, recorded on the trap
-        # file, not a scorer change.
-        "scoring_version": ("v2-strict-unknown" if getattr(trap, "strict_unknown", False)
-                            else "v1"),
+        # Scoring version for this row: the trap FILE's declared
+        # version wins (e.g. the expansion set declares "v2 (this set
+        # only)", so every row in that set is v2-strict-unknown —
+        # including non-unknown traps, whose native-value semantics
+        # are v2 too). Only when the file declares no version does
+        # the per-trap strict_unknown flag decide. The old code
+        # stamped "v1" on every trap without strict_unknown, so a
+        # re-run of expansion traps would have re-emitted v1 labels
+        # (the clean run's v2 labels were fixed by file edit, not
+        # code — root cause fixed 13 Nov 2026).
+        "scoring_version": (trap.scoring_version
+                            or ("v2-strict-unknown"
+                                if getattr(trap, "strict_unknown", False)
+                                else "v1")),
         "provider_id": miner_id,
         "cost_usd": result.cost_usd,
         "signal_hash": result.signal_hash,
@@ -312,6 +318,19 @@ def load_traps(path):
     path = Path(path)
     raw = path.read_bytes()
     doc = json.loads(raw.decode("utf-8"))
+    # Scoring version declared by the trap file itself (top-level
+    # "scoring_version", e.g. "v2 (this set only)" on the expansion
+    # set). Normalised to the row label: a v2-declared set scores
+    # every row v2-strict-unknown; a v1-declared (or undeclared) set
+    # leaves the label to the per-trap strict_unknown flag.
+    declared = doc.get("scoring_version") or ""
+    declared = declared.strip().lower() if isinstance(declared, str) else ""
+    if declared.startswith("v2"):
+        file_scoring_version = "v2-strict-unknown"
+    elif declared.startswith("v1"):
+        file_scoring_version = "v1"
+    else:
+        file_scoring_version = None
     traps_raw = doc["traps"]
     entries = []
     for t in traps_raw:
@@ -319,7 +338,8 @@ def load_traps(path):
                     expected_status=t["expected_status"], expected_from=t["expected_from"],
                     expected_to=t["expected_to"], expected_value=t["expected_value"],
                     expected_block=t["expected_block"],
-                    strict_unknown=bool(t.get("strict_unknown", False)))
+                    strict_unknown=bool(t.get("strict_unknown", False)),
+                    scoring_version=file_scoring_version)
         if trap.expected_status == "pending":
             raise ValueError(
                 f"trap {trap.trap_id!r}: pending transactions are never "
@@ -346,7 +366,7 @@ def load_traps(path):
     return doc, traps, hashlib.sha256(raw).hexdigest()
 
 
-def verify_receipts(rows, rpc_url=SEPOLIA_RPC):
+def verify_receipts(rows, rpc_url=SEPOLIA_RPC, max_attempts=6):
     """Verify settlement receipts on-chain (Sepolia) in one batch.
 
     A receipt verifies only when the settlement tx succeeded AND its
@@ -355,29 +375,65 @@ def verify_receipts(rows, rpc_url=SEPOLIA_RPC):
     filtered BEFORE batching, so ids line up with responses and a
     short response raises instead of silently truncating. Mutates the
     rows in place; returns (verified, total).
+
+    Two failure modes are never silently excluded from ``total``:
+    - an UNDECODABLE receipt (present but no tx hash extractable)
+      counts as FAILED (``receipt_verified_onchain`` False);
+    - a receipt whose RPC result comes back null is RETRIED (up to
+      ``max_attempts`` batch attempts, re-requesting only the nulls):
+      the public RPC's backends disagree on receipt availability —
+      observed 13 Nov 2026, 2 of 3 reads of one 8 Nov settlement tx
+      returned null with no error, and whole batches returned null
+      twice before a third identical batch returned all receipts.
+      A tx still null after all attempts counts as FAILED, not as
+      unverified-and-uncounted.
     """
     tx_hashes = []
+    undecodable = []
     for row in rows:
         if row.get("receipt"):
             tx_hash = decode_receipt_tx_hash(row["receipt"])
             if tx_hash:
                 tx_hashes.append((row["trap_id"], row["provider_id"], tx_hash))
-    if not tx_hashes:
-        return 0, 0
-    payload = json.dumps([{"jsonrpc": "2.0", "id": i, "method": "eth_getTransactionReceipt",
-                           "params": [h]} for i, (_, _, h) in enumerate(tx_hashes)])
-    r = subprocess.run(["curl", "-sS", "-m", "60", rpc_url,
-                        "-H", "Content-Type: application/json", "-d", payload],
-                       capture_output=True, text=True, timeout=90)
-    recs = parse_json_text(r.stdout, "Sepolia receipt batch response")
-    if not isinstance(recs, list):
-        raise RuntimeError("receipt batch response was not a JSON list")
-    verified = verify_receipt_batch(tx_hashes, recs)
+            else:
+                undecodable.append((row["trap_id"], row["provider_id"]))
+    verified = {}
+    pending = list(tx_hashes)
+    for _attempt in range(max_attempts):
+        if not pending:
+            break
+        payload = json.dumps([{"jsonrpc": "2.0", "id": i, "method": "eth_getTransactionReceipt",
+                               "params": [h]} for i, (_, _, h) in enumerate(pending)])
+        r = subprocess.run(["curl", "-sS", "-m", "60", rpc_url,
+                            "-H", "Content-Type: application/json", "-d", payload],
+                           capture_output=True, text=True, timeout=90)
+        recs = parse_json_text(r.stdout, "Sepolia receipt batch response")
+        if not isinstance(recs, list):
+            raise RuntimeError("receipt batch response was not a JSON list")
+        if len(recs) != len(pending):
+            raise ValueError(
+                f"receipt batch length mismatch: requested "
+                f"{len(pending)} receipts, got {len(recs)}; refusing "
+                f"to verify a partial batch")
+        batch = verify_receipt_batch(pending, recs)
+        still_pending = []
+        for (tid, mid, h), rec in zip(pending, recs):
+            res = rec.get("result") if isinstance(rec, dict) else None
+            if res is None:
+                still_pending.append((tid, mid, h))
+            else:
+                verified[(tid, mid)] = batch[(tid, mid)]
+        pending = still_pending
+    for tid, mid, _h in pending:  # still null after all attempts: FAILED, counted
+        verified[(tid, mid)] = False
     tx_by_key = {(t, m): h for t, m, h in tx_hashes}
+    undecodable_set = set(undecodable)
     for row in rows:
         key = (row.get("trap_id"), row.get("provider_id"))
         if key in verified:
             row["receipt_verified_onchain"] = verified[key]
             if verified[key]:
                 row["receipt_settlement_tx"] = tx_by_key[key]
-    return sum(verified.values()), len(verified)
+        elif key in undecodable_set:
+            row["receipt_verified_onchain"] = False
+    return sum(verified.values()), len(verified) + len(undecodable)

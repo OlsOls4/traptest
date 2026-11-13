@@ -26,6 +26,11 @@ class Trap:
     # any invented from/to/value/block fails outright. Defaults to
     # False so the frozen-12 scoring path is byte-identical.
     strict_unknown: bool = False
+    # Scoring version declared by the trap FILE (load_traps fills
+    # this from the file's top-level "scoring_version", e.g. "v2 (this
+    # set only)"); None when the file declares none, in which case
+    # build_scored_row falls back to the strict_unknown rule above.
+    scoring_version: str | None = None
 
     def __post_init__(self):
         if not self.trap_id or not self.intent or not self.tx_hash:

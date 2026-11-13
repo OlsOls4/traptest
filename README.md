@@ -1,28 +1,5 @@
 # TrapTest — live build (6 Nov 2026, corrected re-score 8 Nov 2026)
 
-**Status: LIVE RUN COMPLETE 6 Nov 2026, corrected re-score 8 Nov 2026,
-re-run 8 Nov 2026 (24 calls, $0.24, scores stable). Repo PUBLIC
-(https://github.com/OlsOls4/traptest, commits 0fb660f3 + 02f61d4).
-Registered 27 Oct 2026 (Olly McBride, Individual, Discord ols0817, project
-TrapTest). 12 frozen traps × 5 providers = 60 scored rows, all event-period
-(1 Nov–1 Dec 2026), in `results-live/full-run-2026-11-06.json`
-(`data_kind: LIVE`, strict original) and
-`results-live/results-corrected-2026-11-08.json`
-(`data_kind: CORRECTED_REANALYSIS`), rendered at `docs/leaderboard/`.
-Corrected: Truvian 8453 — 4/12, TxLens 9002 — 2/12, LiveCert 4433 / Sigil
-9010 / OnChain Intel 900 — 0/12 served (unservable). Billed $0.50 total
-($0.26 on 6 Nov incl. $0.02 smoke + $0.24 re-run 8 Nov); $0.24 settled
-into Telegraph escrow credit, NOT billed; wallet 30.00 → 29.26 test USDC.
-Demo video v2 (2026-11-08) PUBLIC at https://youtu.be/993JOD3JRXs —
-2:42 (161.6 s), 1280×720, audio approved by the user. Anjoman evaluation
-material ADMITTED 8 Nov 11:20–11:21 (12 preference pairs + 1 truth source);
-rollover VERIFIED 8 Nov 17:36 — all 13 rows eligible, pool 702 rows,
-5 eligible submitters. Bounties repo starred. X post 1 LIVE
-(https://x.com/OlsOls4/status/2119431200389447911); posts 2/3 scheduled
-10/12 Nov; milestone post scheduled 14 Nov 09:00. Final submission form
-still does not exist — it opens later and will be shared in Discord
-before the 1 Dec deadline.**
-
 **In 60 seconds:** TrapTest is a lie-detector for Telegraph's intelligence
 market. It buys fixed trap transaction queries — queries whose correct answer
 is known in advance — from competing providers on testnet, scores each answer
@@ -31,12 +8,58 @@ A provider that returns a stale or wrong answer is shown failing, with its
 receipt, so builders choosing a provider can see whose answers can be
 trusted — not just who is ranked first.
 
-**Submission status (9 Nov 2026):**
-- Submitted: evaluation material admitted on Anjoman 8 Nov 11:20–11:21 (12 preference pairs + 1 truth source; pool went 4 → 5 contributors, activation threshold met). Rollover verified 8 Nov 17:36 — all 13 rows eligible, pool 702 rows, 5 eligible submitters. Final project submission form does not exist yet — it opens later and will be shared in Discord before the 1 Dec deadline.
-- Done and ready: live run (60 rows), corrected re-score, 8 Nov re-run (24 calls, scores stable), leaderboard page, how-to-run, submission pack, evaluation material for Anjoman (`anjoman-material/`), demo video v2 PUBLIC (https://youtu.be/993JOD3JRXs, audio approved), repo public (commits 0fb660f3 + 02f61d4), bounties repo starred, X post 1 live (https://x.com/OlsOls4/status/2119431200389447911).
-- Not yet: final submission form (does not exist yet — it opens later and will be shared in Discord before the 1 Dec deadline); X posts 2/3 (scheduled 10/12 Nov); milestone post (scheduled 14 Nov 09:00).
-- Next step: apply the staged Anjoman pair fixes (t04/t06/t10) and re-submit; watch Discord for the final submission form.
-- Expansion set DONE 9 Nov 2026 (t13–t24, scoring v2, separate leaderboard section): ChainWire 1707307 — 11/12 (field 46/47); Truvian 8453 — 2/12 (field 39/49); TxLens 9002 — 2/12 (field 2/47); Verity 9001 / INTERLOCK 9007 unservable; ChainWire 7317307 / 7307 t13-pass probes only. Combined 24-trap (NOT one uniform measure): Truvian 6/24, TxLens 4/24. Expansion task spend $0.42 (cap $0.50); wallet 29.26 → 28.84 test USDC. New pairs are LOCAL ONLY — no Anjoman upload (user decision).
+**Results:**
+- Expansion set (9 Nov 2026, t13–t24, scoring v2): ChainWire 1707307 — 11/12 (field accuracy 46/47).
+- Frozen set (6 Nov 2026, corrected re-score 8 Nov): Truvian 8453 — 4/12, TxLens 9002 — 2/12.
+- Leaderboard: `docs/leaderboard/` (live at https://olsols4.github.io/traptest/docs/leaderboard/) · Demo video v2: https://youtu.be/993JOD3JRXs (2:42, audio approved).
+
+**Next step:**
+- Open the leaderboard (`docs/leaderboard/`, or the live link above) and check both ranked tables and both verdicts.
+- Verify in 60 seconds with no spend: the checks in `docs/how-to-run.md` §2 (149 tests + the static leaderboard page).
+- One-trap dry-run (validates traps, key, providers and output path; spends and writes nothing): `python3 -m traptest.run --traps traps-replay-2026-11-08.json --providers 9002,8453 --key .burner-replay.key --out results-live/replay-2026-11-08.json --dry-run`
+
+## Build log (13 Nov 2026)
+
+**Status: LIVE RUN COMPLETE 6 Nov 2026, corrected re-score 8 Nov 2026,
+re-run 8 Nov 2026 (24 calls, $0.24, scores stable); expansion clean re-run
+9 Nov 2026 (36 calls, $0.36, 36/36 receipts verified). Repo PUBLIC
+(https://github.com/OlsOls4/traptest, head 5ba71220, 9 Nov 17:13Z).
+Registered 27 Oct 2026 (Olly McBride, Individual, Discord ols0817, project
+TrapTest). 24 frozen traps (12 on 6 Nov + 12 expansion on 9 Nov), all
+event-period (1 Nov–1 Dec 2026): frozen set 12 traps × 5 providers =
+60 scored rows in `results-live/full-run-2026-11-06.json`
+(`data_kind: LIVE`, strict original) and
+`results-live/results-corrected-2026-11-08.json`
+(`data_kind: CORRECTED_REANALYSIS`), rendered at `docs/leaderboard/`.
+Corrected: Truvian 8453 — 4/12, TxLens 9002 — 2/12, LiveCert 4433 / Sigil
+9010 / OnChain Intel 900 — 0/12 served (unservable). Billed $0.50 on 6–8 Nov
+($0.26 on 6 Nov incl. $0.02 smoke + $0.24 re-run 8 Nov); $0.24 settled
+into Telegraph escrow credit, NOT billed. Expansion 9 Nov: $0.42 task spend
++ $0.36 clean re-run. Wallet 30.00 → 28.48 test USDC (cumulative drop
+$1.52: $1.25 billed + $0.27 escrow credit).
+Demo video v2 (2026-11-08) PUBLIC at https://youtu.be/993JOD3JRXs —
+2:42 (161.6 s), 1280×720, audio approved by the user. Anjoman evaluation
+material ADMITTED 8 Nov 11:20–11:21 (12 preference pairs + 1 truth source);
+rollover VERIFIED 8 Nov 17:36 — all 13 rows eligible (pool 702 rows,
+5 eligible submitters at that snapshot). Expansion pairs UPLOADED 9 Nov
+17:09 (browser): 12 stored, 0 already there, 0 refused; Admitted ·12 new;
+pool 1,045 → 1,057 rows from 6 contributors. Live pool API 13 Nov: 898
+eligible, 1,057 total, 6 submitters (eligible_submitters 6). A signed-in
+dashboard re-check is still pending to confirm the 12 expansion rows'
+admitted-vs-eligible state. Bounties repo starred. X posts 1–3 all LIVE
+(posted by the user himself: post 1, 8 Nov
+https://x.com/OlsOls4/status/2119431200389447911; post 2, 12 Nov
+https://x.com/OlsOls4/status/2121001361965789577; post 3, 12 Nov);
+milestone post scheduled 14 Nov 09:00 GMT (revised draft approved 13 Nov).
+Final submission form still does not exist — it opens later and will be
+shared in Discord before the 1 Dec deadline.**
+
+**Submission status (13 Nov 2026):**
+- Submitted: evaluation material admitted on Anjoman 8 Nov 11:20–11:21 (12 preference pairs + 1 truth source; pool went 4 → 5 contributors, activation threshold met). Rollover verified 8 Nov 17:36 — all 13 rows eligible (pool 702 rows, 5 eligible submitters at that snapshot). Expansion pairs uploaded 9 Nov 17:09 (browser): 12 stored, 0 already there, 0 refused; Admitted ·12 new; pool 1,045 → 1,057 rows from 6 contributors. Live pool API 13 Nov: 898 eligible, 1,057 total, 6 submitters. A signed-in dashboard re-check is still pending to confirm the 12 expansion rows' admitted-vs-eligible state. Final project submission form does not exist yet — it opens later and will be shared in Discord before the 1 Dec deadline.
+- Done and ready: live run (60 rows), corrected re-score, 8 Nov re-run (24 calls, scores stable), expansion clean re-run 9 Nov (36 calls, $0.36, 36/36 receipts verified), leaderboard page (both sets pre-rendered), how-to-run, submission pack, evaluation material for Anjoman (`anjoman-material/`; 24 preference pairs + 1 truth source submitted), demo video v2 PUBLIC (https://youtu.be/993JOD3JRXs, audio approved), repo public (head 5ba71220, 9 Nov 17:13Z), bounties repo starred, X posts 1–3 all live (posted by the user himself 8 + 12 Nov).
+- Not yet: final submission form (does not exist yet — it opens later and will be shared in Discord before the 1 Dec deadline); milestone post (scheduled 14 Nov 09:00 GMT, revised draft approved 13 Nov).
+- Next step: the staged Anjoman pair fixes (t04/t06/t10) were re-uploaded 8 Nov 11:38 and did NOT take — the corrected rows went to a superseded-duplicates bucket and the original weaker pairs remain in effect (no replace control on the eval page; asking the organisers is the only route if replacement matters). Watch Discord for the final submission form.
+- Expansion set DONE 9 Nov 2026 (t13–t24, scoring v2, separate leaderboard section): ChainWire 1707307 — 11/12 (field 46/47); Truvian 8453 — 2/12 (field 39/49); TxLens 9002 — 2/12 (field 2/47); Verity 9001 / INTERLOCK 9007 unservable; ChainWire 7317307 / 7307 t13-pass probes only. Combined 24-trap (NOT one uniform measure): Truvian 6/24, TxLens 4/24. Expansion task spend $0.42 (cap $0.50); clean re-run $0.36; wallet 28.84 → 28.48 test USDC after the clean re-run (cumulative 30.00 → 28.48, drop $1.52: $1.25 billed + $0.27 escrow credit). Expansion pairs uploaded to Anjoman 9 Nov 17:09 (browser), 12 stored / 0 already there / 0 refused; Admitted ·12 new.
 
 TrapTest (Telegraph Hackathon Season II, Evaluator-led): trap queries with known
 ground truth are bought from competing transaction-intelligence providers on
@@ -78,7 +101,9 @@ testnet, scored pass/fail against the truth, and published as a live leaderboard
   escrow credit). 8 Nov re-run (`results-live/replay-2026-11-08.json`):
   24 calls, $0.24, scores stable (Truvian 4/12, TxLens 2/12), wallet
   29.50 → 29.26.
-  All 24 served receipts verified on-chain.
+  All 24 served receipts verified on-chain (backfilled 13 Nov 2026:
+  the flags were null in the file until re-verified on-chain — see
+  `receipt_backfill` in `results-live/replay-2026-11-08.json`).
 - Expansion set (9 Nov 2026, `traps-frozen-2026-11-09.json`, frozen
   13:07:38 UTC, SHA-256
   `940a00400477e0aefb38afe1da20fb98cc03b187e7218da252d322fd4699b5ba`,
@@ -113,10 +138,13 @@ testnet, scored pass/fail against the truth, and published as a live leaderboard
   still settled); wallet 29.26 → 28.84 test USDC. The 7 cap-skipped
   rows in the expansion run file (1707307 t18–t24, file-cumulative
   cap) are excluded from scoring; the 7 bought rows are in
-  `results-live/expansion-run-1707307-rest-2026-11-09.json`. New pairs
-  are LOCAL ONLY — no Anjoman upload of the expansion set (user
-  decision). Tests: 140, all passing (`python3 -m unittest discover
-  -s tests`, 9 Nov 2026).
+  `results-live/expansion-run-1707307-rest-2026-11-09.json`. The 12
+  expansion pairs were uploaded to Anjoman 9 Nov 17:09 (browser),
+  12 stored / 0 already there / 0 refused; Admitted ·12 new. The clean
+  re-run (36 calls, $0.36) took the wallet 28.84 → 28.48 test USDC;
+  cumulative 30.00 → 28.48 (drop $1.52: $1.25 billed + $0.27 escrow
+  credit). Tests: 149, all passing (`python3 -m unittest discover
+  -s tests`, 13 Nov 2026).
 - Comparator WASM: KILLED with evidence 9 Nov 2026 — see
   `docs/comparator-wasm-kill.md` (one-integer scoring cannot express
   multi-field strict scoring; generic fallback already scores the

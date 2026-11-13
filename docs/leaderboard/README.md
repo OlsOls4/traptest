@@ -61,7 +61,10 @@ changed, under the fixed normaliser. LiveCert/Sigil/OnChain Intel served
 HTTP 500 upstream 400) — unservable, not a 0% pass rate. Billed $0.26 total
 including $0.02 smoke tests ($0.24 in the run file + $0.02 smoke); $0.24
 settled into Telegraph escrow credit, NOT billed; wallet 30.00 → 29.50 test
-USDC (drop $0.50). 24 served receipts verified on-chain. It REPLACED the
+USDC (drop $0.50). 24 served receipts verified on-chain. Expansion clean
+re-run 9 Nov: 36 calls, $0.36 billed, wallet 28.84 → 28.48 test USDC;
+cumulative 30.00 → 28.48 (drop $1.52: $1.25 billed + $0.27 escrow credit).
+It REPLACED the
 prep mock fixture (mock-provider-a/b/c, invented trap hashes) — that fixture
 is gone from this folder and must never be quoted as a result. Source of
 truth: `results-live/full-run-2026-11-06.json` (same rows, strict original)
@@ -72,8 +75,12 @@ scored purchase of the run; SHA-256
 rendered on the page from `results.json`). The page is a frozen snapshot:
 run 6 Nov 2026, re-scored 8 Nov, not live-updating (stamped above the
 ranked table). Demo video v2 is the public YouTube link
-https://youtu.be/993JOD3JRXs. Anjoman eval pool evidence: 702 eligible
-rows, 5 submitters — https://anjoman.ai/dashboard/eval. One-command
+https://youtu.be/993JOD3JRXs. Anjoman eval pool evidence (live pool API,
+13 Nov 2026): 898 eligible rows, 1,057 total, 6 submitters
+(eligible_submitters 6) — https://anjoman.ai/dashboard/eval. (8 Nov
+snapshot, history: 702 eligible rows, 5 submitters.) A signed-in dashboard
+re-check is still pending to confirm the 12 expansion rows'
+admitted-vs-eligible state. One-command
 dry-run replay (spends nothing, writes nothing; build the 1-trap replay
 file and fund a burner first, see `docs/how-to-run.md` §4):
 
@@ -109,7 +116,11 @@ set, run on 1707307) and they are not ranked on 1 trap. Combined
 includes the 2 extra v2 fields on Truvian's unknown rows; v1-basis
 76/94). Expansion task spend: $0.42 wallet drop (cap $0.50): $0.24
 expansion run + $0.12 ChainWire 1707307 full set + $0.03 probes billed
-+ $0.03 Verity escrow credit; wallet 29.26 → 28.84 test USDC. The 7
++ $0.03 Verity escrow credit; wallet 29.26 → 28.84 test USDC, then the
+$0.36 clean re-run took it to 28.48 (cumulative 30.00 → 28.48, drop $1.52).
+The 12 expansion pairs were uploaded to Anjoman 9 Nov 17:09 (browser),
+12 stored / 0 already there / 0 refused; Admitted ·12 new (signed-in
+dashboard re-check of their admitted-vs-eligible state still pending). The 7
 cap-skipped rows in `results-live/expansion-run-2026-11-09.json`
 (1707307 t18–t24, stopped by the file-cumulative $0.30 cap) are
 excluded from this file; the 7 bought rows live in
@@ -118,3 +129,18 @@ excluded from this file; the 7 bought rows live in
 — it verifies the frozen tables still render exactly 2 ranked rows,
 the unservable tier, and 24/24 settlement links, plus the expansion
 tables (3 ranked rows, 12-trap matrix, 36/36 settlement links).
+
+## Static render (13 Nov 2026) — no JavaScript needed to see the results
+
+Both ranked tables, both verdicts and both trap-file SHA-256 values are
+pre-rendered into `index.html` as static HTML by
+`scripts/build_leaderboard_static.py` (run from the repo root; re-run it
+after any change to `results.json` or `results-expansion.json` — it is
+idempotent and refuses to write if a `Loading` placeholder or a combined
+24-trap count would survive). The page's `<script>` is kept: on load it
+re-renders the same content and powers the file picker, so the static
+HTML and the JS render agree. Per-trap `<details>` summaries are short
+(trap + result + cost); the receipt, trap tx and signal hash sit inside
+the expanded body. The two sets stay separate measures: the frozen 12
+(Truvian 4/12, 8 Nov) and the expansion 12 (ChainWire 11/12, 9 Nov) are
+never added together on the page.

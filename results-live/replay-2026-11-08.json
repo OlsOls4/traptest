@@ -84,7 +84,9 @@
           "actual": null,
           "passed": false
         }
-      ]
+      ],
+      "receipt_verified_onchain": true,
+      "receipt_settlement_tx": "0x5408936836710b0e05376490c3521e1c9c23131eda7306a195b36bd1a4176d2b"
     },
     {
       "data_kind": "LIVE",
@@ -150,7 +152,9 @@
           "actual": "53047427",
           "passed": true
         }
-      ]
+      ],
+      "receipt_verified_onchain": true,
+      "receipt_settlement_tx": "0xa29c83dc141368fceb6a624fd05f5f3a0ae1cbfa867d1598e6100c1f0e67bbc6"
     },
     {
       "data_kind": "LIVE",
@@ -213,7 +217,9 @@
           "actual": null,
           "passed": false
         }
-      ]
+      ],
+      "receipt_verified_onchain": true,
+      "receipt_settlement_tx": "0x7df4a58c793a1678e8f8cc021e2402c028f9995d01b1f18cb449f4b76e1e71cb"
     },
     {
       "data_kind": "LIVE",
@@ -279,7 +285,9 @@
           "actual": "55258439",
           "passed": true
         }
-      ]
+      ],
+      "receipt_verified_onchain": true,
+      "receipt_settlement_tx": "0x74e0c0ce1a5ea1ad6c5c7d24205e6bedeb793e52aeb8ffef191b54427ef18c75"
     },
     {
       "data_kind": "LIVE",
@@ -342,7 +350,9 @@
           "actual": null,
           "passed": false
         }
-      ]
+      ],
+      "receipt_verified_onchain": true,
+      "receipt_settlement_tx": "0xb8a916f77f22ffacd876619d7e74d759628132c012bb25d92422eb944a0fa607"
     },
     {
       "data_kind": "LIVE",
@@ -408,7 +418,9 @@
           "actual": "53047427",
           "passed": true
         }
-      ]
+      ],
+      "receipt_verified_onchain": true,
+      "receipt_settlement_tx": "0x590f96d822341339b401fbbe6304840a0674a7e71cad77832fcaaa7117d20a2d"
     },
     {
       "data_kind": "LIVE",
@@ -471,7 +483,9 @@
           "actual": null,
           "passed": false
         }
-      ]
+      ],
+      "receipt_verified_onchain": true,
+      "receipt_settlement_tx": "0x1f2957ff4206a44577b7060aef1084db9a44a8dfadd68e98f4c63037d187f683"
     },
     {
       "data_kind": "LIVE",
@@ -537,7 +551,9 @@
           "actual": "55258552",
           "passed": true
         }
-      ]
+      ],
+      "receipt_verified_onchain": true,
+      "receipt_settlement_tx": "0xd6d56e222ef39226e21000ebfe892ad5b4efb23e68a8241d6a9fd4e58a6ca40e"
     },
     {
       "data_kind": "LIVE",
@@ -594,7 +610,9 @@
           "actual": null,
           "passed": false
         }
-      ]
+      ],
+      "receipt_verified_onchain": true,
+      "receipt_settlement_tx": "0xd050b7bfb6ac11069d2110287919b9dc81e985c5ad2ef790ab636216c02f3daf"
     },
     {
       "data_kind": "LIVE",
@@ -654,7 +672,9 @@
           "actual": "55258576",
           "passed": true
         }
-      ]
+      ],
+      "receipt_verified_onchain": true,
+      "receipt_settlement_tx": "0x504bec01a673021ddb79f8eac7356c1871a7b3794f748ddacf907793c7f6c698"
     },
     {
       "data_kind": "LIVE",
@@ -711,7 +731,9 @@
           "actual": null,
           "passed": false
         }
-      ]
+      ],
+      "receipt_verified_onchain": true,
+      "receipt_settlement_tx": "0xfe0daa26f24b42aeb59565b68bd054af02d5ee6eb0b8f030af847b5980dc871c"
     },
     {
       "data_kind": "LIVE",
@@ -771,7 +793,9 @@
           "actual": "55258576",
           "passed": true
         }
-      ]
+      ],
+      "receipt_verified_onchain": true,
+      "receipt_settlement_tx": "0xcf50a2c0fe2012228df75b0eef590fcf5666c59272b864ca39aae7ae423fff74"
     },
     {
       "data_kind": "LIVE",
@@ -828,7 +852,9 @@
           "actual": null,
           "passed": false
         }
-      ]
+      ],
+      "receipt_verified_onchain": true,
+      "receipt_settlement_tx": "0x60ab77125c35dc97cd87063acc16d01f4e15d805eaa890fe2d636439d9f51fbd"
     },
     {
       "data_kind": "LIVE",
@@ -888,7 +914,9 @@
           "actual": "55258569",
           "passed": true
         }
-      ]
+      ],
+      "receipt_verified_onchain": true,
+      "receipt_settlement_tx": "0x8c2f1f39fd93e92705667eb8346af62c7f543fc63327b11482a494ee3dbbfbf9"
     },
     {
       "data_kind": "LIVE",
@@ -951,7 +979,9 @@
           "actual": null,
           "passed": false
         }
-      ]
+      ],
+      "receipt_verified_onchain": true,
+      "receipt_settlement_tx": "0xe158f7c8fdd2529faef1c0a4be8cd831a4c41188d7d32908e7f3f4b5feaa53b2"
     },
     {
       "data_kind": "LIVE",
@@ -1017,7 +1047,9 @@
           "actual": "55258555",
           "passed": true
         }
-      ]
+      ],
+      "receipt_verified_onchain": true,
+      "receipt_settlement_tx": "0x2446df4babfe875661cb7c462476935a4833e99634255e5c5a2548abe1818b13"
     },
     {
       "data_kind": "LIVE",
@@ -1074,7 +1106,9 @@
           "actual": null,
           "passed": false
         }
-      ]
+      ],
+      "receipt_verified_onchain": true,
+      "receipt_settlement_tx": "0xf0cc9d1c41fdc2d28ea7b8f38712fa686fae5f3db608efda718c1186a58be090"
     },
     {
       "data_kind": "LIVE",
@@ -1134,7 +1168,9 @@
           "actual": "55258574",
           "passed": true
         }
-      ]
+      ],
+      "receipt_verified_onchain": true,
+      "receipt_settlement_tx": "0xa735bbe4bfbfe94b8a361a77ffed02d24322b77b506dcc645cbd820daeab522e"
     },
     {
       "data_kind": "LIVE",
@@ -1191,7 +1227,9 @@
           "actual": null,
           "passed": false
         }
-      ]
+      ],
+      "receipt_verified_onchain": true,
+      "receipt_settlement_tx": "0x27e9ecd820d7fe1d5c56ad29d69214f5b8b33272bd06ab75b25b29623be17a1f"
     },
     {
       "data_kind": "LIVE",
@@ -1251,7 +1289,9 @@
           "actual": "55258573",
           "passed": true
         }
-      ]
+      ],
+      "receipt_verified_onchain": true,
+      "receipt_settlement_tx": "0xcb2612d298841a4ddc9bd86592ce82eab6c16ae3b6990babac53a702e3fe960b"
     },
     {
       "data_kind": "LIVE",
@@ -1290,7 +1330,9 @@
           "actual": "not_found",
           "passed": true
         }
-      ]
+      ],
+      "receipt_verified_onchain": true,
+      "receipt_settlement_tx": "0xd323e19b83a7cec41ee9a57069dee0d8fc67186ca93db8d59a05f0021f17fc38"
     },
     {
       "data_kind": "LIVE",
@@ -1329,7 +1371,9 @@
           "actual": "not_found",
           "passed": true
         }
-      ]
+      ],
+      "receipt_verified_onchain": true,
+      "receipt_settlement_tx": "0x9c53b97d4b51b8e4d6b71e47524bf1f1b2fa0c8789e22e2739a4eb7bc8c32d8f"
     },
     {
       "data_kind": "LIVE",
@@ -1368,7 +1412,9 @@
           "actual": "not_found",
           "passed": true
         }
-      ]
+      ],
+      "receipt_verified_onchain": true,
+      "receipt_settlement_tx": "0x65b8b673ad9b17aabe330d2084dfe91f6707d2cdac56248564e322d72c80cf02"
     },
     {
       "data_kind": "LIVE",
@@ -1407,10 +1453,20 @@
           "actual": "not_found",
           "passed": true
         }
-      ]
+      ],
+      "receipt_verified_onchain": true,
+      "receipt_settlement_tx": "0x41dfe9bc01eae405ca803ab51519263121f7dd4a687441b4ec34248d02f351a8"
     }
   ],
   "burner_balance_after_usdc": 29.26,
   "burner_eth_after": 0.05301184639784,
-  "balance_drop_usdc": 0.24
+  "balance_drop_usdc": 0.24,
+  "receipt_backfill": {
+    "date": "2026-11-13",
+    "procedure": "Backfill of the receipt flags lost to the fixed runner bug (traptest/run.py: the pre-9-Nov-2026 final doc rewrite re-read the file from disk, discarding the in-memory receipt_verified_onchain flags). Each row's base64 receipt was decoded to its settlement tx hash (traptest/receipts.py decode_receipt_tx_hash), then verified read-only against the Sepolia public RPC (https://ethereum-sepolia-rpc.publicnode.com) with traptest/harness.py verify_receipts: eth_getTransactionReceipt batch, receipt verifies only when status is 0x1 AND the receipt carries an ERC-20 Transfer log from the accepted token (0xcc194e1a843B658526D0D5C431f670028582Ae17) to payTo (0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b) for exactly 10000 atomic ($0.01). The public RPC's backends intermittently return null results with no error (observed 13 Nov 2026: two identical batches returned all-null before a third returned all receipts), so null-result batches were retried (max 10 attempts), re-requesting only the nulls. No purchase, no re-run, no spend; scores, costs and answers untouched \u2014 only receipt_verified_onchain + receipt_settlement_tx were added.",
+    "rpc": "https://ethereum-sepolia-rpc.publicnode.com",
+    "verified": 24,
+    "total": 24,
+    "max_attempts": 10
+  }
 }

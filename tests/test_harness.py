@@ -11,11 +11,17 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
+from unittest import mock
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
+import traptest.harness as harness
 from traptest.harness import (
-    atomic_write_text, fail_row, load_traps)
+    atomic_write_text, build_scored_row, fail_row, load_traps,
+    verify_receipts)
+from traptest.receipts import (
+    SETTLEMENT_PAY_TO, SETTLEMENT_TOKEN, TRANSFER_TOPIC)
 from traptest.traps import Trap
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -269,6 +275,141 @@ class TestAtomicWrite(unittest.TestCase):
             leftovers = [p for p in Path(d).iterdir()
                          if p.name != "results.json"]
             self.assertEqual(leftovers, [])
+
+
+# --- Scoring version from the trap file (13 Nov 2026) ---------------------
+
+def _fake_result(answer):
+    return SimpleNamespace(answer=answer, cost_usd=0.01,
+                           signal_hash="mock-sig", receipt=None,
+                           charged=True)
+
+
+def _answer_for(trap):
+    ans = {"status": trap.expected_status}
+    if trap.expected_from is not None:
+        ans["from"] = trap.expected_from
+    if trap.expected_to is not None:
+        ans["to"] = trap.expected_to
+    if trap.expected_value is not None:
+        ans["value"] = trap.expected_value
+    if trap.expected_block is not None:
+        ans["block"] = trap.expected_block
+    return ans
+
+
+class TestScoringVersionFromTrapFile(unittest.TestCase):
+    """Regression: build_scored_row derives scoring_version from the
+    trap file's declared version. The old code stamped v1 on every
+    trap without strict_unknown, so expansion traps t13-t22 would
+    re-emit v1 labels (the clean run's v2 labels were fixed by file
+    edit, not code)."""
+
+    def test_expansion_non_strict_trap_stamps_v2(self):
+        doc, traps, _ = load_traps(ROOT / "traps-frozen-2026-11-09.json")
+        by_id = {t["trap_id"]: t for t in doc["traps"]}
+        t13 = next(t for t in traps if t.trap_id == "t13-token-transfer")
+        self.assertFalse(t13.strict_unknown)  # not an unknown trap
+        row = build_scored_row(t13, by_id["t13-token-transfer"],
+                               "9002", INTENT, _fake_result(_answer_for(t13)))
+        self.assertEqual(row["scoring_version"], "v2-strict-unknown")
+
+    def test_expansion_unknown_trap_stamps_v2(self):
+        doc, traps, _ = load_traps(ROOT / "traps-frozen-2026-11-09.json")
+        by_id = {t["trap_id"]: t for t in doc["traps"]}
+        t23 = next(t for t in traps if t.trap_id == "t23-unknown-tx")
+        self.assertTrue(t23.strict_unknown)
+        row = build_scored_row(t23, by_id["t23-unknown-tx"],
+                               "9002", INTENT, _fake_result(_answer_for(t23)))
+        self.assertEqual(row["scoring_version"], "v2-strict-unknown")
+
+    def test_frozen12_trap_stamps_v1(self):
+        doc, traps, _ = load_traps(FROZEN_TRAPS)
+        by_id = {t["trap_id"]: t for t in doc["traps"]}
+        t01 = traps[0]
+        self.assertIsNone(t01.scoring_version)  # file declares none
+        row = build_scored_row(t01, by_id[t01.trap_id],
+                               "9002", INTENT, _fake_result(_answer_for(t01)))
+        self.assertEqual(row["scoring_version"], "v1")
+
+
+# --- Receipt verification totals (13 Nov 2026) ----------------------------
+
+def _transfer_log(to=SETTLEMENT_PAY_TO, amount=10000,
+                  token=SETTLEMENT_TOKEN):
+    return {
+        "address": token,
+        "topics": [TRANSFER_TOPIC,
+                   "0x" + "00" * 12 + "170dfa67d1e37915d8130eab9bd3b0a4e115f0c0",
+                   "0x" + "00" * 12 + to[2:].lower()],
+        "data": "0x" + format(amount, "064x"),
+    }
+
+
+def _settled_receipt():
+    return {"status": "0x1", "logs": [_transfer_log()],
+            "transactionHash": "0x" + "aa" * 32}
+
+
+class TestVerifyReceiptsTotals(unittest.TestCase):
+    """Undecodable receipts count as FAILED in verify totals — never
+    silently excluded. Rows with no receipt at all are not counted
+    (they are fail rows, not served receipts)."""
+
+    def test_undecodable_receipt_counts_as_failed(self):
+        rows = [{"trap_id": "t01", "provider_id": "9002",
+                 "receipt": "!!!not-base64!!!", "receipt_present": True}]
+        self.assertEqual(verify_receipts(rows), (0, 1))
+        self.assertIs(rows[0]["receipt_verified_onchain"], False)
+
+    def test_no_receipt_rows_not_counted(self):
+        rows = [{"trap_id": "t01", "provider_id": "9002",
+                 "receipt": None, "receipt_present": False}]
+        self.assertEqual(verify_receipts(rows), (0, 0))
+
+    def test_transient_null_results_retried_then_verified(self):
+        import base64
+        tx = "0x" + "ab" * 32
+        receipt = base64.b64encode(
+            json.dumps({"tx_hash": tx}).encode()).decode()
+        rows = [{"trap_id": "t01", "provider_id": "9002",
+                 "receipt": receipt, "receipt_present": True}]
+        calls = {"n": 0}
+
+        def fake_run(*args, **kwargs):
+            calls["n"] += 1
+            if calls["n"] == 1:
+                body = json.dumps([{"jsonrpc": "2.0", "id": 0,
+                                    "result": None}])
+            else:
+                body = json.dumps([{"jsonrpc": "2.0", "id": 0,
+                                    "result": _settled_receipt()}])
+            return SimpleNamespace(stdout=body)
+
+        with mock.patch.object(harness.subprocess, "run", fake_run):
+            self.assertEqual(verify_receipts(rows), (1, 1))
+        self.assertEqual(calls["n"], 2)
+        self.assertTrue(rows[0]["receipt_verified_onchain"])
+        self.assertEqual(rows[0]["receipt_settlement_tx"], tx)
+
+    def test_persistent_null_counts_as_failed_not_excluded(self):
+        import base64
+        tx = "0x" + "ab" * 32
+        receipt = base64.b64encode(
+            json.dumps({"tx_hash": tx}).encode()).decode()
+        rows = [{"trap_id": "t01", "provider_id": "9002",
+                 "receipt": receipt, "receipt_present": True}]
+        calls = {"n": 0}
+
+        def fake_run(*args, **kwargs):
+            calls["n"] += 1
+            return SimpleNamespace(stdout=json.dumps(
+                [{"jsonrpc": "2.0", "id": 0, "result": None}]))
+
+        with mock.patch.object(harness.subprocess, "run", fake_run):
+            self.assertEqual(verify_receipts(rows, max_attempts=2), (0, 1))
+        self.assertEqual(calls["n"], 2)  # retried, then gave up as FAILED
+        self.assertIs(rows[0]["receipt_verified_onchain"], False)
 
 
 if __name__ == "__main__":

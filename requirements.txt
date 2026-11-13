@@ -1,0 +1,5 @@
+# TrapTest runtime dependencies.
+# Python 3.12.3 (the version used for all live runs; see README).
+# Everything else the runner uses is Python stdlib (argparse, json,
+# subprocess/curl, tempfile) plus the live engine over HTTPS.
+eth-account==0.14.0

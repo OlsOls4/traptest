@@ -1,8 +1,9 @@
 # TrapTest — submission pack (live, 6 Nov 2026)
 
 **Status: LIVE RUN COMPLETE 6 Nov 2026, corrected re-score 8 Nov 2026, expansion
-set t13–t24 DONE 9 Nov 2026 (scoring v2, separate leaderboard section; new pairs
-local only, no Anjoman upload — user decision), not yet submitted. Every number below is event-period (1 Nov–1 Dec 2026)
+set t13–t24 DONE 9 Nov 2026 (scoring v2, separate leaderboard section; the 12
+expansion pairs were uploaded to Anjoman 9 Nov 17:09 — 12 stored, 0 already
+there, 0 refused; Admitted ·12 new), not yet submitted. Every number below is event-period (1 Nov–1 Dec 2026)
 evidence from `results-live/full-run-2026-11-06.json` (60 rows,
 `data_kind: LIVE`, strict original) and
 `results-live/results-corrected-2026-11-08.json` (corrected re-score).
@@ -30,11 +31,11 @@ not on this list is unverified and must not appear on a submission surface.
 | Judging | /100 (TRACK 03 Evaluator rubric, verified live 8 Nov 2026): Measurement validity 40 (minimum 28/40 to qualify), Integrity and robustness 15, Reproducibility and protocol compatibility 10, Useful evaluation coverage and demonstrated improvement 10, Documentation and integration clarity 5, Organic growth / education / developer activation 20 (5+5+5+5); need 70/100 AND pass 28/40 on Measurement validity | Official rules (live check, 8 Nov) |
 | Prize context | $10,000 programme total; main $7,000 (Apps & Agents $3,000, Miners $2,000, Evaluators $2,000) + $3,000 December challenges. TrapTest is Evaluator-led — do not claim the $10,000 or the $3,000 Apps slice as its prize | Official rules |
 | Entry fee | Site says "free to register" (27 Oct) | Live browser |
-| Test count | 140 tests, all passing (`python3 -m unittest discover -s tests`, 9 Nov 2026) | Repo tests |
-| Live results (corrected) | 12 frozen traps × 5 providers = 60 rows, 6 Nov 2026 run, corrected re-score 8 Nov 2026. Corrected: Truvian 8453: 4/12 (t07, t08, t11, t12; field accuracy 37/47). TxLens 9002: 2/12 (t11 + t12 only; field accuracy 2/47). LiveCert 4433: 0/12 served (503). Sigil 9010: 0/12 served (HTTP 500 upstream 404). OnChain Intel 900: 0/12 served (HTTP 500 upstream 400). Strict original (preserved verbatim in the corrected file): Truvian 3/12, field accuracy 36/47 — only t08 changed. Billed $0.26 on 6 Nov including $0.02 smoke tests ($0.24 in the run file + $0.02 smoke); $0.24 settled into Telegraph escrow credit, NOT billed. 8 Nov re-run (`results-live/replay-2026-11-08.json`): 24 calls, $0.24, scores stable (Truvian 4/12, TxLens 2/12). Burner 30.00 → 29.26 test USDC (cumulative drop $0.74: $0.50 billed + $0.24 escrow credit). 24 served receipts verified on-chain (6 Nov) + 24 re-run receipts (8 Nov). | `results-live/results-corrected-2026-11-08.json` (CORRECTED_REANALYSIS), `results-live/full-run-2026-11-06.json` (LIVE, strict original), `results-live/replay-2026-11-08.json` (LIVE re-run, 8 Nov), `docs/leaderboard/results.json` (copy of the corrected file) |
-| Live results — expansion set (9 Nov 2026) | ADDITIVE set t13–t24 (`traps-frozen-2026-11-09.json`, SHA-256 `940a00400477e0aefb38afe1da20fb98cc03b187e7218da252d322fd4699b5ba`; frozen 12 untouched), scoring v2 disclosed: token traps score the NATIVE tx value (0 wei for t13/t14); unknown traps carry the strict-unknown rule; field accuracy co-primary. 36 served rows, all receipts verified on-chain: ChainWire 1707307 (Cross-Checked) 11/12 (field 46/47; only t17 fails — reverted value returned 0, expected 607000000000000 wei); Truvian 8453 2/12 (t17, t18; field 39/49); TxLens 9002 2/12 (t23, t24 only; field 2/47). Truvian t23/t24 fail only under v2, on its `from` source label — a provenance string, not a hallucinated address. Verity 9001 (HTTP 500 upstream 404) and INTERLOCK 9007 (HTTP 503 no_compatible_miner) served 0 — unservable. ChainWire 7317307 / 7307 t13-pass probes only (full sets not run — cap). Combined 24-trap (NOT one uniform measure): Truvian 6/24 (field 76/96), TxLens 4/24 (field 4/94); ChainWire expansion-only. Expansion task spend $0.42 (cap $0.50): $0.24 expansion run + $0.12 ChainWire 1707307 full set + $0.03 probes billed + $0.03 Verity escrow; wallet 29.26 → 28.84 test USDC. New pairs LOCAL ONLY — no Anjoman upload (user decision). | `docs/leaderboard/results-expansion.json` (LIVE, 36 rows), `results-live/expansion-run-2026-11-09.json`, `results-live/expansion-run-1707307-rest-2026-11-09.json`, `results-live/probe-*.json`, `traps-frozen-2026-11-09.json` |
+| Test count | 149 tests, all passing (`python3 -m unittest discover -s tests`, 13 Nov 2026) | Repo tests |
+| Live results (corrected) | 12 frozen traps × 5 providers = 60 rows, 6 Nov 2026 run, corrected re-score 8 Nov 2026. Corrected: Truvian 8453: 4/12 (t07, t08, t11, t12; field accuracy 37/47). TxLens 9002: 2/12 (t11 + t12 only; field accuracy 2/47). LiveCert 4433: 0/12 served (503). Sigil 9010: 0/12 served (HTTP 500 upstream 404). OnChain Intel 900: 0/12 served (HTTP 500 upstream 400). Strict original (preserved verbatim in the corrected file): Truvian 3/12, field accuracy 36/47 — only t08 changed. Billed $0.26 on 6 Nov including $0.02 smoke tests ($0.24 in the run file + $0.02 smoke); $0.24 settled into Telegraph escrow credit, NOT billed. 8 Nov re-run (`results-live/replay-2026-11-08.json`): 24 calls, $0.24, scores stable (Truvian 4/12, TxLens 2/12). Burner 30.00 → 28.48 test USDC by 9 Nov (cumulative drop $1.52: $1.25 billed + $0.27 escrow credit; 30.00 → 29.26, drop $0.74, was the 8 Nov state). 24 served receipts verified on-chain (6 Nov) + 24 re-run receipts (8 Nov), verified on-chain by backfill 13 Nov 2026 (see `receipt_backfill` in the replay file). | `results-live/results-corrected-2026-11-08.json` (CORRECTED_REANALYSIS), `results-live/full-run-2026-11-06.json` (LIVE, strict original), `results-live/replay-2026-11-08.json` (LIVE re-run, 8 Nov), `docs/leaderboard/results.json` (copy of the corrected file) |
+| Live results — expansion set (9 Nov 2026) | ADDITIVE set t13–t24 (`traps-frozen-2026-11-09.json`, SHA-256 `940a00400477e0aefb38afe1da20fb98cc03b187e7218da252d322fd4699b5ba`; frozen 12 untouched), scoring v2 disclosed: token traps score the NATIVE tx value (0 wei for t13/t14); unknown traps carry the strict-unknown rule; field accuracy co-primary. 36 served rows, all receipts verified on-chain: ChainWire 1707307 (Cross-Checked) 11/12 (field 46/47; only t17 fails — reverted value returned 0, expected 607000000000000 wei); Truvian 8453 2/12 (t17, t18; field 39/49); TxLens 9002 2/12 (t23, t24 only; field 2/47). Truvian t23/t24 fail only under v2, on its `from` source label — a provenance string, not a hallucinated address. Verity 9001 (HTTP 500 upstream 404) and INTERLOCK 9007 (HTTP 503 no_compatible_miner) served 0 — unservable. ChainWire 7317307 / 7307 t13-pass probes only (full sets not run — cap). Combined 24-trap (NOT one uniform measure): Truvian 6/24 (field 76/96), TxLens 4/24 (field 4/94); ChainWire expansion-only. Expansion task spend $0.42 (cap $0.50): $0.24 expansion run + $0.12 ChainWire 1707307 full set + $0.03 probes billed + $0.03 Verity escrow; wallet 29.26 → 28.84 test USDC, then the $0.36 clean re-run took it to 28.48 (cumulative 30.00 → 28.48, drop $1.52). The 12 expansion pairs were uploaded to Anjoman 9 Nov 17:09 (browser), 12 stored / 0 already there / 0 refused; Admitted ·12 new. A signed-in dashboard re-check is still pending to confirm the 12 expansion rows' admitted-vs-eligible state. | `docs/leaderboard/results-expansion.json` (LIVE, 36 rows), `results-live/expansion-run-2026-11-09.json`, `results-live/expansion-run-1707307-rest-2026-11-09.json`, `results-live/probe-*.json`, `traps-frozen-2026-11-09.json` |
 | Demo video | v2, 2026-11-08, `docs/demo-video/traptest-demo-2026-11-08.mp4` — DONE, 2:42 (161.6 s), 1280×720; v1 (2:36, 155.8 s, 1280×720, local file `docs/demo-video/traptest-demo-2026-11-06.mp4`) superseded as the submission video. v2 PUBLIC at https://youtu.be/993JOD3JRXs (audio approved by the user, 9 Nov 2026). Narration script + storyboard in `docs/demo-video/narration.md`. | Submission |
-| Repo | https://github.com/OlsOls4/traptest — PUBLIC (commits 0fb660f3 + 02f61d4, confirmed 9 Nov 2026) | GitHub |
+| Repo | https://github.com/OlsOls4/traptest — PUBLIC (head 5ba71220, 9 Nov 17:13Z) | GitHub |
 | **UNVERIFIED — do not claim** | UK prize eligibility; payout currency/method/timing (re-checked 1 Nov and 6 Nov, still unpublished) | Re-check before submitting |
 | Evaluator submission route (VERIFIED 8 Nov, Discord #hackathon) | There is NO sign-in on the hackathon website and none is needed — the hackathon is completely open. Sign in on anjoman.ai (Telegraph's dashboard). Evaluation material is submitted at anjoman.ai/dashboard/eval. No GitHub bounty issue exists for `ONCHAIN_TX_LOOKUP_GENERAL`, so there is nothing to /claim for this intent. The final submission form does NOT exist yet — it opens later and will be shared in Discord before the 1 Dec deadline. | Discord server findings, 8 Nov 2026 (`~/workspace/goals/traptest-telegraph-season-ii-submission/hidden_files/discord-server-findings-2026-11-08.md`) |
 
@@ -87,8 +88,8 @@ not on this list is unverified and must not appear on a submission surface.
   NOT billed (Sigil $0.12 + OnChain Intel $0.12 — failed calls that still
   settled; see `docs/how-to-run.md` §4). 8 Nov re-run: 24 calls, $0.24
   billed, scores stable (Truvian 4/12, TxLens 2/12). Burner wallet 30.00 →
-  29.26 test USDC (cumulative drop $0.74: $0.50 billed + $0.24 escrow
-  credit, verified on-chain). Spend caps: the per-run hard cap defaults
+  28.48 test USDC by 9 Nov (cumulative drop $1.52: $1.25 billed + $0.27 escrow
+  credit, verified on-chain; 30.00 → 29.26, drop $0.74, was the 8 Nov state). Spend caps: the per-run hard cap defaults
   to $0.30 (`traptest/run.py` `DEFAULT_SPEND_CAP_USD`; `scripts/full_run.py`
   `SPEND_CAP_USD`); the $0.50 figure was the 6 Nov session cap only
   (`scripts/mini_run.py` `SESSION_CAP_USD = 0.50`: full run + smoke +
@@ -135,9 +136,12 @@ not on this list is unverified and must not appear on a submission surface.
   suggested a gap. Combined 24-trap numbers (Truvian 6/24, TxLens
   4/24) are NOT one uniform measure — the two sets use different
   semantics — and are never presented as such. Expansion task spend
-  $0.42 (cap $0.50); wallet 29.26 → 28.84 test USDC. All 36 served
-  expansion receipts verified on-chain. The expansion pairs are local
-  only; no Anjoman upload (user decision).
+  $0.42 (cap $0.50); wallet 29.26 → 28.84 test USDC, then the $0.36 clean
+  re-run took it to 28.48. All 36 served
+  expansion receipts verified on-chain. The expansion pairs were uploaded
+  to Anjoman 9 Nov 17:09 (browser), 12 stored / 0 already there / 0 refused;
+  Admitted ·12 new (signed-in dashboard re-check of their admitted-vs-eligible
+  state still pending).
 - **Honest limits (repeat on the submission surface):** [No independent
   adoption is claimed. All usage to date is testnet evaluation by the
   author during the event window. Testnet use is not adoption. No user,
@@ -152,7 +156,7 @@ not on this list is unverified and must not appear on a submission surface.
   change to the buy–score–rank loop is needed. No mainnet run has been made
   and none is claimed.
 - **How to try:** repo https://github.com/OlsOls4/traptest (PUBLIC,
-  commits 0fb660f3 + 02f61d4). Reviewer replay: dry-run first with
+  head 5ba71220, 9 Nov 17:13Z). Reviewer replay: dry-run first with
   `python3 -m traptest.run --traps traps-frozen-2026-11-06.json
   --providers 9002,8453 --out results-live/replay-<date>.json --dry-run`,
   then the same command without `--dry-run`; or the historical scripts
@@ -238,6 +242,6 @@ not on this list is unverified and must not appear on a submission surface.
   and the mock file removed from every submitted surface.
 - [x] Demo video recorded from the live run (v1, 2:36), with the failure
   case visible on screen — v2 (2026-11-08) DONE, supersedes v1.
-- [x] Repo public (https://github.com/OlsOls4/traptest, commits 0fb660f3 +
-  02f61d4, confirmed 9 Nov 2026) with the final how-to-run — and the
+- [x] Repo public (https://github.com/OlsOls4/traptest, head 5ba71220,
+  9 Nov 17:13Z) with the final how-to-run — and the
   submission verified live after saving.

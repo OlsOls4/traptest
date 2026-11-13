@@ -22,10 +22,9 @@ itself can be trusted.
 
 ## 1. Prerequisites (zero cost)
 
-- Python 3 (stdlib only for the scaffold, plus one pip package for the
-  live loop: `pip install eth-account` — `traptest/x402.py` imports
-  `eth_account` for signing; no version is pinned anywhere in the code,
-  and there is no `requirements.txt`). No API keys, no account, no hosting.
+- Python 3.12 (stdlib only for the scaffold, plus one pip package for the
+  live loop: `pip install -r requirements.txt` — pins `eth-account==0.14.0`,
+  which `traptest/x402.py` imports for signing). No API keys, no account, no hosting.
 - `curl` — the live engine transport defaults to curl
   (`traptest/harness.py` `curl_transport`): urllib truncates the live
   catalogue, while curl fetches it whole. Tests inject a fake transport,
@@ -46,7 +45,7 @@ itself can be trusted.
 ```bash
 # From ~/workspace/telegraph-traptest/
 python3 -m unittest discover -s tests -v
-# Expected: 91 tests pass (scoring strictness + ranking + gates +
+# Expected: 149 tests pass (scoring strictness + ranking + gates +
 # parametrised-runner guards: no-overwrite, missing-key, dry-run,
 # append-without-duplicates).
 # These tests use MOCK fixtures and are NOT event evidence.
@@ -65,18 +64,20 @@ strict original (Truvian 3/12), the per-trap field table, the `FAIL` rows
 every mined tx; Truvian fails 8, six of them only on a missing `status`
 for confirmed txs), and the unservable providers listed at 0/12 served with
 their returned error strings (LiveCert 503 on all 12; Sigil HTTP 500 upstream
-404; OnChain Intel HTTP 500 upstream 400).
+404; OnChain Intel HTTP 500 upstream 400). Then check the expansion section
+below it (ChainWire 11/12, Truvian 2/12, TxLens 2/12 — a separate measure,
+not combined with the frozen set).
 
-## 3. Judge-in-60-seconds path (live build, from 1 Nov)
+## 3. Judge path — verify in 60 seconds (no spend), replay in ~15 min (testnet)
 
-1. **One input.** Enter a single trap transaction hash — a query with
-   known ground truth from the fixed trap set (see §4). There is no live
-   in-page loop: replaying the loop needs the reviewer's own burner wallet,
-   funded with test USDC as in §1 (self-minted via the token's open mint
-   plus a little Sepolia ETH for gas). The pre-run evidence — the
-   leaderboard, the corrected results file, and every receipt — is the
-   default: it costs nothing to inspect and is what a reviewer should check
-   first.
+1. **Verify first — no spend. Stop here if you only want to verify.**
+   Run the §2 prep checks above (`python3 -m unittest discover -s tests -v`
+   — expect 149 tests to pass) and open the static leaderboard page
+   (`docs/leaderboard/`, served locally). That is the whole 60-second
+   verification: the pre-run evidence — the leaderboard, the corrected
+   results file, and every receipt — costs nothing to inspect and is what a
+   reviewer should check first. **Stop here if you only want to verify;
+   steps 2–5 below only apply if you want to buy traps yourself on testnet.**
 2. **Competing answers bought.** TrapTest buys that trap from at least
    two competing `ONCHAIN_TX_LOOKUP_GENERAL` providers via Direct Ask
    (`POST /engine/v1/ask/{minerId}` — one miner at a time; the
@@ -117,6 +118,8 @@ their returned error strings (LiveCert 503 on all 12; Sigil HTTP 500 upstream
 >     --out results-live/replay-2026-11-08.json
 >
 > # Validate everything first without spending or writing anything:
+> # the dry-run needs a key file to exist (it validates it) but spends
+> # nothing and needs no funds in it — funding is only for the live run:
 > python3 -m traptest.run --traps traps-replay-2026-11-08.json \
 >     --providers 9002,8453 --out results-live/replay-2026-11-08.json \
 >     --dry-run
@@ -190,7 +193,8 @@ their returned error strings (LiveCert 503 on all 12; Sigil HTTP 500 upstream
   4. Create the activation marker (only in the event window, 1 Nov–
      1 Dec 2026): `touch LIVE-ACTIVATED`.
   5. Dry-run first (validates traps, key, providers, output path;
-     spends and writes nothing):
+     spends and writes nothing — the key file must exist, but it needs
+     no funds in it; funding is only for the live run in step 6):
      `python3 -m traptest.run --traps traps-replay-2026-11-08.json
      --providers 9002,8453 --key .burner-replay.key
      --out results-live/replay-2026-11-08.json --dry-run`
@@ -224,7 +228,10 @@ their returned error strings (LiveCert 503 on all 12; Sigil HTTP 500 upstream
   `SESSION_CAP_USD = 0.50`). 8 Nov re-run
   (`results-live/replay-2026-11-08.json`): 24 calls, $0.24, scores
   stable (Truvian 4/12, TxLens 2/12), wallet 29.50 → 29.26; cumulative
-  drop 30.00 → 29.26 ($0.74: $0.50 billed + $0.24 escrow credit). Any
+  drop 30.00 → 29.26 ($0.74: $0.50 billed + $0.24 escrow credit) at 8 Nov.
+  Expansion 9 Nov ($0.42 task spend + $0.36 clean re-run) took the wallet
+  to 28.48; cumulative drop 30.00 → 28.48 ($1.52: $1.25 billed + $0.27
+  escrow credit). Any
   further spend needs a fresh explicit approval — never a silent
   purchase or bridge.
 

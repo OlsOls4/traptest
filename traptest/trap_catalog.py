@@ -57,24 +57,35 @@ CATEGORY_SPECS = {
                    "or report the wrong block.",
     },
     "token_transfer": {
-        "description": "ERC-20 token transfer, confirmed. Scored on the "
-                       "Transfer event, NOT on the transaction value field "
-                       "(which is 0 for a token transfer).",
+        "description": "ERC-20 token transfer, confirmed. The value "
+                       "basis is PER SET, recorded on the trap file "
+                       "(value_basis / scoring_version): v1 sets (frozen "
+                       "12) score the Transfer-event amount; v2 sets "
+                       "(expansion, 9 Nov 2026) score the NATIVE tx "
+                       "value field (0 for a token transfer).",
         "scored_fields": ("status", "from", "to", "value", "block"),
         "required_fields": ("status", "from", "to", "value", "block"),
         "optional_fields": (),
         "required_status": "confirmed",
-        "value_basis": "Transfer event amount in the token's raw units, "
-                       "as decoded from the event log. The trap record "
-                       "must state the token contract and that the value "
-                       "is the event amount, so a provider returning the "
-                       "tx value field (0) is scored as wrong, not as a "
-                       "convention difference.",
+        "value_basis": "Per-set — the trap file's own value_basis is "
+                       "authoritative, never assume one basis across "
+                       "sets. v1 (frozen 12): Transfer event amount in "
+                       "the token's raw units, as decoded from the "
+                       "event log; a provider returning the tx value "
+                       "field (0) is scored as wrong, not as a "
+                       "convention difference. v2 (expansion): the "
+                       "native tx value field, raw wei — 0 for a token "
+                       "transfer, scored explicitly; a provider "
+                       "returning the Transfer-event amount is scored "
+                       "as wrong under v2.",
         "ground_truth_source": "Explorer transaction page: receipt status, "
                                "Transfer event log (from, to, amount), "
                                "block number.",
-        "catches": "Providers that report the tx value field (0) for a "
-                   "token transfer, or that miss/misread the event log.",
+        "catches": "v1: providers that report the tx value field (0) "
+                   "for a token transfer, or that miss/misread the "
+                   "event log. v2: providers that report the "
+                   "Transfer-event amount instead of the native tx "
+                   "value (0).",
     },
     "contract_interaction": {
         "description": "Confirmed transaction calling a contract (e.g. a "
